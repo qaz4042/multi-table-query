@@ -1,14 +1,11 @@
 package com.lzb.mpmt.service;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
-import java.util.List;
-
 public interface MultiServiceImpl<MAIN> {
-    default List<MAIN> list(Wrapper<MAIN> wrapperMain, Wrapper<?>... wrapperOther) {
-        wrapperMain.getSqlSegment()
-        Wrappers.lambdaQuery()
-        return
-    }
+
+//
+//    default List<MAIN> list(Map<String, String> params, Class<? extends BaseModel>[] clazzs, List<Function> selectProps) {
+//        wrapperMain.getSqlSegment()
+//        Wrappers.lambdaQuery()
+//        return
+//    }
 }

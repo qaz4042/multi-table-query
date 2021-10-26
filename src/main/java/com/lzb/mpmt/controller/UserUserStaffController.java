@@ -11,6 +11,6 @@ public class UserUserStaffController {
 
     @RequestMapping("/list")
     public R<List<User>> list() {
-        return
+        return new R();
     }
 }
