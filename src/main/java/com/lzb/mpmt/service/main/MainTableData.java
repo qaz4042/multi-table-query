@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,10 +22,10 @@ public class MainTableData {
     private String tableName;
     private List<String> selectProps;
     // 多个条件 n1 and ( n2 or n3 )
-    private WhereTreeNode whereTree;
+    private WhereTreeNode whereTree = new WhereTreeNode();
 
     // List<propName opt values> 子表在主SQL下的的条件(与子表在子表sql下的where条件区分开)
-    private List<WhereTreeNode> subTableWhereTrees;
+    private List<WhereTreeNode> subTableWhereTrees = new ArrayList<>();
 
     //    mysql> SELECT * FROM table LIMIT {limitOffset},{limitSize};   //检索 第limitOffset+1行 到 limitOffset+limitSize行
     //    mysql> SELECT * FROM table LIMIT 5,10;                        //检索 第6行 到 第15行

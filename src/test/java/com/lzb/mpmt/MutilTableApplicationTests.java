@@ -1,5 +1,4 @@
 package com.lzb.mpmt;
-import cn.hutool.json.JSONUtil;
 import com.lzb.mpmt.model.UserStaff;
 import com.lzb.mpmt.service.MultiWrapperMain;
 import org.junit.jupiter.api.Test;
@@ -46,10 +45,13 @@ class MutilTableApplicationTests {
                 .and(w ->
                         w.eq(true, UserStaff::getStaffName, "StaffName3")
                                 .or()
-                                .eq(true, UserStaff::getStaffName, "StaffName4")
+                                .and(w2->w2.eq(true, UserStaff::getStaffName, "StaffName4")
+                                        .eq(true, UserStaff::getStaffName, "StaffName4"))
+
                 )
                 .eq(true, UserStaff::getSex, 1);
-        System.out.println(JSONUtil.toJsonPrettyStr(eq));
+        int it = 0;
+//        System.out.println(eq);
     }
 
 }

@@ -12,9 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class WhereTreeNode {
+public class WhereTreeNode implements IWhereTreeData {
     //默认是and 遇到or才改为or
     private WhereAndOrEnum andOr = WhereAndOrEnum.and;
-    private List<WhereTreeNodeData> whereDatas = new ArrayList<>(8);
-    private List<WhereTreeNode> subNodes = new ArrayList<>(8);
+    private List<IWhereTreeData> whereTreeData = new ArrayList<>(8);
 }

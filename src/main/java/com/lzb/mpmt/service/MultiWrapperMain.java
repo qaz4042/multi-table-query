@@ -1,53 +1,47 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.enums.ClassRelationEnum;
-import com.lzb.mpmt.enums.JoinTypeEnum;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzb.mpmt.service.common.*;
 import com.lzb.mpmt.service.main.MainTableData;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMain<MAIN> {
+public class MultiWrapperMain<MAIN> extends AbstractMultiWrapper<MAIN, MultiWrapperMain<MAIN>> {
+    private List<String> selectProps;
 
-    private MainTableData mainTableData = new MainTableData();
-    private Boolean hasOr = false;
+    // List<propName opt values> 子表在主SQL下的的条件(与子表在子表sql下的where条件区分开)
+    private List<WhereTreeNode> subTableWhereTrees = new ArrayList<>();
+
+    //    mysql> SELECT * FROM table LIMIT {limitOffset},{limitSize};   //检索 第limitOffset+1行 到 limitOffset+limitSize行
+    //    mysql> SELECT * FROM table LIMIT 5,10;                        //检索 第6行 到 第15行
+    //    mysql> SELECT * FROM table LIMIT 95,-1;                       //检索 第96行 到 第last行.
+    //    mysql> SELECT * FROM table LIMIT {limitSize};                 //检索 第1行 到 第limitSize行 (limitOffset为空)
+    //    mysql> SELECT * FROM table LIMIT 5;                           //检索 第1行 到 第5行
+    private Long limitOffset;
+    private Long limitSize;
+//    private MainTableData mainTableData = new MainTableData();
 
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         return new MultiWrapperMain<>();
     }
 
-    public <VAL> MultiWrapperMain<MAIN> and(Consumer<MultiWrapperMain<MAIN>> andContent) {
-        MultiWrapperMain<MAIN> whereContent = new MultiWrapperMain<>();
-        andContent.accept(whereContent);
-        this.mainTableData.getWhereTree().getSubNodes().add(whereContent.getMainTableData().getWhereTree());
+    public <VAL> MultiWrapperMain<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
+        selectProps = Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getPropNameUnderline()).collect(Collectors.toList());
         return this;
     }
 
-    public <VAL> MultiWrapperMain<MAIN> or() {
-        mainTableData.getWhereTree().setAndOr(WhereAndOrEnum.or);
+    public <VAL> MultiWrapperMain<MAIN> limit(long offset, long size) {
+        this.limitOffset = offset;
+        this.limitSize = size;
         return this;
     }
-
-    public <VAL> MultiWrapperMain<MAIN> eq(Boolean condition, MultiFunction<MAIN, VAL> prop, VAL value) {
-        SerializedLambdaData resolve = SerializedLambda.resolveCache(prop);
-        if (null == mainTableData.getTableName()) {
-            mainTableData.setTableName(resolve.getClazzNameUnderline());
-        }
-        String propNameUnderline = resolve.getPropNameUnderline();
-        mainTableData.getWhereTree().getWhereDatas().add(new WhereTreeNodeData(propNameUnderline, WhereOptEnum.eq, value));
-        return this;
-    }
-
 }

@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class WhereTreeNodeData {
+public class WhereTreeNodeData implements IWhereTreeData {
     private String propName;
     private WhereOptEnum opt;
     private Object values;
