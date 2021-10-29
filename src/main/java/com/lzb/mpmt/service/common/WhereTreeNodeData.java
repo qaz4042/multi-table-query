@@ -13,4 +13,10 @@ public class WhereTreeNodeData implements IWhereTreeData {
     private String propName;
     private WhereOptEnum opt;
     private Object values;
+
+
+    @Override
+    public String toSql(String tableName) {
+        return propName + opt.getSqlFunction().apply(tableName + "." + propName, values);
+    }
 }

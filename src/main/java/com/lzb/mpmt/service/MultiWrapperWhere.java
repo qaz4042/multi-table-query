@@ -1,17 +1,17 @@
 package com.lzb.mpmt.service;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzb.mpmt.service.common.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @SuppressWarnings({"unused", "unchecked"})
-public class AbstractMultiWrapper<T, Wrapper extends AbstractMultiWrapper<T, Wrapper>> {
+public class MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapper>> {
     private String tableName;
     // 多个条件 n1 and ( n2 or n3 )
     private WhereTreeNode whereTree = new WhereTreeNode();
@@ -77,6 +77,14 @@ public class AbstractMultiWrapper<T, Wrapper extends AbstractMultiWrapper<T, Wra
         }
         String propNameUnderline = resolve.getPropNameUnderline();
         whereTree.getWhereTreeData().add(new WhereTreeNodeData(propNameUnderline, opt, value));
+    }
+
+    public String getWhereSql() {
+        return " where " + getWhereSqlRecursion(tableName, whereTree);
+    }
+
+    private String getWhereSqlRecursion(String tableName, WhereTreeNode whereTree) {
+        return whereTree.getWhereTreeData().stream().map(data -> data.toSql(tableName)).collect(Collectors.joining(" " + whereTree.getAndOr().name() + " "));
     }
 
 }

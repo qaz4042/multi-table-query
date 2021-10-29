@@ -1,21 +1,18 @@
 package com.lzb.mpmt.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lzb.mpmt.service.common.*;
-import com.lzb.mpmt.service.main.MainTableData;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMain<MAIN> extends AbstractMultiWrapper<MAIN, MultiWrapperMain<MAIN>> {
+public class MultiWrapperMain<MAIN> extends MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>> {
     private List<String> selectProps;
 
     // List<propName opt values> 子表在主SQL下的的条件(与子表在子表sql下的where条件区分开)
