@@ -1,4 +1,6 @@
 package com.lzb.mpmt;
+
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzb.mpmt.model.UserStaff;
 import com.lzb.mpmt.service.MultiWrapperMain;
 import org.junit.jupiter.api.Test;
@@ -36,7 +38,9 @@ class MutilTableApplicationTests {
 
     @Test
     void testSql2() {
-        MultiWrapperMain<UserStaff> eq = MultiWrapperMain.lambda(UserStaff.class)
+//        Wrappers.lambdaQuery().select()
+        MultiWrapperMain<UserStaff> wrapperMain = MultiWrapperMain.lambda(UserStaff.class)
+                .select(UserStaff::getSex, UserStaff::getStaffName)
                 .and(w ->
                         w.eq(true, UserStaff::getStaffName, "StaffName1")
                                 .eq(true, UserStaff::getStaffName, "StaffName2")
@@ -45,13 +49,14 @@ class MutilTableApplicationTests {
                 .and(w ->
                         w.eq(true, UserStaff::getStaffName, "StaffName3")
                                 .or()
-                                .and(w2->w2.eq(true, UserStaff::getStaffName, "StaffName4")
+                                .and(w2 -> w2.eq(true, UserStaff::getStaffName, "StaffName4")
                                         .eq(true, UserStaff::getStaffName, "StaffName4"))
 
                 )
                 .eq(true, UserStaff::getSex, 1);
         int it = 0;
-//        System.out.println(eq);
+        System.out.println(wrapperMain.getSelectSql());
+        System.out.println(wrapperMain.getWhereSql());
     }
 
 }

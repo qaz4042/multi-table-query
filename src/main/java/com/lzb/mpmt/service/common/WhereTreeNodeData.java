@@ -17,6 +17,6 @@ public class WhereTreeNodeData implements IWhereTreeData {
 
     @Override
     public String toSql(String tableName) {
-        return propName + opt.getSqlFunction().apply(tableName + "." + propName, values);
+        return opt.getSqlFunction().apply(tableName + "." + propName, values);
     }
 }

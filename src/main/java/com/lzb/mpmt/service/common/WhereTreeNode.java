@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -15,10 +16,10 @@ import java.util.List;
 public class WhereTreeNode implements IWhereTreeData {
     //默认是and 遇到or才改为or
     private WhereAndOrEnum andOr = WhereAndOrEnum.and;
-    private List<IWhereTreeData> whereTreeData = new ArrayList<>(8);
+    private List<IWhereTreeData> whereTreeDatas = new ArrayList<>(8);
 
     @Override
     public String toSql(String tableName) {
-        return IWhereTreeData.super.toSql(tableName);
+        return "(" + whereTreeDatas.stream().map(o -> o.toSql(tableName)).collect(Collectors.joining(") " + andOr.name() + " (")) + ")";
     }
 }
