@@ -42,5 +42,9 @@ public class MultiWrapperMain<MAIN> implements
     // List<propName opt values> 子表在主SQL下的的条件(与子表在子表sql下的where条件区分开)
 //    private List<MultiWrapperWhere> subTableWhereTrees = new ArrayList<>();
 
-
+    @SafeVarargs
+    @Override
+    public final <VAL> MultiWrapperMain<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
+        return MultiWrapperSelect.super.select(propFuncs);
+    }
 }

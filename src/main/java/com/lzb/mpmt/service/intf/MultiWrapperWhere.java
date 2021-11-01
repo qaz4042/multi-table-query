@@ -24,7 +24,7 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         Wrapper wrapper = (Wrapper) this.getClass().newInstance();
         andContent.accept(wrapper);
         getWhereTree().getWhereTreeDatas().add(wrapper.getWhereTree());
-        return wrapper;
+        return (Wrapper) this;
     }
 
     default <VAL> Wrapper or() {
@@ -72,6 +72,10 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         return (Wrapper) this;
     }
 
+    default String getSqlWhere() {
+        return " where " + getWhereSqlRecursion(getTableName(), getWhereTree());
+    }
+
     private <VAL> void addWhereTreeData(MultiFunction<T, VAL> prop, VAL value, WhereOptEnum opt) {
         SerializedLambdaData resolve = SerializedLambda.resolveCache(prop);
         if (null == getTableName()) {
@@ -79,10 +83,6 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         }
         String propNameUnderline = resolve.getPropNameUnderline();
         getWhereTree().getWhereTreeDatas().add(new WhereTreeNodeData(propNameUnderline, opt, value));
-    }
-
-    default String getWhereSql() {
-        return " where " + getWhereSqlRecursion(getTableName(), getWhereTree());
     }
 
     private String getWhereSqlRecursion(String tableName, WhereTreeNode whereTree) {

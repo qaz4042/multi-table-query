@@ -5,10 +5,19 @@ import com.lzb.mpmt.service.common.MybatisPlusException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 
 public class MutilUtil {
 
     public static final String UNDERLINE = "_";
+
+    public static Boolean isEmpty(Collection<?> list) {
+        return null == list || list.isEmpty();
+    }
+
+    public static Boolean isEmpty(Object... list) {
+        return null == list || list.length == 0;
+    }
 
     /**
      * 首字母转换小写
@@ -115,6 +124,7 @@ public class MutilUtil {
     public static MybatisPlusException mpe(String msg, Throwable t, Object... params) {
         return new MybatisPlusException(String.format(msg, params), t);
     }
+
     /**
      * 返回一个新的异常，统一构建，方便统一处理
      *

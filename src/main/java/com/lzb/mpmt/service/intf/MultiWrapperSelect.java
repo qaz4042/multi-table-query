@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.intf;
 
 import com.lzb.mpmt.service.common.*;
+import com.lzb.mpmt.service.util.MutilUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,14 +22,20 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
     default <VAL> Wrapper select(MultiFunction<T, VAL>... propFuncs) {
         if (null != propFuncs && propFuncs.length > 0) {
             if (null == getTableName()) {
-                setTableName(SerializedLambda.resolveCache(propFuncs[0]).getClazzNameUnderline());
+                this.setTableName(SerializedLambda.resolveCache(propFuncs[0]).getClazzNameUnderline());
             }
-            setSelectProps(Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getPropNameUnderline()).collect(Collectors.toList()));
+            this.setSelectProps(Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getPropNameUnderline()).collect(Collectors.toList()));
         }
         return (Wrapper) this;
     }
 
-    default String getSelectSql() {
-        return (null == getSelectProps() || getSelectProps().size() <= 0) ? "" : ("select " + String.join(",", getSelectProps()));
+    default String getSqlSelectProps() {
+        List<String> selectProps = getSelectProps();
+        if (!MutilUtil.isEmpty(selectProps)) {
+            return selectProps.stream().map(p ->
+                    // todo 短写表名
+                    getTableName() + "." + p).collect(Collectors.joining(","));
+        }
+        return getTableName() + ".*";
     }
 }

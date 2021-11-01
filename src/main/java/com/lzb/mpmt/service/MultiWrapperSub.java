@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service;
 
+import com.lzb.mpmt.service.common.MultiFunction;
 import com.lzb.mpmt.service.common.WhereTreeNode;
 import com.lzb.mpmt.service.intf.MultiWrapperLimit;
 import com.lzb.mpmt.service.intf.MultiWrapperSelect;
@@ -12,9 +13,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperSub<MAIN> implements
-        MultiWrapperWhere<MAIN, MultiWrapperSub<MAIN>>,
-        MultiWrapperSelect<MAIN, MultiWrapperSub<MAIN>>
+public class MultiWrapperSub<SUB> implements
+        MultiWrapperWhere<SUB, MultiWrapperSub<SUB>>,
+        MultiWrapperSelect<SUB, MultiWrapperSub<SUB>>
 {
 
     //下划线表名
@@ -27,7 +28,13 @@ public class MultiWrapperSub<MAIN> implements
     private List<String> selectProps;
 
 
-    public static <MAIN> MultiWrapperSub<MAIN> lambda(Class<MAIN> clazz) {
+    public static <SUB> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
         return new MultiWrapperSub<>();
+    }
+
+    @SafeVarargs
+    @Override
+    public final <VAL> MultiWrapperSub<SUB> select(MultiFunction<SUB, VAL>... propFuncs) {
+        return MultiWrapperSelect.super.select(propFuncs);
     }
 }

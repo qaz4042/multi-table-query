@@ -1,6 +1,5 @@
 package com.lzb.mpmt;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lzb.mpmt.model.UserStaff;
 import com.lzb.mpmt.service.MultiWrapperMain;
 import org.junit.jupiter.api.Test;
@@ -55,8 +54,8 @@ class MutilTableApplicationTests {
                 )
                 .eq(true, UserStaff::getSex, 1);
         int it = 0;
-        System.out.println(wrapperMain.getSelectSql());
-        System.out.println(wrapperMain.getWhereSql());
+        System.out.println(wrapperMain.getSqlSelectProps());
+        System.out.println(wrapperMain.getSqlWhere());
     }
 
 }
