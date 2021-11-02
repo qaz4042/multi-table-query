@@ -1,5 +1,6 @@
 package com.lzb.mpmt;
 
+import com.lzb.mpmt.demo.model.BaseModel;
 import com.lzb.mpmt.demo.model.User;
 import com.lzb.mpmt.demo.model.UserStaff;
 import com.lzb.mpmt.service.MultiWrapper;
@@ -7,6 +8,12 @@ import com.lzb.mpmt.service.MultiWrapperMain;
 import com.lzb.mpmt.service.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.MultiWrapperSub;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 
 //@SpringBootTest
 class MutilTableApplicationTests {
@@ -53,6 +60,9 @@ class MutilTableApplicationTests {
                 )
                 .leftJoin(MultiWrapperSub.lambda(User.class)
                         .select(User::getUsername)
+                        .gt(BaseModel::getCreateTime,new Date())
+                        .gt(BaseModel::getUpdateTime, LocalDateTime.now())
+                        .gt(BaseModel::getId, "1' or '1'='1")
                         .likeDefault(User::getUsername, "1")
                 );
 

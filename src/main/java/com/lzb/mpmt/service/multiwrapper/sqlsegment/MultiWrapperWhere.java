@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapper>> {
 
     String getTableName();
+
     void setTableName(String tableName);
 
     WhereDataTree getWhereTree();
@@ -40,6 +41,15 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
     default <VAL> Wrapper eq(MultiFunction<T, VAL> prop, VAL value) {
         return eq(true, prop, value);
     }
+
+    default <VAL> Wrapper isNull(MultiFunction<T, VAL> prop) {
+        return isNull(true, prop);
+    }
+
+    default <VAL> Wrapper isNotNull(MultiFunction<T, VAL> prop) {
+        return isNotNull(true, prop);
+    }
+
 
     default <VAL> Wrapper gt(MultiFunction<T, VAL> prop, VAL value) {
         return gt(true, prop, value);
@@ -72,6 +82,16 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
 
     default <VAL> Wrapper eq(Boolean condition, MultiFunction<T, VAL> prop, VAL value) {
         this.addWhereTreeData(condition, prop, value, WhereOptEnum.eq);
+        return (Wrapper) this;
+    }
+
+    default <VAL> Wrapper isNull(Boolean condition, MultiFunction<T, VAL> prop) {
+        this.addWhereTreeData(condition, prop, null, WhereOptEnum.isNull);
+        return (Wrapper) this;
+    }
+
+    default <VAL> Wrapper isNotNull(Boolean condition, MultiFunction<T, VAL> prop) {
+        this.addWhereTreeData(condition, prop, null, WhereOptEnum.isNotNull);
         return (Wrapper) this;
     }
 

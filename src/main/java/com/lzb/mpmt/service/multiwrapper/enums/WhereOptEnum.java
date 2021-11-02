@@ -21,6 +21,8 @@ import static com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum.Const.POINT;
 public enum WhereOptEnum {
     /***/
     eq((key, val) -> key + Const.EQ + POINT + val.toString() + POINT, "age = 18"),
+    isNull((key, val) -> key + Const.BLANK + Const.IS_NULL, "age is null"),
+    isNotNull((key, val) -> key + Const.BLANK + Const.IS_NOT_NULL, "age is not null"),
     in((key, val) -> whereSqlValueList(key, val, "in"), "age in (18,19)"),
     not_in((key, val) -> whereSqlValueList(key, val, "not in"), "age not in (18,19)"),
     gt((key, val) -> key + Const.GT + POINT + val + POINT, "age > 18"),
@@ -39,6 +41,8 @@ public enum WhereOptEnum {
         public static final char EQ = '=';
         public static final char GT = '>';
         public static final char LT = '<';
+        public static final String IS_NULL = "is null";
+        public static final String IS_NOT_NULL = "is not null";
         public static final String LIKE = "like";
     }
 

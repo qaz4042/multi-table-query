@@ -147,4 +147,8 @@ public class MultiWrapper<MAIN> {
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
+
+    public List<MAIN> list() {
+        return Collections.emptyList();
+    }
 }
