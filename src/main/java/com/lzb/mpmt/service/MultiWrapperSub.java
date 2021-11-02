@@ -5,6 +5,7 @@ import com.lzb.mpmt.service.common.WhereTreeNode;
 import com.lzb.mpmt.service.intf.MultiWrapperLimit;
 import com.lzb.mpmt.service.intf.MultiWrapperSelect;
 import com.lzb.mpmt.service.intf.MultiWrapperWhere;
+import com.lzb.mpmt.service.util.MutilUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,7 +30,9 @@ public class MultiWrapperSub<SUB> implements
 
 
     public static <SUB> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
-        return new MultiWrapperSub<>();
+        MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
+        wrapperSub.setTableName(MutilUtil.camelToUnderline(clazz.getSimpleName()));
+        return wrapperSub;
     }
 
     @SafeVarargs

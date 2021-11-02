@@ -15,8 +15,9 @@ import java.util.Map;
 @AllArgsConstructor
 public enum JoinTypeEnum {
     /***/
-    left_join,
-    inner_join,
-    right_join,
+    left_join("left join "),
+    inner_join("inner join "),
+    right_join("right join "),
     ;
+    private final String sql;
 }

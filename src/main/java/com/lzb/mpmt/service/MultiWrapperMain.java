@@ -4,6 +4,7 @@ import com.lzb.mpmt.service.common.*;
 import com.lzb.mpmt.service.intf.MultiWrapperLimit;
 import com.lzb.mpmt.service.intf.MultiWrapperSelect;
 import com.lzb.mpmt.service.intf.MultiWrapperWhere;
+import com.lzb.mpmt.service.util.MutilUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -36,8 +37,11 @@ public class MultiWrapperMain<MAIN> implements
     private Long limitSize;
 
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
-        return new MultiWrapperMain<>();
+        MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
+        wrapperMain.setTableName(MutilUtil.camelToUnderline(clazz.getSimpleName()));
+        return wrapperMain;
     }
+
 
     // List<propName opt values> 子表在主SQL下的的条件(与子表在子表sql下的where条件区分开)
 //    private List<MultiWrapperWhere> subTableWhereTrees = new ArrayList<>();

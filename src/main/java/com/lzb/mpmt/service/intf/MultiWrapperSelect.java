@@ -34,8 +34,8 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
         if (!MutilUtil.isEmpty(selectProps)) {
             return selectProps.stream().map(p ->
                     // todo 短写表名
-                    getTableName() + "." + p).collect(Collectors.joining(","));
+                    "  " + getTableName() + "." + p).collect(Collectors.joining(",\n"));
         }
-        return getTableName() + ".*";
+        return "  " + getTableName() + ".*";
     }
 }

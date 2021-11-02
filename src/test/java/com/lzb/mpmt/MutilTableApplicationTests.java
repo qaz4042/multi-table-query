@@ -1,61 +1,55 @@
 package com.lzb.mpmt;
 
+import com.lzb.mpmt.model.User;
 import com.lzb.mpmt.model.UserStaff;
+import com.lzb.mpmt.service.MultiWrapper;
 import com.lzb.mpmt.service.MultiWrapperMain;
+import com.lzb.mpmt.service.MultiWrapperMainSubWhere;
+import com.lzb.mpmt.service.MultiWrapperSub;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class MutilTableApplicationTests {
 
-    WrapperServiceSub<UserStaff> wrapperServiceSub = new WrapperServiceSub<>();
-
-//    @Test
-//    void testSql() {
-//        Page<UserStaff> page = new Page<>();
-//        String sql = MultiWrapper
-//                .main(
-//                        Wrappers.lambdaQuery(UserStaff.class)
-//                                .select(UserStaff::getStaffName, UserStaff::getSex)
-//                                .eq(UserStaff::getStaffName, "staffName")
-//                                .eq(UserStaff::getSex, "1")
-//                                .orderByDesc(UserStaff::getId)
-//                        ,
-//                        Wrappers.lambdaQuery(User.class)
-//                                .eq(User::getUsername, "username")
-//                                .eq(User::getSex, "0")
-//                )
-//                .leftJoin(Wrappers.lambdaQuery(User.class)
-//                        .select(User::getUsername)
-//                        .eq(User::getUsername, "usernameSub")
-//                )
-//                .limit(0, 10)
-//                .limit(page)
-//                .computeSql();
-//        System.out.println("testSql=" + sql);
-//    }
+    @Test
+    void testSimple() {
+        MultiWrapper<UserStaff> wrapper = MultiWrapper
+                .main(MultiWrapperMain.lambda(UserStaff.class))
+                .leftJoin(MultiWrapperSub.lambda(User.class));
+        System.out.println(wrapper.computeSql());
+    }
 
     @Test
-    void testSql2() {
-//        Wrappers.lambdaQuery().select()
-        MultiWrapperMain<UserStaff> wrapperMain = MultiWrapperMain.lambda(UserStaff.class)
-                .select(UserStaff::getSex, UserStaff::getStaffName)
-                .and(w ->
-                        w.eq(true, UserStaff::getStaffName, "StaffName1")
-                                .eq(true, UserStaff::getStaffName, "StaffName2")
+    void testComplex() {
+        MultiWrapper<UserStaff> wrapper = MultiWrapper
+                .main(
+                        MultiWrapperMain.lambda(UserStaff.class)
+                                .select(UserStaff::getSex, UserStaff::getStaffName)
+                                .and(w ->
+                                        w.eq(true, UserStaff::getStaffName, "StaffName1")
+                                                .eq(true, UserStaff::getStaffName, "StaffName2")
 
-                )
-                .and(w ->
-                        w.eq(true, UserStaff::getStaffName, "StaffName3")
-                                .or()
-                                .and(w2 -> w2.eq(true, UserStaff::getStaffName, "StaffName4")
-                                        .eq(true, UserStaff::getStaffName, "StaffName4"))
+                                )
+                                .and(w ->
+                                        w.eq(true, UserStaff::getStaffName, "StaffName3")
+                                                .or()
+                                                .and(w2 -> w2.eq(true, UserStaff::getStaffName, "StaffName4")
+                                                        .eq(true, UserStaff::getStaffName, "StaffName4"))
 
+                                )
+                                .eq(true, UserStaff::getSex, 1)
+                                .likeDefault(true, UserStaff::getStaffName, "111")
+                                .notIn(true, UserStaff::getStaffName, "111", "11122", "1112"),
+                        MultiWrapperMainSubWhere.lambda(User.class)
+                                .eq(User::getSex, 1)
                 )
-                .eq(true, UserStaff::getSex, 1);
-        int it = 0;
-        System.out.println(wrapperMain.getSqlSelectProps());
-        System.out.println(wrapperMain.getSqlWhere());
+                .leftJoin(MultiWrapperSub.lambda(User.class)
+                        .select(User::getUsername)
+                        .likeDefault(User::getUsername, "1")
+                );
+
+        System.out.println(wrapper.computeSql());
     }
 
 }

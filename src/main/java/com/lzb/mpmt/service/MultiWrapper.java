@@ -1,11 +1,14 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.enums.ClassRelationEnum;
 import com.lzb.mpmt.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.intf.MultiWrapperSelect;
+import com.lzb.mpmt.service.intf.MultiWrapperWhere;
+import com.lzb.mpmt.service.util.MutilUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 多表联查器
@@ -23,7 +26,7 @@ public class MultiWrapper<MAIN> {
     private List<MultiWrapperMainSubWhere<?>> wrapperMainSubWheres = Collections.emptyList();
 
     //副表信息
-    private List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations = Collections.emptyList();
+    private List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations = new ArrayList<>(8);
 
     /**
      * 主表信息
@@ -32,7 +35,7 @@ public class MultiWrapper<MAIN> {
      * @return MultiWrapper
      */
     public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
-        return main(wrapperMain, null);
+        return main(wrapperMain, (MultiWrapperMainSubWhere<?>[]) null);
     }
 
     /**
@@ -43,10 +46,12 @@ public class MultiWrapper<MAIN> {
      *
      * @return MultiWrapper
      */
-    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperMainSubWhere<?>> wrapperMainSubWhere) {
+    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
         MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
         wrapper.setWrapperMain(wrapperMain);
-        wrapper.setWrapperMainSubWheres(wrapperMainSubWhere);
+        if (wrapperMainSubWhere != null) {
+            wrapper.setWrapperMainSubWheres(Arrays.stream(wrapperMainSubWhere).filter(Objects::nonNull).collect(Collectors.toList()));
+        }
         return wrapper;
     }
 
@@ -70,21 +75,23 @@ public class MultiWrapper<MAIN> {
 
     /***
      * join是有顺序的,前后两张表,必须有直接关联
+     *
+     * @param relationId
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(ClassRelationEnum relationEnum, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(Long relationId, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.left_join;
-        return this.getMainMultiWrapper(joinType, relationEnum, subTableWrapper);
+        return this.getMainMultiWrapper(joinType, relationId, subTableWrapper);
     }
 
-    public <SUB> MultiWrapper<MAIN> innerJoin(ClassRelationEnum relationEnum, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(Long relationId, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.inner_join;
-        return this.getMainMultiWrapper(joinType, relationEnum, subTableWrapper);
+        return this.getMainMultiWrapper(joinType, relationId, subTableWrapper);
     }
 
-    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, ClassRelationEnum relationEnum, MultiWrapperSub<SUB> subTableWrapper) {
-        wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationEnum, subTableWrapper));
+    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, Long relationId, MultiWrapperSub<SUB> subTableWrapper) {
+        wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationId, subTableWrapper));
         return this;
     }
 
@@ -101,48 +108,30 @@ public class MultiWrapper<MAIN> {
 
     //输出最终sql
     public String computeSql() {
-
+        String mainTableName = wrapperMain.getTableName();
+        if (mainTableName == null) {
+            throw new RuntimeException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+        }
         // 1. select user_staff.* from user_staff
-
-        String sqlSelect = "select " + wrapperMain.getSqlSelectProps() + " , " + wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps());
+        List<String> selectPropsList = wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps()).collect(Collectors.toList());
+        selectPropsList.add(0, wrapperMain.getSqlSelectProps());
+        String sqlSelect = "\nselect\n" + String.join(",\n", selectPropsList);
 
         // 2. 添加limit
-        //	SELECT u.*,p.* FROM
-        //	user_info u
-        //	LEFT JOIN principal_user p ON p.user_id = u.id
-        //	where p.admin_flag = 1;
-        //	-->
-        //	SELECT * FROM
-        //	(select * from user_info limit 10) u
-        //	LEFT JOIN principal_user p ON p.user_id = u.id
-        //	where p.admin_flag = 1;
-        String sqlFromLimit = wrapperMain.getSqlWhereLimit(wrapperMain.getTableName());
+        //	SELECT u.*,p.* FROM user_info                          u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
+        //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
+        String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
 
         // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
-        String sqlLeftJoinOn = wrapperSubAndRelations.stream();
+        String sqlLeftJoinOn = "\n" + wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
         // 4. where user_staff.state = 0
         //      and user_staff_address.del_flag = 0
-        String sqlWhere = " where " + wrapperMain.getSqlWhere(wrapperMainSubWheres);
+        List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>(wrapperMainSubWheres);
+        whereWrappers.add(0, wrapperMain);
+        String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MutilUtil.isEmpty(s)).collect(Collectors.joining("\nand "));
+        String sqlWhere = MutilUtil.isEmpty(wherePropsAppend) ? MutilUtil.EMPTY : "\nwhere " + wherePropsAppend;
 
-
-        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere
+        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
-
-
-//    @Data
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    @SuperBuilder
-//    public static class SubTableInfo<SUB> {
-//
-//        private Wrapper<SUB> wrapper;
-//        private JoinTypeEnum joinType;
-//        private ClassRelationEnum classRelation;
-//
-//        public SubTableInfo(Wrapper<SUB> wrapper) {
-//            LambdaQueryWrapper<Object> objectLambdaQueryWrapper = Wrappers.lambdaQuery();
-//        }
-//    }
-
 }

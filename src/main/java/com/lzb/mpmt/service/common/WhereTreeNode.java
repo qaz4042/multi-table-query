@@ -19,7 +19,7 @@ public class WhereTreeNode implements IWhereTreeData {
     private List<IWhereTreeData> whereTreeDatas = new ArrayList<>(8);
 
     @Override
-    public String toSql(String tableName) {
-        return "(" + whereTreeDatas.stream().map(o -> o.toSql(tableName)).collect(Collectors.joining(") " + andOr.name() + " (")) + ")";
+    public String getSqlWhereProps(String tableName) {
+        return "(" + whereTreeDatas.stream().map(o -> o.getSqlWhereProps(tableName)).collect(Collectors.joining(") " + andOr.name() + " (")) + ")";
     }
 }

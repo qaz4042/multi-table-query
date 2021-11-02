@@ -9,6 +9,7 @@ import java.util.Collection;
 
 public class MutilUtil {
 
+    public static final String EMPTY = "";
     public static final String UNDERLINE = "_";
 
     public static Boolean isEmpty(Collection<?> list) {
@@ -17,6 +18,9 @@ public class MutilUtil {
 
     public static Boolean isEmpty(Object... list) {
         return null == list || list.length == 0;
+    }
+    public static Boolean isEmpty(String str) {
+        return null == str || str.length() == 0;
     }
 
     /**
@@ -27,7 +31,7 @@ public class MutilUtil {
      */
     public static String firstToLowerCase(String param) {
         if (null == param || param.length() == 0) {
-            return "";
+            return MutilUtil.EMPTY;
         }
         return param.substring(0, 1).toLowerCase() + param.substring(1);
     }
@@ -155,7 +159,7 @@ public class MutilUtil {
      */
     public static String camelToUnderline(String param) {
         if (null == param || param.length() == 0) {
-            return "";
+            return MutilUtil.EMPTY;
         }
         int len = param.length();
         StringBuilder sb = new StringBuilder(len);
