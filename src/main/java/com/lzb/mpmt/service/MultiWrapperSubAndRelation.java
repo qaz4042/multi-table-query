@@ -1,11 +1,9 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.model.ClassRelation;
-import com.lzb.mpmt.enums.JoinTypeEnum;
-import com.lzb.mpmt.model.User;
-import com.lzb.mpmt.model.UserStaff;
-import com.lzb.mpmt.service.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.ClassRelation;
+import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +19,7 @@ public class MultiWrapperSubAndRelation<SUB> {
     //聚合方式
     private JoinTypeEnum joinType;
     /**
-     * 关系 ClassRelation.id {@link com.lzb.mpmt.model.ClassRelation#getId()}
+     * 关系 ClassRelation.id {@link ClassRelation#getId()}
      */
     private Long relationId;
 
@@ -35,13 +33,13 @@ public class MultiWrapperSubAndRelation<SUB> {
         relationsAll.add(
                 ClassRelation.builder()
                         .id(1L)
-                        .class1(User.class)
+//                        .class1(User.class)     todo 数据初始化
                         .tableName1("user")
                         .class1KeyProp("id")
                         .class1OneOrMany(ClassRelationOneOrManyEnum.ONE)
                         .class1Require(true)
 
-                        .class2(UserStaff.class)
+//                        .class2(UserStaff.class) todo 数据初始化
                         .tableName2("user_staff")
                         .class2KeyProp("admin_user_id")
                         .class2OneOrMany(ClassRelationOneOrManyEnum.MANY)

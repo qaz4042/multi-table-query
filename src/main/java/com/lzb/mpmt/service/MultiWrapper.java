@@ -1,9 +1,8 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.enums.JoinTypeEnum;
-import com.lzb.mpmt.service.intf.MultiWrapperSelect;
-import com.lzb.mpmt.service.intf.MultiWrapperWhere;
-import com.lzb.mpmt.service.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
+import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

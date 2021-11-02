@@ -1,15 +1,14 @@
 package com.lzb.mpmt;
 
-import com.lzb.mpmt.model.User;
-import com.lzb.mpmt.model.UserStaff;
+import com.lzb.mpmt.demo.model.User;
+import com.lzb.mpmt.demo.model.UserStaff;
 import com.lzb.mpmt.service.MultiWrapper;
 import com.lzb.mpmt.service.MultiWrapperMain;
 import com.lzb.mpmt.service.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.MultiWrapperSub;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class MutilTableApplicationTests {
 
     @Test

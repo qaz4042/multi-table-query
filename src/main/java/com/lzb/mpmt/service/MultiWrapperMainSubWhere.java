@@ -1,9 +1,7 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.service.common.WhereTreeNode;
-import com.lzb.mpmt.service.intf.MultiWrapperLimit;
-import com.lzb.mpmt.service.intf.MultiWrapperSelect;
-import com.lzb.mpmt.service.intf.MultiWrapperWhere;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereTreeNode;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

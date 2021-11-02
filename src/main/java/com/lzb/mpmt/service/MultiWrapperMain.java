@@ -1,10 +1,11 @@
 package com.lzb.mpmt.service;
 
-import com.lzb.mpmt.service.common.*;
-import com.lzb.mpmt.service.intf.MultiWrapperLimit;
-import com.lzb.mpmt.service.intf.MultiWrapperSelect;
-import com.lzb.mpmt.service.intf.MultiWrapperWhere;
-import com.lzb.mpmt.service.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
+import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereTreeNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
