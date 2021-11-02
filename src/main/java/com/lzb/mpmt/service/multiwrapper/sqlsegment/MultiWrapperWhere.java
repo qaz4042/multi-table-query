@@ -5,8 +5,8 @@ import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
 import com.lzb.mpmt.service.multiwrapper.enums.WhereAndOrEnum;
 import com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereTreeNode;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereTreeNodeData;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataUnit;
 import lombok.SneakyThrows;
 
 import java.util.function.Consumer;
@@ -15,22 +15,20 @@ import java.util.stream.Collectors;
 /**
  * @author Administrator
  */
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings({"unused", "unchecked", "AlibabaAbstractMethodOrInterfaceMethodMustUseJavadoc"})
 public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapper>> {
-//    private String tableName;
-//    private WhereTreeNode whereTree = new WhereTreeNode();    // 多个条件 n1 and ( n2 or n3 )
 
     String getTableName();
     void setTableName(String tableName);
 
-    WhereTreeNode getWhereTree();
+    WhereDataTree getWhereTree();
 
     @SneakyThrows
     default <VAL> Wrapper and(Consumer<Wrapper> andContent) {
         // noinspection deprecation
         Wrapper wrapper = (Wrapper) this.getClass().newInstance();
         andContent.accept(wrapper);
-        getWhereTree().getWhereTreeDatas().add(wrapper.getWhereTree());
+        getWhereTree().getWhereDatas().add(wrapper.getWhereTree());
         return (Wrapper) this;
     }
 
@@ -112,12 +110,24 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         return (Wrapper) this;
     }
 
+    /**
+     * 递归 getSqlWhereProps 拼接最后结果
+     *
+     * @return where条件中的字段条件信息(拼接后)
+     */
     default String getSqlWhereProps() {
-        WhereTreeNode whereTree = getWhereTree();
-        String tableName = getTableName();
-        return whereTree.getWhereTreeDatas().stream().map(data -> data.getSqlWhereProps(tableName)).collect(Collectors.joining("\n" + whereTree.getAndOr().name() + " "));
+        return getWhereTree().getSqlWhereProps(getTableName());
     }
 
+    /**
+     * 添加过滤条件
+     *
+     * @param condition 方便开发,false忽略此次添加
+     * @param prop      字段名
+     * @param values    字段值
+     * @param opt       等于/大于 等条件判断
+     * @param <VAL>     字段的泛型
+     */
     private <VAL> void addWhereTreeData(Boolean condition, MultiFunction<T, VAL> prop, Object values, WhereOptEnum opt) {
         if (!condition) {
             return;
@@ -127,6 +137,6 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
             setTableName(resolve.getClazzNameUnderline());
         }
         String propNameUnderline = resolve.getPropNameUnderline();
-        getWhereTree().getWhereTreeDatas().add(new WhereTreeNodeData(propNameUnderline, opt, values));
+        getWhereTree().getWhereDatas().add(new WhereDataUnit(propNameUnderline, opt, values));
     }
 }

@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
 
+/**
+ * @author Administrator
+ */
 public class MutilUtil {
 
     public static final String EMPTY = "";

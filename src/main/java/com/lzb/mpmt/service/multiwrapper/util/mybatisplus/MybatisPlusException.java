@@ -2,6 +2,9 @@ package com.lzb.mpmt.service.multiwrapper.util.mybatisplus;
 
 import lombok.NoArgsConstructor;
 
+/**
+ * @author Administrator
+ */
 @NoArgsConstructor
 public class MybatisPlusException extends RuntimeException{
     public MybatisPlusException(String message) {

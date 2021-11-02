@@ -8,15 +8,16 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * 类和类的关系  可以自动生成join语句 统一规范sql 按表名字排序
+ * @author Administrator
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class ClassRelation {
+public class TableRelation {
     /***/
-//    r1(User.class, UserStaff.class, ONE, MANY, true, false, User::getId);
     private Long id;
+//    r1(User.class, UserStaff.class, ONE, MANY, true, false, User::getId);
 
     /***
      * 两张表名

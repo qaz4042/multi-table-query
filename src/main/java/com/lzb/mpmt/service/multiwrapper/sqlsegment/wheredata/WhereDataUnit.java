@@ -6,11 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * @author Administrator
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class WhereTreeNodeData implements IWhereTreeData {
+public class WhereDataUnit implements IWhereData {
     private String propName;
     private WhereOptEnum opt;
     private Object values;

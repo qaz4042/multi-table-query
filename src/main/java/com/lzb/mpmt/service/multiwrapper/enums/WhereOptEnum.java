@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 
 import static com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum.Const.POINT;
 
+/**
+ * @author Administrator
+ */
+
 @SuppressWarnings("ConstantConditions")
 @Getter
 @AllArgsConstructor

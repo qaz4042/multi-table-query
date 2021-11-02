@@ -1,7 +1,7 @@
 package com.lzb.mpmt.service;
 
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.ClassRelation;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.TableRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
 import lombok.AllArgsConstructor;
@@ -11,27 +11,36 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 副表,和主副表对应关系信息
+ * @author Administrator
+ * @param <SUB> 副表泛型
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings("unused")
 public class MultiWrapperSubAndRelation<SUB> {
-    //聚合方式
+    /**
+     * 聚合方式
+     */
     private JoinTypeEnum joinType;
     /**
-     * 关系 ClassRelation.id {@link ClassRelation#getId()}
+     * 关系 ClassRelation.id {@link TableRelation#getId()}
      */
     private Long relationId;
 
-    //内容
+    /**
+     * 副表信息
+     */
     private MultiWrapperSub<SUB> wrapperSub;
 
-    //todo
-    static List<ClassRelation> relationsAll = new ArrayList<>();
+    /** todo */
+    static List<TableRelation> relationsAll = new ArrayList<>();
 
     static {
         relationsAll.add(
-                ClassRelation.builder()
+                TableRelation.builder()
                         .id(1L)
 //                        .class1(User.class)     todo 数据初始化
                         .tableName1("user")
@@ -51,7 +60,7 @@ public class MultiWrapperSubAndRelation<SUB> {
     public String getSqlJoin(String mainTableName) {
         String subTableName = wrapperSub.getTableName();
 
-        ClassRelation relation = relationsAll.stream().filter(r -> r.getId().equals(relationId)).findFirst().orElse(null);
+        TableRelation relation = relationsAll.stream().filter(r -> r.getId().equals(relationId)).findFirst().orElse(null);
         if (relation == null) {
             relation = relationsAll.stream().filter(r -> (mainTableName.equals(r.getTableName1()) && subTableName.equals(r.getTableName2()))
                     || (mainTableName.equals(r.getTableName2()) && subTableName.equals(r.getTableName1()))).findFirst().orElse(null);

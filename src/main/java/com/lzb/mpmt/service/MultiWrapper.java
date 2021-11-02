@@ -2,6 +2,7 @@ package com.lzb.mpmt.service;
 
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.TableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,18 +15,29 @@ import java.util.stream.Collectors;
  * 举例说明 主表:user_staff 副表:user_staff_address
  *
  * @param <MAIN>
+ * @author Administrator
  */
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
 public class MultiWrapper<MAIN> {
 
-    //主表信息
+    /**
+     * 主表信息
+     */
     private MultiWrapperMain<MAIN> wrapperMain;
     private List<MultiWrapperMainSubWhere<?>> wrapperMainSubWheres = Collections.emptyList();
 
-    //副表信息
+    /**
+     * 副表信息
+     */
     private List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations = new ArrayList<>(8);
+
+    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?>... subTableWrappers) {
+        this.wrapperMain = wrapperMain;
+        //默认leftJoin
+        Arrays.stream(subTableWrappers).forEach(this::leftJoin);
+    }
 
     /**
      * 主表信息
@@ -75,8 +87,8 @@ public class MultiWrapper<MAIN> {
     /***
      * join是有顺序的,前后两张表,必须有直接关联
      *
-     * @param relationId
-     * @param subTableWrapper subTableWrapper
+     * @param relationId      {@link TableRelation#getId()}
+     * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
     public <SUB> MultiWrapper<MAIN> leftJoin(Long relationId, MultiWrapperSub<SUB> subTableWrapper) {
@@ -105,7 +117,9 @@ public class MultiWrapper<MAIN> {
         return this;
     }
 
-    //输出最终sql
+    /**
+     * 输出最终sql
+     */
     public String computeSql() {
         String mainTableName = wrapperMain.getTableName();
         if (mainTableName == null) {
@@ -128,8 +142,8 @@ public class MultiWrapper<MAIN> {
         //      and user_staff_address.del_flag = 0
         List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>(wrapperMainSubWheres);
         whereWrappers.add(0, wrapperMain);
-        String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MutilUtil.isEmpty(s)).collect(Collectors.joining("\nand "));
-        String sqlWhere = MutilUtil.isEmpty(wherePropsAppend) ? MutilUtil.EMPTY : "\nwhere " + wherePropsAppend;
+        String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MutilUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
+        String sqlWhere = MutilUtil.isEmpty(wherePropsAppend) ? MutilUtil.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }

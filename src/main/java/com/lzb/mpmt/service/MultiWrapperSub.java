@@ -1,7 +1,7 @@
 package com.lzb.mpmt.service;
 
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereTreeNode;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @author Administrator
+ */
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
@@ -18,13 +21,13 @@ public class MultiWrapperSub<SUB> implements
         MultiWrapperSelect<SUB, MultiWrapperSub<SUB>>
 {
 
-    //下划线表名
+    /** 下划线表名 */
     private String tableName;
 
-    // where id='1' and name like '%张三%   '多个条件 n1 and ( n2 or n3 )
-    private WhereTreeNode whereTree = new WhereTreeNode();
+    /** where条件 */
+    private WhereDataTree whereTree = new WhereDataTree();
 
-    // select id,name,sex
+    /** select属性列表 */
     private List<String> selectProps;
 
 

@@ -21,16 +21,21 @@ import lombok.SneakyThrows;
 
 /**
  *
+ * @author Administrator
  */
 @SuppressWarnings("unused")
 @Data
 public class SerializedLambdaData {
+    /** 类 */
     private Class<?> clazz;
+    /** 属性名(驼峰) */
     private String propName;
+    /** 属性了行 */
     private Class<?> propReturnType;
 
-    //驼峰
+    /** 表名(类名转的,带下划线) */
     private String clazzNameUnderline;
+    /** 属性名(带下划线) */
     private String propNameUnderline;
 
     @SneakyThrows

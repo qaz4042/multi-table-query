@@ -6,11 +6,11 @@ import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
 /**
  * @author Administrator
  */
+@SuppressWarnings({"unchecked", "AlibabaAbstractMethodOrInterfaceMethodMustUseJavadoc"})
 public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapper>> {
 
-//     Long limitOffset;
 
-    //     Long limitSize;
+    /***/
     void setLimitOffset(Long limitOffset);
 
     Long getLimitOffset();
@@ -19,7 +19,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
 
     Long getLimitSize();
 
-    default <VAL> Wrapper limit(long offset, long size) {
+    default Wrapper limit(long offset, long size) {
         setLimitOffset(offset);
         setLimitSize(size);
         return (Wrapper) this;
@@ -30,7 +30,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
         if (null == getLimitSize()) {
             return tableName;
         } else {
-            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitOffset(), MutilUtil.EMPTY) + ")";
+            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitOffset(), MutilUtil.EMPTY) + ") " + tableName;
         }
     }
 
