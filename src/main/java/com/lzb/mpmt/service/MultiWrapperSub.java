@@ -4,7 +4,7 @@ import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
-import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,12 +28,15 @@ public class MultiWrapperSub<SUB> implements
     private WhereDataTree whereTree = new WhereDataTree();
 
     /** select属性列表 */
-    private List<String> selectProps;
+    private List<String> selectFields;
 
+    /** 类为了生成List<SUB> */
+    private Class<SUB> clazz;
 
     public static <SUB> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
         MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
-        wrapperSub.setTableName(MutilUtil.camelToUnderline(clazz.getSimpleName()));
+        wrapperSub.setTableName(MultiUtil.camelToUnderline(clazz.getSimpleName()));
+        wrapperSub.setClazz(clazz);
         return wrapperSub;
     }
 

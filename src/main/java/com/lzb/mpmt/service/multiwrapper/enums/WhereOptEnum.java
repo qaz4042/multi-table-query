@@ -20,48 +20,18 @@ import static com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum.Const.POINT;
 @AllArgsConstructor
 public enum WhereOptEnum {
     /***/
-    eq((key, val) -> key + Const.EQ + POINT + val.toString() + POINT, "age = 18"),
-    isNull((key, val) -> key + Const.BLANK + Const.IS_NULL, "age is null"),
-    isNotNull((key, val) -> key + Const.BLANK + Const.IS_NOT_NULL, "age is not null"),
-    in((key, val) -> whereSqlValueList(key, val, "in"), "age in (18,19)"),
-    not_in((key, val) -> whereSqlValueList(key, val, "not in"), "age not in (18,19)"),
-    gt((key, val) -> key + Const.GT + POINT + val + POINT, "age > 18"),
-    ge((key, val) -> key + Const.GT + Const.EQ + POINT + val + POINT, "age >= 18"),
-    lt((key, val) -> key + Const.LT + POINT + val + POINT, "age < 18"),
-    le((key, val) -> key + Const.LT + Const.EQ + POINT + val + POINT, "age <= 18"),
-    likeDefault((key, val) -> key + Const.BLANK + Const.LIKE + Const.BLANK + POINT + "%" + val + "%" + POINT, "name like %咔咔%"),
+    eq((key, val) -> "{0}='{1}'", "age = 18"),
+    isNull((key, val) -> "{0} is null", "age is null"),
+    isNotNull((key, val) -> "{0} is not null", "age is not null"),
+    in((key, val) -> "{0} in {1}", "age in (18,19)"),
+    not_in((key, val) -> "{0} not in {1}", "age not in (18,19)"),
+    gt((key, val) -> "{0} > '{1}'", "age > '18'"),
+    ge((key, val) -> "{0} >= '{1}'", "age >= '18'"),
+    lt((key, val) -> "{0} < '{1}'","age < '18'"),
+    le((key, val) -> "{0} <= '{1}'", "age <= '18'"),
+    likeDefault((key, val) -> "{0} like '%{1}%'", "name like '%咔咔%'"),
     ;
 
     private final BiFunction<String, Object, String> sqlFunction;
     private final String demo;
-
-    static class Const {
-        public static final char BLANK = ' ';
-        public static final char POINT = '\'';
-        public static final char EQ = '=';
-        public static final char GT = '>';
-        public static final char LT = '<';
-        public static final String IS_NULL = "is null";
-        public static final String IS_NOT_NULL = "is not null";
-        public static final String LIKE = "like";
-    }
-
-    private static String whereSqlValueList(String key, Object val, String inOpt) {
-        if (null == val) {
-            throw new RuntimeException("in 语句的values不能为空");
-        }
-        if (val instanceof Collection) {
-            val = ((Collection<?>) val).stream().filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
-            if (((Collection<?>) val).size() == 0) {
-                return "1!=1";
-            }
-        }
-        if (val.getClass().isArray()) {
-            if (((Object[]) val).length == 0) {
-                return "1!=1";
-            }
-            val = Arrays.stream(((Object[]) val)).filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
-        }
-        return key + " " + inOpt + " (" + val + ")";
-    }
 }

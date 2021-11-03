@@ -11,7 +11,13 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum.Const.POINT;
 
 /**
  * @author Administrator
@@ -28,7 +34,7 @@ public class WhereDataUnit implements IWhereData {
 
     @Override
     public String getSqlWhereProps(String tableName) {
-        return opt.getSqlFunction().apply(tableName + "." + propName, formatValues(values));
+        return opt.getSqlFunction().apply(tableName + "." + propName + " ", formatValues(values));
     }
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -42,21 +48,28 @@ public class WhereDataUnit implements IWhereData {
     private static Object formatValues(Object value) {
         if (null == value) {
             return null;
-        }
-        if (value instanceof Date) {
+        } else if (value instanceof Date) {
             value = DATE_FORMAT.format(value);
-        }
-        if (value instanceof LocalDateTime) {
+        } else if (value instanceof LocalDateTime) {
             value = DATE_TIME_FORMAT.format((LocalDateTime) value);
-        }
-        if (value instanceof LocalTime) {
+        } else if (value instanceof LocalTime) {
             value = TIME_FORMAT.format((LocalTime) value);
-        }
-        if (value instanceof String) {
+        } else if (value instanceof String) {
             //防止SQL注入
             value = ClientPreparedQueryBindings.sqlAvoidAttack((String) value);
+        } else if (value instanceof Collection) {
+            value = ((Collection<?>) value).stream().filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
+            if (((Collection<?>) value).size() == 0) {
+                return "1!=1";
+            }
+            value = " (" + value + ")";
+        } else if (value.getClass().isArray()) {
+            value = Arrays.stream(((Object[]) value)).filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
+            if (((Object[]) value).length == 0) {
+                return "1!=1";
+            }
+            value = " (" + value + ")";
         }
         return value;
     }
-
 }

@@ -1,13 +1,12 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.jdbc;
 
 import com.lzb.mpmt.service.MultiWrapper;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
@@ -20,23 +19,25 @@ public class MysqlExecutor {
         MysqlExecutor.jdbcTemplate = jdbcTemplate;
     }
 
-    public static <MAIN> List<MAIN> query(MultiWrapper wrapper) {
+    @SneakyThrows
+    public static <MAIN> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
-        Statement stm = null;
-        ResultSet rs = null;
-        Connection con = null;
-        List<MAIN> MAINs = jdbcTemplate.query(sql, new RowMapper<MAIN>() {
-            @Override
-            public MAIN mapRow(ResultSet resultSet, int i) throws SQLException {
-                MAIN MAIN = (MAIN) wrapper.getWrapperMain().getTableName().getClass().getNestHost();// todo  改成 class
-                MAIN.setId(resultSet.getInt("id"));
-                MAIN.setName(resultSet.getString("name"));
-                MAIN.setPassword(resultSet.getString("password"));
-                MAIN.setSex(resultSet.getString("sex"));
-                MAIN.setAge(resultSet.getInt("age"));
-                return MAIN;
-            }
-        });
 
+        Class<MAIN> mainClazz = wrapper.getWrapperMain().getClazz();
+
+        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(mainClazz, resultSet));
+    }
+
+    @SneakyThrows
+    private static <MAIN> MAIN buildReturn(Class<MAIN> mainClazz, ResultSet resultSet) {
+        MAIN MAIN = mainClazz.newInstance();
+        //
+
+//        MAIN.setId(resultSet.getInt("id"));
+//        MAIN.setName(resultSet.getString("name"));
+//        MAIN.setPassword(resultSet.getString("password"));
+//        MAIN.setSex(resultSet.getString("sex"));
+//        MAIN.setAge(resultSet.getInt("age"));
+        return MAIN;
     }
 }

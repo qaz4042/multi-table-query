@@ -10,7 +10,7 @@ import java.util.Collection;
 /**
  * @author Administrator
  */
-public class MutilUtil {
+public class MultiUtil {
 
     public static final String EMPTY = "";
     public static final String UNDERLINE = "_";
@@ -34,7 +34,7 @@ public class MutilUtil {
      */
     public static String firstToLowerCase(String param) {
         if (null == param || param.length() == 0) {
-            return MutilUtil.EMPTY;
+            return MultiUtil.EMPTY;
         }
         return param.substring(0, 1).toLowerCase() + param.substring(1);
     }
@@ -86,7 +86,7 @@ public class MutilUtil {
         }
         if (cl == null) {
             // No thread context class loader -> use class loader of this class.
-            cl = MutilUtil.class.getClassLoader();
+            cl = MultiUtil.class.getClassLoader();
             if (cl == null) {
                 // getClassLoader() returning null indicates the bootstrap ClassLoader
                 try {
@@ -162,7 +162,7 @@ public class MutilUtil {
      */
     public static String camelToUnderline(String param) {
         if (null == param || param.length() == 0) {
-            return MutilUtil.EMPTY;
+            return MultiUtil.EMPTY;
         }
         int len = param.length();
         StringBuilder sb = new StringBuilder(len);

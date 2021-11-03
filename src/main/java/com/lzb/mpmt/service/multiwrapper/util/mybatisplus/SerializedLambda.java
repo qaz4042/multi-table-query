@@ -15,7 +15,7 @@
  */
 package com.lzb.mpmt.service.multiwrapper.util.mybatisplus;
 
-import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.Data;
 
 import java.io.*;
@@ -76,14 +76,14 @@ public class SerializedLambda implements Serializable {
      */
     private static SerializedLambda resolve(MultiFunction<?, ?> lambda) {
         if (!lambda.getClass().isSynthetic()) {
-            throw MutilUtil.mpe("该方法仅能传入 lambda 表达式产生的合成类");
+            throw MultiUtil.mpe("该方法仅能传入 lambda 表达式产生的合成类");
         }
-        try (ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(MutilUtil.serialize(lambda))) {
+        try (ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(MultiUtil.serialize(lambda))) {
             @Override
             protected Class<?> resolveClass(ObjectStreamClass objectStreamClass) throws IOException, ClassNotFoundException {
                 Class<?> clazz;
                 try {
-                    clazz = MutilUtil.toClassConfident(objectStreamClass.getName());
+                    clazz = MultiUtil.toClassConfident(objectStreamClass.getName());
                 } catch (Exception ex) {
                     clazz = super.resolveClass(objectStreamClass);
                 }
@@ -92,7 +92,7 @@ public class SerializedLambda implements Serializable {
         }) {
             return (SerializedLambda) objIn.readObject();
         } catch (ClassNotFoundException | IOException e) {
-            throw MutilUtil.mpe("This is impossible to happen", e);
+            throw MultiUtil.mpe("This is impossible to happen", e);
         }
     }
 
@@ -111,7 +111,7 @@ public class SerializedLambda implements Serializable {
      * @return 实现类
      */
     public Class<?> getImplClass() {
-        return MutilUtil.toClassConfident(getImplClassName());
+        return MultiUtil.toClassConfident(getImplClassName());
     }
 
     /**
@@ -147,7 +147,7 @@ public class SerializedLambda implements Serializable {
      */
     public Class<?> getInstantiatedType() {
         String instantiatedTypeName = normalizedName(instantiatedMethodType.substring(2, instantiatedMethodType.indexOf(';')));
-        return MutilUtil.toClassConfident(instantiatedTypeName);
+        return MultiUtil.toClassConfident(instantiatedTypeName);
     }
 
     /**

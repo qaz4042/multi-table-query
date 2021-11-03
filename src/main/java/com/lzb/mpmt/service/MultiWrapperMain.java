@@ -4,7 +4,7 @@ import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
-import com.lzb.mpmt.service.multiwrapper.util.MutilUtil;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +23,7 @@ public class MultiWrapperMain<MAIN> implements
         MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
 {
 
+
     /** 下划线表名 */
     private String tableName;
 
@@ -30,7 +31,7 @@ public class MultiWrapperMain<MAIN> implements
     private WhereDataTree whereTree = new WhereDataTree();
 
     /** select属性列表 */
-    private List<String> selectProps;
+    private List<String> selectFields;
 
     /**
      * limit分页
@@ -43,9 +44,13 @@ public class MultiWrapperMain<MAIN> implements
     private Long limitOffset;
     private Long limitSize;
 
+    /** 类为了生成List<SUB> */
+    private Class<MAIN> clazz;
+
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
-        wrapperMain.setTableName(MutilUtil.camelToUnderline(clazz.getSimpleName()));
+        wrapperMain.setTableName(MultiUtil.camelToUnderline(clazz.getSimpleName()));
+        wrapperMain.setClazz(clazz);
         return wrapperMain;
     }
 

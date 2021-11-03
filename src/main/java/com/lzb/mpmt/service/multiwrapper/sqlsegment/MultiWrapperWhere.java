@@ -10,7 +10,6 @@ import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataUnit;
 import lombok.SneakyThrows;
 
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * @author Administrator
@@ -154,9 +153,9 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         }
         SerializedLambdaData resolve = SerializedLambda.resolveCache(prop);
         if (null == getTableName()) {
-            setTableName(resolve.getClazzNameUnderline());
+            setTableName(resolve.getTableName());
         }
-        String propNameUnderline = resolve.getPropNameUnderline();
+        String propNameUnderline = resolve.getFieldName();
         getWhereTree().getWhereDatas().add(new WhereDataUnit(propNameUnderline, opt, values));
     }
 }
