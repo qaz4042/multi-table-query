@@ -103,6 +103,7 @@ class MultiTableApplicationTests {
                         .gt(BaseModel::getCreateTime, new Date())
                         .gt(BaseModel::getUpdateTime, LocalDateTime.now())
                         .gt(BaseModel::getId, "1")
+                        .in(BaseModel::getId, "1","1","3")
                         .likeDefault(User::getUsername, "1")
                 )
                 .leftJoin(MultiWrapperSub.lambda(UserAddress.class)

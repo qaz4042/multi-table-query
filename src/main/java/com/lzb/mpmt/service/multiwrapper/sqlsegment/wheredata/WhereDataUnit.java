@@ -17,8 +17,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum.Const.POINT;
-
 /**
  * @author Administrator
  */
@@ -34,7 +32,7 @@ public class WhereDataUnit implements IWhereData {
 
     @Override
     public String getSqlWhereProps(String tableName) {
-        return opt.getSqlFunction().apply(tableName + "." + propName + " ", formatValues(values));
+        return String.format(opt.getTemplate(), tableName + "." + propName + " ", formatValues(values));
     }
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -58,17 +56,15 @@ public class WhereDataUnit implements IWhereData {
             //防止SQL注入
             value = ClientPreparedQueryBindings.sqlAvoidAttack((String) value);
         } else if (value instanceof Collection) {
-            value = ((Collection<?>) value).stream().filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
             if (((Collection<?>) value).size() == 0) {
                 return "1!=1";
             }
-            value = " (" + value + ")";
+            value = ((Collection<?>) value).stream().filter(Objects::nonNull).map(v -> '\'' + v.toString() + '\'').collect(Collectors.joining(","));
         } else if (value.getClass().isArray()) {
-            value = Arrays.stream(((Object[]) value)).filter(Objects::nonNull).map(v -> POINT + v.toString() + POINT).collect(Collectors.joining(","));
             if (((Object[]) value).length == 0) {
                 return "1!=1";
             }
-            value = " (" + value + ")";
+            value = Arrays.stream(((Object[]) value)).filter(Objects::nonNull).map(v -> '\'' + v.toString() + '\'').collect(Collectors.joining(","));
         }
         return value;
     }

@@ -41,23 +41,15 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
     /**
      * 拼接出select字段列表
      *
-     * @param hasSameRelation 是否有主表副表存在两个关系(副表ID,对应主表两个属性)
-     * @param relationCode    当前关系的code
+     * @param relationCode 当前关系的code
      * @return sqlSelectProps
      */
-    default String getSqlSelectProps(Boolean hasSameRelation, String relationCode) {
+    default String getSqlSelectProps(String relationCode) {
         List<String> selectProps = getSelectFields();
         if (null == selectProps) {
             return "  " + getTableName() + ".*";
         }
-        if (selectProps.size() > 0) {
-            return selectProps.stream().map(fieldName -> "  " + getTableName() + "." + fieldName + getAsSql(hasSameRelation, relationCode, fieldName))
-                    .collect(Collectors.joining(",\n"));
-        }
-        return null;
-    }
-
-    private String getAsSql(Boolean hasSameRelation, String relationCode, String filedName) {
-        return hasSameRelation ? MultiUtil.EMPTY : " as " + "`" + relationCode + "." + filedName + "`";
+        return selectProps.stream().map(fieldName -> "  " + getTableName() + "." + fieldName + " as " + "`" + relationCode + "." + fieldName + "`")
+                .collect(Collectors.joining(",\n"));
     }
 }

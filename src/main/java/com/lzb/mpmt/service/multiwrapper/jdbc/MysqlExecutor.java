@@ -1,13 +1,11 @@
-package com.lzb.mpmt.service.multiwrapper.sqlsegment.jdbc;
+package com.lzb.mpmt.service.multiwrapper.jdbc;
 
 import com.lzb.mpmt.service.MultiWrapper;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 public class MysqlExecutor {
@@ -24,13 +22,17 @@ public class MysqlExecutor {
         String sql = wrapper.computeSql();
 
         Class<MAIN> mainClazz = wrapper.getWrapperMain().getClazz();
+        String mainTableName = wrapper.getWrapperMain().getTableName();
+        String mainIdPropName = mainTableName + ".id";
 
-        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(mainClazz, resultSet));
+        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(mainClazz,mainIdPropName, resultSet));
     }
 
     @SneakyThrows
-    private static <MAIN> MAIN buildReturn(Class<MAIN> mainClazz, ResultSet resultSet) {
+    private static <MAIN> MAIN buildReturn(Class<MAIN> mainClazz,String mainIdPropName, ResultSet resultSet) {
+        resultSet.next()
         MAIN MAIN = mainClazz.newInstance();
+        resultSet.getString(mainIdPropName)
         //
 
 //        MAIN.setId(resultSet.getInt("id"));

@@ -132,11 +132,15 @@ public class MultiWrapper<MAIN> {
         if (mainTableName == null) {
             throw new RuntimeException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
         }
+        // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
+        // 加载默认的关系配置 todo  wrapperSubAndRelations 没有指定关系的当前leftjoin的表必须跟前面的某张表有直接关系
+        wrapperSubAndRelations = reloadRelations(wrapperMain.getTableName(), wrapperSubAndRelations);
+
         // 1. select user_staff.* from user_staff
         /* 是否有主表副表存在两个关系(副表ID,对应主表两个属性) */
-        Boolean hasSameRelation = hasSameRelation(wrapperSubAndRelations);
-        List<String> selectPropsList = wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(hasSameRelation, o.getRelationCode())).collect(Collectors.toList());
-        selectPropsList.add(0, wrapperMain.getSqlSelectProps(hasSameRelation, ""));
+//        Boolean hasSameRelation = hasSameRelation(wrapperSubAndRelations);
+        List<String> selectPropsList = wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(o.getRelationCode())).collect(Collectors.toList());
+        selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getTableName()));
         String sqlSelect = "\nselect\n" + selectPropsList.stream().filter(Objects::nonNull).collect(Collectors.joining(",\n"));
 
         // 2. 添加limit
@@ -144,9 +148,7 @@ public class MultiWrapper<MAIN> {
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
 
-        // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
-        // 加载默认的关系配置 todo  wrapperSubAndRelations 没有指定关系的当前leftjoin的表必须跟前面的某张表有直接关系
-        wrapperSubAndRelations = reloadRelations(wrapperMain.getTableName(), wrapperSubAndRelations);
+
         String sqlLeftJoinOn = "\n" + wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
         // 4. where user_staff.state = 0
@@ -234,10 +236,10 @@ public class MultiWrapper<MAIN> {
         return MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
     }
 
-    private static Boolean hasSameRelation(List<MultiWrapperSubAndRelation<?>> relations) {
-        Set<String> tableSets = relations.stream().map(r -> r.getWrapperSub().getTableName()).collect(Collectors.toSet());
-        return tableSets.size() != relations.size();
-    }
+//    private static Boolean hasSameRelation(List<MultiWrapperSubAndRelation<?>> relations) {
+//        Set<String> tableSets = relations.stream().map(r -> r.getWrapperSub().getTableName()).collect(Collectors.toSet());
+//        return tableSets.size() != relations.size();
+//    }
 
     public List<MAIN> list() {
         return Collections.emptyList();
