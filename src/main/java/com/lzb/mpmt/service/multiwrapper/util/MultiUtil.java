@@ -1,10 +1,13 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
+import com.lzb.mpmt.service.MultiModel;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.util.Collection;
 
 /**
@@ -22,6 +25,7 @@ public class MultiUtil {
     public static Boolean isEmpty(Object... list) {
         return null == list || list.length == 0;
     }
+
     public static Boolean isEmpty(String str) {
         return null == str || str.length() == 0;
     }
@@ -175,4 +179,36 @@ public class MultiUtil {
         }
         return sb.toString();
     }
+
+    public static <T> T getFieldValue(Class<?> clazz, String fieldName, T defaultVal) {
+        try {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (fieldName.equals(field.getName())) {
+                    //noinspection unchecked
+                    T val = (T) field.get(null);
+                    if (null == val) {
+                        break;
+                    }
+                    return val;
+                }
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+        return defaultVal;
+    }
+
+    public static Field getField(Class<?> clazz, String fieldName) {
+        try {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (fieldName.equals(field.getName())) {
+                    return field;
+                }
+            }
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+        return null;
+    }
+
 }

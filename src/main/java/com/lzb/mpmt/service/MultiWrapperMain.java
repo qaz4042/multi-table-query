@@ -9,6 +9,7 @@ import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -17,20 +18,25 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMain<MAIN> implements
+public class MultiWrapperMain<MAIN extends MultiModel> implements
         MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
-{
+        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>> {
 
 
-    /** 下划线表名 */
+    /**
+     * 下划线表名
+     */
     private String tableName;
 
-    /** where条件 */
+    /**
+     * where条件
+     */
     private WhereDataTree whereTree = new WhereDataTree();
 
-    /** select属性列表 */
+    /**
+     * select属性列表
+     */
     private List<String> selectFields;
 
     /**
@@ -44,13 +50,34 @@ public class MultiWrapperMain<MAIN> implements
     private Long limitOffset;
     private Long limitSize;
 
-    /** 类为了生成List<SUB> */
+    /**
+     * id字段名
+     */
+    private Field idField;
+    /**
+     * id字段名
+     */
+    private String idFieldName;
+
+    /**
+     * 类为了生成List<SUB>
+     */
     private Class<MAIN> clazz;
 
-    public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
+    public static final String ID_FIELD_NAME = "idFieldName";
+    public static final String ID_FIELD_NAME_DEFAULT = "id";
+
+    public static <MAIN extends MultiModel> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
+        String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
+        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, ID_FIELD_NAME, ID_FIELD_NAME_DEFAULT));
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
-        wrapperMain.setTableName(MultiUtil.camelToUnderline(clazz.getSimpleName()));
+        wrapperMain.setTableName(tableName);
         wrapperMain.setClazz(clazz);
+        //默认是id 用它来去重 setIdFieldName(null) 则不去重  setIdFieldName("code")则用code去去重
+        wrapperMain.setIdField(idField);
+        if (idField != null) {
+            wrapperMain.setIdFieldName(tableName + "." + MultiUtil.camelToUnderline(idField.getName()));
+        }
         return wrapperMain;
     }
 

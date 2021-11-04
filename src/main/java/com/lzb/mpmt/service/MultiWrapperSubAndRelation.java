@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
-
 /**
  * 副表,和主副表对应关系信息
  *
@@ -20,10 +18,13 @@ import java.util.*;
 @NoArgsConstructor
 @Slf4j
 @SuppressWarnings("unused")
-public class MultiWrapperSubAndRelation<SUB> {
+public class MultiWrapperSubAndRelation<SUB extends MultiModel> implements IMultiWrapperSubAndRelationTreeNode {
 
     public static MultiTableRelationFactory MULTI_TABLE_RELATION_FACTORY;
 
+    /**
+     * wrapperSub 为空表示主表临时对象
+     */
     public MultiWrapperSubAndRelation(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> wrapperSub) {
         this.joinType = joinType;
         this.relationCode = relationCode;
@@ -44,6 +45,15 @@ public class MultiWrapperSubAndRelation<SUB> {
      * 副表信息
      */
     private MultiWrapperSub<SUB> wrapperSub;
+
+    /**
+     * relationCode对应的关系表1
+     */
+    private String tableNameThis;
+    /**
+     * relationCode对应的关系表2
+     */
+    private String tableNameOther;
 
 //    public static List<TableRelation> getRelationsAll() {
 //        return relationsAll;
@@ -75,40 +85,6 @@ public class MultiWrapperSubAndRelation<SUB> {
         MultiTableRelation relation = MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
         String subTableName = wrapperSub.getTableName();
 
-//
-//        MultiTableRelation relation = null;
-//        if (relationCode != null) {
-//            relation = MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
-//            if (relation == null) {
-//                // todo mainTableName
-//                //默认取第一个关系
-//                List<MultiTableRelation> relations = MULTI_TABLE_RELATION_FACTORY.getRelation2TableNameMap()
-//                        .getOrDefault(mainTableName, Collections.emptyMap())
-//                        .getOrDefault(subTableName, Collections.emptyList());
-//                if (relations.size() > 0) {
-//                    if (relations.size() > 1) {
-//                        log.warn("");
-//                    }
-//                    relation = relations.get(0);
-//                }
-//            } else {
-//
-//            }
-//
-//            if (relation == null) {
-//                throw new RuntimeException("表关联不存在,mainTableName=" + mainTableName + ",subTableName=" + subTableName);
-//            }
-//
-//            //关系,需要当前副表,跟已知的主表副表都有关系
-//            Set<String> relationTableNames = new HashSet<>(Arrays.asList(relation.getTableName1(), relation.getTableName2()));
-//            boolean containsCurrSubTableName = relationTableNames.contains(wrapperSub.getTableName());
-//            boolean containsOneOffTables = relationTableNames.contains(wrapperSub.getTableName());
-//        }
-
-//        boolean mainTableIs1 = mainTableName.equals(relation.getTableName1());
-//        String mainTableKeyProp = mainTableIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp();
-//        String subTableKeyProp = mainTableIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp();
-//        relation.getTableName1()
         String sqlWhereProps = getWrapperSub().getSqlWhereProps();
         sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiUtil.EMPTY : " and " + sqlWhereProps;
         return joinType.getSql() + subTableName + " on " + relation.getTableName1() + "." + relation.getClass1KeyProp() + " = " + relation.getTableName2() + "." + relation.getClass2KeyProp() + sqlWhereProps;
