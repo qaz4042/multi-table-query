@@ -1,10 +1,8 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
-import com.lzb.mpmt.service.MultiModel;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
@@ -15,8 +13,6 @@ import java.util.Collection;
  */
 public class MultiUtil {
 
-    public static final String EMPTY = "";
-    public static final String UNDERLINE = "_";
 
     public static Boolean isEmpty(Collection<?> list) {
         return null == list || list.isEmpty();
@@ -38,9 +34,21 @@ public class MultiUtil {
      */
     public static String firstToLowerCase(String param) {
         if (null == param || param.length() == 0) {
-            return MultiUtil.EMPTY;
+            return MultiConstant.Strings.EMPTY;
         }
         return param.substring(0, 1).toLowerCase() + param.substring(1);
+    }
+    /**
+     * 首字母转换小写
+     *
+     * @param param 需要转换的字符串
+     * @return 转换好的字符串
+     */
+    public static String firstToUpperCase(String param) {
+        if (null == param || param.length() == 0) {
+            return MultiConstant.Strings.EMPTY;
+        }
+        return param.substring(0, 1).toUpperCase() + param.substring(1);
     }
 
 
@@ -166,16 +174,43 @@ public class MultiUtil {
      */
     public static String camelToUnderline(String param) {
         if (null == param || param.length() == 0) {
-            return MultiUtil.EMPTY;
+            return MultiConstant.Strings.EMPTY;
         }
         int len = param.length();
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
             char c = param.charAt(i);
             if (Character.isUpperCase(c) && i > 0) {
-                sb.append(UNDERLINE);
+                sb.append(MultiConstant.Strings.UNDERLINE);
             }
             sb.append(Character.toLowerCase(c));
+        }
+        return sb.toString();
+    }
+
+
+    /**
+     * 字符串下划线转驼峰格式
+     *
+     * @param param 需要转换的字符串
+     * @return 转换好的字符串
+     */
+    public static String underlineToCamel(String param) {
+        if (null == param || param.length() == 0) {
+            return MultiConstant.Strings.EMPTY;
+        }
+        String temp = param.toLowerCase();
+        int len = temp.length();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            char c = temp.charAt(i);
+            if (c == MultiConstant.Strings.UNDERLINE) {
+                if (++i < len) {
+                    sb.append(Character.toUpperCase(temp.charAt(i)));
+                }
+            } else {
+                sb.append(c);
+            }
         }
         return sb.toString();
     }

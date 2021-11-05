@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 
 import com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.ClientPreparedQueryBindings;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,11 +36,6 @@ public class WhereDataUnit implements IWhereData {
         return String.format(opt.getTemplate(), tableName + "." + propName + " ", formatValues(values));
     }
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
-//    private static final String CHECKSQL = "^(.+)\\\\sand\\\\s(.+)|(.+)\\\\sor(.+)\\\\s$";//防止SQL注入
-
     /***
      * 格式化value
      */
@@ -47,11 +43,11 @@ public class WhereDataUnit implements IWhereData {
         if (null == value) {
             return null;
         } else if (value instanceof Date) {
-            value = DATE_FORMAT.format(value);
+            value = MultiConstant.DateTimes.DATE_FORMAT.format(value);
         } else if (value instanceof LocalDateTime) {
-            value = DATE_TIME_FORMAT.format((LocalDateTime) value);
+            value = MultiConstant.DateTimes.DATE_TIME_FORMAT.format((LocalDateTime) value);
         } else if (value instanceof LocalTime) {
-            value = TIME_FORMAT.format((LocalTime) value);
+            value = MultiConstant.DateTimes.TIME_FORMAT.format((LocalTime) value);
         } else if (value instanceof String) {
             //防止SQL注入
             value = ClientPreparedQueryBindings.sqlAvoidAttack((String) value);

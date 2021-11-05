@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service;
 
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
@@ -64,12 +65,9 @@ public class MultiWrapperMain<MAIN extends MultiModel> implements
      */
     private Class<MAIN> clazz;
 
-    public static final String ID_FIELD_NAME = "idFieldName";
-    public static final String ID_FIELD_NAME_DEFAULT = "id";
-
     public static <MAIN extends MultiModel> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
-        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, ID_FIELD_NAME, ID_FIELD_NAME_DEFAULT));
+        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
         wrapperMain.setTableName(tableName);
         wrapperMain.setClazz(clazz);

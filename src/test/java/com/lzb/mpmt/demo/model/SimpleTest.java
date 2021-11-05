@@ -9,8 +9,7 @@ public class SimpleTest {
 
     @Test
     public void simpleTest() {
-        Class<User> userClass = User.class;
-        Field[] declaredFields = userClass.getDeclaredFields();
-        int i = 0;
+        Field[] declaredFields = User.class.getDeclaredFields();
+        System.out.println(declaredFields);
     }
 }

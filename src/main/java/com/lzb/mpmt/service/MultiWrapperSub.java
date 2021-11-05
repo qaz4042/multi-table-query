@@ -3,6 +3,7 @@ package com.lzb.mpmt.service;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import lombok.Data;
@@ -10,9 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.List;
-
-import static com.lzb.mpmt.service.MultiWrapperMain.ID_FIELD_NAME;
-import static com.lzb.mpmt.service.MultiWrapperMain.ID_FIELD_NAME_DEFAULT;
 
 /**
  * @author Administrator
@@ -63,7 +61,7 @@ public class MultiWrapperSub<SUB extends MultiModel> implements
         wrapperSub.setClazz(clazz);
         //默认是id 用它来去重 setIdFieldName(null) 则不去重  setIdFieldName("code")则用code去去重
 //        clazz.getDeclaredField("id").get(null)
-        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, ID_FIELD_NAME, ID_FIELD_NAME_DEFAULT));
+        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
         wrapperSub.setIdField(idField); // IdFieldName 需要relationCode
         return wrapperSub;
     }

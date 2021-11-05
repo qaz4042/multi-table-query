@@ -1,7 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 
-import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 
 /**
  * @author Administrator
@@ -30,7 +30,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
         if (null == getLimitSize()) {
             return tableName;
         } else {
-            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitOffset(), MultiUtil.EMPTY) + ") " + tableName;
+            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitOffset(), MultiConstant.Strings.EMPTY) + ") " + tableName;
         }
     }
 
@@ -38,7 +38,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
      * long转字符串
      */
     private String valToStr(Long l, String appendLast) {
-        return l == null ? MultiUtil.EMPTY : l + appendLast;
+        return l == null ? MultiConstant.Strings.EMPTY : l + appendLast;
     }
 
 

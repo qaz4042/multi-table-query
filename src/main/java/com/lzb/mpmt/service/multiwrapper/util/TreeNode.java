@@ -54,7 +54,7 @@ public class TreeNode<T> {
         List<T> parents = listNew.stream().filter(isParentFun::apply).collect(Collectors.toList());
         if (parents.size() != 1) {
 //            log.warn("树根节点(parentProp为空的节点)理论上只能有一个" + parents.size());
-            throw new RuntimeException("树根节点(parentProp为空的节点)理论上只且只能能有一个,结果有" + parents.size() + "个");
+            throw new MultiException("树根节点(parentProp为空的节点)理论上只且只能能有一个,结果有" + parents.size() + "个");
         }
         listNew.removeAll(parents);
         return buildTreeUnderTopRecursion(null, parents.get(0), listNew, keyPropFun, parentKeyPropFun);
@@ -63,7 +63,7 @@ public class TreeNode<T> {
     public static <T, KEY extends IEqualsKey<KEY>> TreeNode<T> buildTreeUnderTopRecursion(T parent, T curr, List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun) {
         KEY currKey = keyPropFun.apply(curr);
         if (currKey == null) {
-            throw new RuntimeException("所有树节点的key不允许为空" + parent);
+            throw new MultiException("所有树节点的key不允许为空" + parent);
         }
         List<T> childrenT = list.stream().filter(o -> currKey.parentKeyEqualsChildKey(parentKeyPropFun.apply(o))).collect(Collectors.toList());
         List<TreeNode<T>> children = childrenT.stream().map(childT -> buildTreeUnderTopRecursion(curr, childT, list, keyPropFun, parentKeyPropFun)).collect(Collectors.toList());

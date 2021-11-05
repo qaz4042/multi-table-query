@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 
-import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 
 /**
  * @author Administrator
@@ -13,6 +13,6 @@ public interface IWhereData {
      * @return sqlWhereProps
      */
     default String getSqlWhereProps(String tableName) {
-        return MultiUtil.EMPTY;
+        return MultiConstant.Strings.EMPTY;
     }
 }

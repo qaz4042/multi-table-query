@@ -42,13 +42,16 @@ public class MysqlExecutor {
         String idFieldName = wrapper.getWrapperMain().getIdFieldName();
         boolean checkAndSetIsRepeat = isCheckAndSetRepeat(resultSet, relationIdSet, tableName, idField, idFieldName);
         boolean isNewObj = !checkAndSetIsRepeat;
+        MAIN main = null;
         if (isNewObj) {
             //重复则不在生成
-            MAIN main = wrapper.getWrapperMain().getClazz().newInstance();
+            main = wrapper.getWrapperMain().getClazz().newInstance();
             for (String selectField : wrapper.getWrapperMain().getSelectFields()) {
                 Field field = null; //todo 提前确定出field
                 fieldSetMethodMap.get(selectField).invoke(main, getValue(selectField, field, resultSet));
             }
+        } else {
+//            旧的列表中查询出来
         }
 
         //(子类信息还要 找到原来那条去聚合) todo
@@ -56,7 +59,7 @@ public class MysqlExecutor {
         wrapper.getRelationTree().getChildren().forEach(relationTreeNode -> {
             Object sub = buildReturnRecursion(relationTreeNode, resultSet, relationIdSet, isNewObj);
             //看是否添加到列表
-            main;//把 listSub set到main里面
+//            main;//把 listSub set到main里面
         });
         return main;
     }
@@ -66,11 +69,12 @@ public class MysqlExecutor {
         String relationCode = curr.getRelationCode();
         Field idField = curr.getWrapperSub().getIdField();
         String idFieldName = curr.getWrapperSub().getIdFieldName();
-        relationTreeNode.getChildren().forEach(relationTreeNode -> {
-            Object subChild = buildReturnRecursion(relationTreeNode, resultSet, relationIdSet, isNewObj);
-            //看是否添加到列表
-            main;//把 listSub set到main里面
-        });
+//        relationTreeNode.getChildren().forEach(relationTreeNode -> {
+//            Object subChild = buildReturnRecursion(relationTreeNode, resultSet, relationIdSet, isNewObj);
+//            //看是否添加到列表
+//            main;//把 listSub set到main里面
+//        });
+        return null;
     }
 
     private static boolean isCheckAndSetRepeat(ResultSet resultSet, Set<String> relationIdSet, String tableName, Field idField, String idFieldFullName) {

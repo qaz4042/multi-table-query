@@ -2,6 +2,8 @@ package com.lzb.mpmt.service;
 
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.Data;
@@ -80,13 +82,13 @@ public class MultiWrapperSubAndRelation<SUB extends MultiModel> implements IMult
 
     public String getSqlJoin(String mainTableName) {
         if (MULTI_TABLE_RELATION_FACTORY == null) {
-            throw new RuntimeException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");
+            throw new MultiException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");
         }
         MultiTableRelation relation = MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
         String subTableName = wrapperSub.getTableName();
 
         String sqlWhereProps = getWrapperSub().getSqlWhereProps();
-        sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiUtil.EMPTY : " and " + sqlWhereProps;
+        sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiConstant.Strings.EMPTY : " and " + sqlWhereProps;
         return joinType.getSql() + subTableName + " on " + relation.getTableName1() + "." + relation.getClass1KeyProp() + " = " + relation.getTableName2() + "." + relation.getClass2KeyProp() + sqlWhereProps;
     }
 }

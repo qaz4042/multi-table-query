@@ -3,6 +3,8 @@ package com.lzb.mpmt.service;
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 import lombok.Data;
@@ -136,7 +138,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
     public String computeSql() {
         String mainTableName = wrapperMain.getTableName();
         if (mainTableName == null) {
-            throw new RuntimeException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+            throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
         }
         // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
         // 加载默认的关系配置 将关系排序
@@ -169,7 +171,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
         List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>(wrapperMainSubWheres);
         whereWrappers.add(0, wrapperMain);
         String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
-        String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiUtil.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
+        String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
@@ -211,12 +213,12 @@ public class MultiWrapper<MAIN extends MultiModel> {
                                 .getOrDefault(relationTableName, Collections.emptyList());
                         if (relations.size() > 1) {
                             //有多种关系,需要重新确定
-                            throw new RuntimeException(relationTableName + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
+                            throw new MultiException(relationTableName + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
                         }
                         if (relations.size() < 1) {
                             break;
                             //有多种关系,需要重新确定
-//                            throw new RuntimeException(relationTableName + "和" + subTableName + "没有存在表关系,无法关联");
+//                            throw new MultiException(relationTableName + "和" + subTableName + "没有存在表关系,无法关联");
                         }
                         MultiTableRelation relation = relations.get(0);
 
@@ -229,7 +231,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
                     if (hasRelation) {
                         relationTableNames.add(subTableName);
                     } else {
-                        throw new RuntimeException(subTableName + "和[" + String.join(",", relationTableNames) + "]没有存在表关系,无法关联");
+                        throw new MultiException(subTableName + "和[" + String.join(",", relationTableNames) + "]没有存在表关系,无法关联");
                     }
                 }
         );
@@ -248,7 +250,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
             noCodeRelation.setTableNameThis(tableName2);
             noCodeRelation.setTableNameOther(tableName1);
         } else {
-            throw new RuntimeException("表关系" + multiTableRelation.getCode() + "(" + tableName1 + "," + tableName2 + ")其中之一必须和当前查询的表" + subTableName);
+            throw new MultiException("表关系" + multiTableRelation.getCode() + "(" + tableName1 + "," + tableName2 + ")其中之一必须和当前查询的表" + subTableName);
         }
     }
 
