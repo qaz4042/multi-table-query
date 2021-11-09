@@ -49,6 +49,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
         Arrays.stream(subTableWrappers).forEach(this::leftJoin);
     }
 
+    @SafeVarargs
     public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, Class<? extends MultiModel>... subTableClasses) {
         this.wrapperMain = wrapperMain;
         Arrays.stream(subTableClasses).forEach(subTableClass -> this.leftJoin(MultiWrapperSub.lambda(subTableClass)));
@@ -235,9 +236,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
                     }
                 }
         );
-        wrapperSubAndRelations.forEach(r->{
-            r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName()));
-        });
+        wrapperSubAndRelations.forEach(r-> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {
@@ -281,11 +280,6 @@ public class MultiWrapper<MAIN extends MultiModel> {
     private MultiTableRelation getRelationByCode(String relationCode) {
         return MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
     }
-
-//    private static Boolean hasSameRelation(List<MultiWrapperSubAndRelation<?>> relations) {
-//        Set<String> tableSets = relations.stream().map(r -> r.getWrapperSub().getTableName()).collect(Collectors.toSet());
-//        return tableSets.size() != relations.size();
-//    }
 
     public List<MAIN> list() {
         return Collections.emptyList();

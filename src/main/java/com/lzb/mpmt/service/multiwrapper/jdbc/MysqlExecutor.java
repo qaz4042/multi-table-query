@@ -1,9 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.jdbc;
 
-import com.lzb.mpmt.service.IMultiWrapperSubAndRelationTreeNode;
-import com.lzb.mpmt.service.MultiModel;
-import com.lzb.mpmt.service.MultiWrapper;
-import com.lzb.mpmt.service.MultiWrapperSubAndRelation;
+import com.lzb.mpmt.service.*;
+import com.lzb.mpmt.service.multiwrapper.util.MultiRelationCaches;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,8 @@ public class MysqlExecutor {
     @SneakyThrows
     public static <MAIN extends MultiModel> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
-        Set<String> relationIdSet = new HashSet<>(2048);
-        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdSet))
+        Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
+        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
                 .stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -36,7 +34,22 @@ public class MysqlExecutor {
     private static Map<String, Method> fieldSetMethodMap = new WeakHashMap<>();
 
     @SneakyThrows
-    private static <MAIN extends MultiModel> MAIN buildReturn(MultiWrapper<MAIN> wrapper, ResultSet resultSet, Set<String> relationIdSet) {
+    private static <MAIN extends MultiModel> MAIN buildReturn(MultiWrapper<MAIN> wrapper, ResultSet resultSet, Map<String, Object> relationIdObjectMap) {
+        TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNodeTop = wrapper.getRelationTree();
+        return buildReturnRecursion(null, relationTreeNodeTop, resultSet, relationIdObjectMap, null);
+    }
+
+    private static <SUB extends MultiModel> SUB buildReturnRecursion(Object parentEntity, TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode, ResultSet resultSet, Map<String, Object> relationIdObjectMap, Boolean isParentNewObj) {
+        //如果是主表
+        MultiWrapperSubAndRelationTreeNodeMain currMain = relationTreeNode.getCurr() instanceof MultiWrapperSubAndRelationTreeNodeMain ? ((MultiWrapperSubAndRelationTreeNodeMain) relationTreeNode.getCurr()) : null;
+        if (currMain != null) {
+
+        }
+        //如果是子表
+        MultiWrapperSubAndRelation currRelation = relationTreeNode.getCurr() instanceof MultiWrapperSubAndRelation ? ((MultiWrapperSubAndRelation) relationTreeNode.getCurr()) : null;
+        if (currRelation != null) {
+
+        }
         String tableName = wrapper.getWrapperMain().getTableName();
         Field idField = wrapper.getWrapperMain().getIdField();
         String idFieldName = wrapper.getWrapperMain().getIdFieldName();
@@ -47,6 +60,7 @@ public class MysqlExecutor {
             //重复则不在生成
             main = wrapper.getWrapperMain().getClazz().newInstance();
             for (String selectField : wrapper.getWrapperMain().getSelectFields()) {
+
                 Field field = null; //todo 提前确定出field
                 fieldSetMethodMap.get(selectField).invoke(main, getValue(selectField, field, resultSet));
             }
@@ -57,15 +71,13 @@ public class MysqlExecutor {
         //(子类信息还要 找到原来那条去聚合) todo
         //第一个是当前主表
         wrapper.getRelationTree().getChildren().forEach(relationTreeNode -> {
-            Object sub = buildReturnRecursion(relationTreeNode, resultSet, relationIdSet, isNewObj);
+            Object sub = buildReturnRecursion(main, relationTreeNode, resultSet, relationIdSet, isNewObj);
             //看是否添加到列表
 //            main;//把 listSub set到main里面
         });
-        return main;
-    }
 
-    private static <SUB> SUB buildReturnRecursion(TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode, ResultSet resultSet, Set<String> relationIdSet, Boolean isParentNewObj) {
-        MultiWrapperSubAndRelation curr = (MultiWrapperSubAndRelation) relationTreeNode.getCurr();
+        //noinspection unchecked
+        MultiWrapperSubAndRelation<SUB> curr = (MultiWrapperSubAndRelation<SUB>) relationTreeNode.getCurr();
         String relationCode = curr.getRelationCode();
         Field idField = curr.getWrapperSub().getIdField();
         String idFieldName = curr.getWrapperSub().getIdFieldName();
@@ -74,6 +86,9 @@ public class MysqlExecutor {
 //            //看是否添加到列表
 //            main;//把 listSub set到main里面
 //        });
+
+        MultiRelationCaches.getRelation_TableWithTable_setMethod(curr.getRelationCode(), curr)
+
         return null;
     }
 
