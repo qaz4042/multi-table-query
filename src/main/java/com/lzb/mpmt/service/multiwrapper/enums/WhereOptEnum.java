@@ -3,14 +3,10 @@ package com.lzb.mpmt.service.multiwrapper.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.function.BiFunction;
-
 
 /**
  * @author Administrator
  */
-
-@SuppressWarnings("ConstantConditions")
 @Getter
 @AllArgsConstructor
 public enum WhereOptEnum {

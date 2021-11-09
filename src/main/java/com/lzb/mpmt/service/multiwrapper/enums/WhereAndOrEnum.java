@@ -13,5 +13,4 @@ public enum WhereAndOrEnum {
     /***/
     and,
     or,
-    ;
 }

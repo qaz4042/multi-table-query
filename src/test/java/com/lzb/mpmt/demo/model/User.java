@@ -17,6 +17,6 @@ public class User extends BaseModel {
     private Integer sex;
     private Long parentId;
 
-    private List<UserAddress> addresses;
+    private List<UserAddress> user_userAddress;
 
 }

@@ -2,7 +2,6 @@ package com.lzb.mpmt.service.multiwrapper.util.mybatisplus;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -17,11 +16,8 @@ public class ClientPreparedQueryBindings {
     public static String sqlAvoidAttack(String originValue) {
         int stringLength = originValue.length();
 
-        String parameterAsBytes = null;
         String convertedValue = originValue;
-        boolean needsQuoted = true;
         if (isEscapeNeededForString(originValue, stringLength)) {
-            needsQuoted = false;
             StringBuilder buf = new StringBuilder((int) ((double) originValue.length() * 1.1D));
             buf.append('\'');
 

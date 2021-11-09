@@ -1,5 +1,6 @@
 package com.lzb.mpmt.demo.model;
 
+import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +10,7 @@ public class SimpleTest {
 
     @Test
     public void simpleTest() {
-        Field[] declaredFields = User.class.getDeclaredFields();
-        System.out.println(declaredFields);
+        Class<? extends JoinTypeEnum> aClass = JoinTypeEnum.inner_join.getClass();
+        int i = 0;
     }
 }

@@ -58,29 +58,6 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
      */
     private String tableNameOther;
 
-//    public static List<TableRelation> getRelationsAll() {
-//        return relationsAll;
-//    }
-
-//    static {
-//        relationsAll.add(
-//                TableRelation.builder()
-//                        .id(1L)
-////                        .class1(User.class)     todo 数据初始化
-//                        .tableName1("user")
-//                        .class1KeyProp("id")
-//                        .class1OneOrMany(ClassRelationOneOrManyEnum.ONE)
-//                        .class1Require(true)
-//
-////                        .class2(UserStaff.class) todo 数据初始化
-//                        .tableName2("user_staff")
-//                        .class2KeyProp("admin_user_id")
-//                        .class2OneOrMany(ClassRelationOneOrManyEnum.MANY)
-//                        .class2Require(false)
-//                        .build()
-//        );
-//    }
-
     public String getSqlJoin(String mainTableName) {
         if (MULTI_TABLE_RELATION_FACTORY == null) {
             throw new MultiException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");

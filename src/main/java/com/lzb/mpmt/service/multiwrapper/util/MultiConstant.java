@@ -29,7 +29,7 @@ public class MultiConstant {
      * multi框架相关常量
      */
     public static class MultiStrings {
-//        public static final String ID_FIELD_NAME = "idFieldName";
+//        public static final String ID_FIELD_NAME = "";
     }
 
 }

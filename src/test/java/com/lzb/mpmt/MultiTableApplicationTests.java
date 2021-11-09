@@ -1,5 +1,6 @@
 package com.lzb.mpmt;
 
+import cn.hutool.json.JSONUtil;
 import com.lzb.mpmt.demo.model.BaseModel;
 import com.lzb.mpmt.demo.model.User;
 import com.lzb.mpmt.demo.model.UserAddress;
@@ -18,14 +19,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-//@SpringBootTest
+@SpringBootTest
 class MultiTableApplicationTests {
 
     @BeforeEach
     public void doBefore() {
         System.out.println("BeforeEach");
 
-        //理论上应该从数据库查询
+        // todo 理论上应该从数据库查询
         MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY = new MultiTableRelationFactory(() -> Arrays.asList(
                 MultiTableRelation.builder()
                         .code("user__user_staff")
@@ -57,31 +58,17 @@ class MultiTableApplicationTests {
     }
 
     @Test
-    void testSimple() {
+    void testQuerySimple() {
         System.out.println("testSimple");
-
-//        //标准
-//        MultiWrapper<UserStaff> wrapper = MultiWrapper
-//                .main(MultiWrapperMain.lambda(UserStaff.class))
-//                .leftJoin(MultiWrapperSub.lambda(User.class));
-//        System.out.println(wrapper.computeSql());
-
-        //简写
-        MultiWrapper<UserStaff> wrapper2 = new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class);
-        System.out.println(wrapper2.computeSql());
+        List<UserStaff> userStaffsSimple = MysqlExecutor.query(
+                new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
+        );
+        System.out.println(JSONUtil.toJsonStr(userStaffsSimple));
     }
 
     @Test
-    void complexWrapperQuery() {
-        List<UserStaff> query = MysqlExecutor.query(complexWrapper());
-        System.out.println(query);
-    }
-
-    private MultiWrapper<UserStaff> complexWrapper() {
-        System.out.println("testComplex");
-
-        //最复杂的情况
-        MultiWrapper<UserStaff> wrapper = MultiWrapper
+    void testQueryComplex() {
+        List<UserStaff> userStaffsComplex = MysqlExecutor.query(MultiWrapper
                 .main(
                         MultiWrapperMain.lambda(UserStaff.class)
                                 .select(UserStaff::getSex, UserStaff::getStaffName)
@@ -116,10 +103,8 @@ class MultiTableApplicationTests {
                 .leftJoin(MultiWrapperSub.lambda(UserAddress.class)
                         .select(UserAddress::getProvince)
                         .gt(UserAddress::getId, "1")
-                );
-
-        System.out.println(wrapper.computeSql());
-        return wrapper;
+                ));
+        System.out.println(JSONUtil.toJsonStr(userStaffsComplex));
     }
 
 }

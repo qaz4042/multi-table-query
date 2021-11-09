@@ -1,33 +1,34 @@
 package com.lzb.mpmt.service.multiwrapper.jdbc;
 
 import com.lzb.mpmt.service.*;
-import com.lzb.mpmt.service.multiwrapper.util.MultiException;
-import com.lzb.mpmt.service.multiwrapper.util.MultiRelationCaches;
-import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
-import com.lzb.mpmt.service.multiwrapper.util.Tuple2;
+import com.lzb.mpmt.service.multiwrapper.enums.MutilEnum;
+import com.lzb.mpmt.service.multiwrapper.util.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.sql.rowset.CachedRowSet;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public abstract class MysqlExecutor {
+public class MysqlExecutor {
 
     private static JdbcTemplate jdbcTemplate;
 
-    @Autowired    // 自动注入，spring boot会帮我们实例化一个对象
-    public static void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+    @Autowired
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         MysqlExecutor.jdbcTemplate = jdbcTemplate;
     }
 
@@ -35,11 +36,10 @@ public abstract class MysqlExecutor {
     public static <MAIN> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
-        //todo test
-        ResultSetImpl resultSet1 = new ResultSetImpl();
-        MAIN main = buildReturn(wrapper, resultSet1, relationIdObjectMap);
-        return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
+        List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
                 .stream().filter(Objects::nonNull).collect(Collectors.toList());
+        log.info("查询结果:{}条", list.size());
+        return list;
     }
 
     @SneakyThrows
@@ -62,21 +62,14 @@ public abstract class MysqlExecutor {
         MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(currRelationCode + id);
         //要新增元素
         if (currEntity == null) {
-//            //如果是主表
-//            MultiWrapperSubAndRelationTreeNodeMain currMain = currNode instanceof MultiWrapperSubAndRelationTreeNodeMain ? ((MultiWrapperSubAndRelationTreeNodeMain) currNode) : null;
-//            if (currMain != null) {
-//            }
-//            //如果是子表
-//            MultiWrapperSubAndRelation currRelation = currNode instanceof MultiWrapperSubAndRelation ? ((MultiWrapperSubAndRelation) currNode) : null;
-//            if (currRelation != null) {
-//
-//            }
             //重复则不在生成
+            //noinspection deprecation
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
             List<String> selectFields = currNode.getMultiWrapperSelectInfo().getSelectFields();
             for (String selectField : selectFields) {
                 Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(currRelationCode, selectField, currTableClass);
-                MultiRelationCaches.getRelation_setMethod(selectField, currTableClass).invoke(currEntity, getValue(selectField, fieldReturnType, resultSet));
+                Object value = getValue(selectField, fieldReturnType, resultSet);
+                MultiRelationCaches.getRelation_setMethod(currRelationCode, selectField, currTableClass).invoke(currEntity, value);
             }
 
             //顶层节点为null,不用出setSubEntitys(subEntitys);
@@ -87,9 +80,9 @@ public abstract class MysqlExecutor {
                 Object subEntityExists = getMethod.invoke(parentEntity);
                 Class<?> returnType = getMethod.getReturnType();
                 //列表
-                if (Collection.class.isAssignableFrom(returnType)) {
+                if (List.class.isAssignableFrom(returnType)) {
                     if (subEntityExists == null) {
-                        subEntityExists = returnType.newInstance();
+                        subEntityExists = new ArrayList<>(8);
                         setMethod.invoke(parentEntity, subEntityExists);
                     }
                     ((Collection<MAIN_OR_SUB>) subEntityExists).add(currEntity);
@@ -109,44 +102,64 @@ public abstract class MysqlExecutor {
 
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
-        relationTreeNode.getChildren().forEach(subNode -> {
-            buildReturnRecursion(finalCurrEntity, subNode, resultSet, relationIdObjectMap);
-        });
+        relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(finalCurrEntity, subNode, resultSet, relationIdObjectMap));
         return currEntity;
     }
 
-//    private static boolean isCheckAndSetRepeat(ResultSet resultSet, Set<String> relationIdSet, String tableName, Field idField, String idFieldFullName) {
-//        if (null == idField) {
-//            //没重复
-//            return false;
-//        }
-//        String relationIdVale = tableName + getValue(idFieldFullName, idField, resultSet);
-//        boolean repeat = relationIdSet.contains(relationIdVale);
-//        if (!repeat) {
-//            //没重复,本次添加到结果集以后,下次就重复
-//            relationIdSet.add(relationIdVale);
-//        }
-//        return repeat;
-//    }
-
-    @SuppressWarnings("unchecked")
+    // todo 抽出sql查询方法提供定制
     @SneakyThrows
-    private static <T> T getValue(String fieldName, Field field, ResultSet resultSet) {
+    private static Object getValue(String fieldName, Field field, ResultSet resultSet) {
         Class<?> type = field.getType();
         return getValue(fieldName, type, resultSet);
     }
 
-    private static <T> T getValue(String fieldName, Class<?> type, ResultSet resultSet) throws SQLException {
+    private static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) throws SQLException {
         if (Long.class.isAssignableFrom(type)) {
-            return (T) (Long) resultSet.getLong(fieldName);
+            return resultSet.getLong(fieldName);
         }
         if (Integer.class.isAssignableFrom(type)) {
-            return (T) (Integer) resultSet.getInt(fieldName);
+            return resultSet.getInt(fieldName);
+        }
+        if (Float.class.isAssignableFrom(type)) {
+            return resultSet.getFloat(fieldName);
+        }
+        if (Double.class.isAssignableFrom(type)) {
+            return resultSet.getDouble(fieldName);
         }
         if (String.class.isAssignableFrom(type)) {
-            return (T) resultSet.getString(fieldName);
+            return resultSet.getString(fieldName);
         }
-        //todo 其他类型
-        return null;
+        if (BigDecimal.class.isAssignableFrom(type)) {
+            return resultSet.getBigDecimal(fieldName);
+        }
+        if (Blob.class.isAssignableFrom(type)) {
+            return resultSet.getBlob(fieldName);
+        }
+        if (Boolean.class.isAssignableFrom(type)) {
+            return resultSet.getBoolean(fieldName);
+        }
+        if (Date.class.isAssignableFrom(type)) {
+            return resultSet.getDate(fieldName);
+        }
+        if (LocalDateTime.class.isAssignableFrom(type)) {
+            return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName));
+        }
+        if (LocalDate.class.isAssignableFrom(type)) {
+            return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName)).toLocalDate();
+        }
+        if (LocalTime.class.isAssignableFrom(type)) {
+            return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName)).toLocalTime();
+        }
+        if (Enum.class.isAssignableFrom(type)) {
+            if (MutilEnum.class.isAssignableFrom(type)) {
+                Integer value = resultSet.getInt(fieldName);
+                return MultiUtil.getEnumByValue(type, value);
+            } else {
+                //默认用枚举的name存取
+                String value = resultSet.getString(fieldName);
+                return MultiUtil.getEnumByName(type, value);
+            }
+        }
+        throw new MultiException("未知的数据类型|" + fieldName + "|" + type);
     }
 }

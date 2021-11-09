@@ -13,4 +13,6 @@ public class UserStaff extends BaseModel {
     private String staffName;
     private Integer sex;
     private Long adminUserId;
+
+    private User user_userStaff;
 }

@@ -1,7 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
-import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
 
 import java.util.Arrays;

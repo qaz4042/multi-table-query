@@ -52,15 +52,6 @@ public class MultiWrapperMain<MAIN> implements
     private Long limitOffset;
     private Long limitSize;
 
-//    /**
-//     * id字段名
-//     */
-//    private Field idField;
-//    /**
-//     * id字段名
-//     */
-//    private String idFieldName;
-
     /**
      * 类为了生成List<SUB>
      */
@@ -72,11 +63,6 @@ public class MultiWrapperMain<MAIN> implements
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
         wrapperMain.setTableName(tableName);
         wrapperMain.setClazz(clazz);
-        //默认是id 用它来去重 setIdFieldName(null) 则不去重  setIdFieldName("code")则用code去去重
-//        wrapperMain.setIdField(idField);
-//        if (idField != null) {
-//            wrapperMain.setIdFieldName(tableName + "." + MultiUtil.camelToUnderline(idField.getName()));
-//        }
         return wrapperMain;
     }
 

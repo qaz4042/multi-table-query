@@ -49,7 +49,6 @@ public class MultiWrapper<MAIN> {
         Arrays.stream(subTableWrappers).forEach(this::leftJoin);
     }
 
-    @SafeVarargs
     public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, Class<?>... subTableClasses) {
         this.wrapperMain = wrapperMain;
         Arrays.stream(subTableClasses).forEach(subTableClass -> this.leftJoin(MultiWrapperSub.lambda(subTableClass)));
@@ -122,17 +121,6 @@ public class MultiWrapper<MAIN> {
         return this;
     }
 
-
-    /***
-     * 参数可以统一格式map传递(容易缺失编译约束,不建议后端自查询频繁使用)
-     * @param allTableParamMap allTableParamMap
-     * @return MultiWrapper
-     */
-    public MultiWrapper<MAIN> allTableParamMap(Map<String, Object> allTableParamMap) {
-        //可能还有分页的limit 按主表去limit
-        return this;
-    }
-
     /**
      * 输出最终sql
      */
@@ -141,10 +129,10 @@ public class MultiWrapper<MAIN> {
         if (mainTableName == null) {
             throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
         }
-        // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
-        // 加载默认的关系配置 将关系排序
+        // 1.1 解析 主表和副表的关系树
         relationTree = this.reloadRelations(wrapperMain, this.wrapperSubAndRelations);
-        //关系列表需要,按树从顶向下排序
+
+        // 1.2 关系统一按树自顶向下排列
         this.wrapperSubAndRelations = new ArrayList<>();
         relationTree.consumerTopToBottom(relationNode -> {
             if (relationNode instanceof MultiWrapperSubAndRelation) {
@@ -152,14 +140,13 @@ public class MultiWrapper<MAIN> {
             }
         });
 
-        // 1. select user_staff.* from user_staff
-        /* 是否有主表副表存在两个关系(副表ID,对应主表两个属性) */
-//        Boolean hasSameRelation = hasSameRelation(wrapperSubAndRelations);
+        // 2.1. 解析 select要查出的字段语句片段
+        // select user_staff.* from user_staff
         List<String> selectPropsList = this.wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(o.getRelationCode())).collect(Collectors.toList());
         selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getTableName()));
         String sqlSelect = "\nselect\n" + selectPropsList.stream().filter(Objects::nonNull).collect(Collectors.joining(",\n"));
 
-        // 2. 添加limit
+        // 3. 解析 from主表,limit主表语句片段
         //	SELECT u.*,p.* FROM user_info                          u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
@@ -167,14 +154,18 @@ public class MultiWrapper<MAIN> {
 
         String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
-        // 4. where user_staff.state = 0
+        // 4. 解析 where条件语句片段
+        //    where user_staff.state = 0
         //      and user_staff_address.del_flag = 0
         List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>(wrapperMainSubWheres);
         whereWrappers.add(0, wrapperMain);
         String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
         String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
 
-        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+        String sql = sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+
+        log.info("sql: " + sql);
+        return sql;
     }
 
     private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
@@ -217,9 +208,8 @@ public class MultiWrapper<MAIN> {
                             throw new MultiException(relationTableName + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
                         }
                         if (relations.size() < 1) {
-                            break;
                             //有多种关系,需要重新确定
-//                            throw new MultiException(relationTableName + "和" + subTableName + "没有存在表关系,无法关联");
+                            throw new MultiException(relationTableName + "和" + subTableName + "没有存在表关系,无法关联");
                         }
                         MultiTableRelation relation = relations.get(0);
 
@@ -236,7 +226,6 @@ public class MultiWrapper<MAIN> {
                     }
                 }
         );
-//        wrapperSubAndRelations.forEach(r -> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {

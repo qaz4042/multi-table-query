@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
+import cn.hutool.json.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -53,7 +54,6 @@ public class TreeNode<T> {
         List<T> listNew = new ArrayList<>(list);
         List<T> parents = listNew.stream().filter(isParentFun::apply).collect(Collectors.toList());
         if (parents.size() != 1) {
-//            log.warn("树根节点(parentProp为空的节点)理论上只能有一个" + parents.size());
             throw new MultiException("树根节点(parentProp为空的节点)理论上只且只能能有一个,结果有" + parents.size() + "个");
         }
         listNew.removeAll(parents);
@@ -73,8 +73,7 @@ public class TreeNode<T> {
 
     public void consumerTopToBottom(Consumer<T> consumer) {
         if (parent != null) {
-            //todo parent toJson
-            log.warn("不是从树根节点开始执行topToBottom的:" + parent);
+            log.warn("不是从树根节点开始执行topToBottom的:" + JSONUtil.toJsonStr(parent));
         }
         this.consumerTopToBottomRecursion(consumer);
     }

@@ -1,16 +1,24 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
+import cn.hutool.core.convert.BasicType;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.lang.reflect.Method;
+import java.time.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * @author Administrator
+ * 部分代码参考 hutool 为了避免引用多余包,因此拷贝过来
+ * https://www.hutool.cn/docs/
  */
+@SuppressWarnings("unused")
 public class MultiUtil {
 
 
@@ -38,6 +46,7 @@ public class MultiUtil {
         }
         return param.substring(0, 1).toLowerCase() + param.substring(1);
     }
+
     /**
      * 首字母转换小写
      *
@@ -152,7 +161,7 @@ public class MultiUtil {
      * @return 返回异常
      */
     public static MybatisPlusException mpe(String msg, Throwable t) {
-        return new MybatisPlusException(String.format(msg, null), t);
+        return new MybatisPlusException(String.format(msg, (Object[]) null), t);
     }
 
     /**
@@ -215,35 +224,71 @@ public class MultiUtil {
         return sb.toString();
     }
 
-    public static <T> T getFieldValue(Class<?> clazz, String fieldName, T defaultVal) {
-        try {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (fieldName.equals(field.getName())) {
-                    //noinspection unchecked
-                    T val = (T) field.get(null);
-                    if (null == val) {
-                        break;
-                    }
-                    return val;
-                }
-            }
-        } catch (Exception e) {
-            e.getStackTrace();
-        }
-        return defaultVal;
+    public static List<Field> getAllFields(Class<?> clazz) {
+        return getClassMetas(clazz, Class::getDeclaredFields);
+
     }
 
-    public static Field getField(Class<?> clazz, String fieldName) {
-        try {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (fieldName.equals(field.getName())) {
-                    return field;
-                }
-            }
-        } catch (Exception e) {
-            e.getStackTrace();
+    public static List<Method> getAllMethods(Class<?> clazz) {
+        return getClassMetas(clazz, Class::getDeclaredMethods);
+    }
+
+    private static <T> List<T> getClassMetas(Class<?> clazz, Function<Class<?>, T[]> getOneClassMetaFun) {
+        List<T> list = new ArrayList<>(64);
+        Class<?> currClazz = clazz;
+        while (!currClazz.equals(Object.class)) {
+            list.addAll(Arrays.asList(getOneClassMetaFun.apply(currClazz)));
+            currClazz = currClazz.getSuperclass();
         }
+        return list;
+    }
+
+    public static String methodNameToFieldName(String methodName) {
+        return camelToUnderline(methodName.substring(3));
+    }
+
+    public static boolean isBasicType(Class<?> clazz) {
+        if (null == clazz) {
+            return false;
+        } else {
+            return clazz.isEnum() || clazz.isPrimitive() || isPrimitiveWrapper(clazz);
+        }
+    }
+
+    private static boolean isPrimitiveWrapper(Class<?> clazz) {
+        return null != clazz && BasicType.WRAPPER_PRIMITIVE_MAP.containsKey(clazz);
+    }
+
+    public static final Map<Class<?>, Class<?>> WRAPPER_PRIMITIVE_MAP = new ConcurrentHashMap<>(8);
+
+    static {
+        WRAPPER_PRIMITIVE_MAP.put(Boolean.class, Boolean.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Byte.class, Byte.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Character.class, Character.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Double.class, Double.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Float.class, Float.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Integer.class, Integer.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Long.class, Long.TYPE);
+        WRAPPER_PRIMITIVE_MAP.put(Short.class, Short.TYPE);
+    }
+
+    /**
+     * Date转LocalDate
+     */
+    public static LocalDateTime date2LocalDateTime(Date date) {
+        if(null == date) {
+            return null;
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    public static Object getEnumByValue(Class<?> type, Integer value) {
+        //todo
         return null;
     }
 
+    public static Object getEnumByName(Class<?> type, String value) {
+        //todo
+        return null;
+    }
 }
