@@ -8,4 +8,6 @@ import java.io.Serializable;
  */
 public interface MultiModel {
     Serializable getId();
+
+    void setId(Serializable id);
 }

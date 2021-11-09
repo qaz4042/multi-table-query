@@ -22,7 +22,8 @@ import java.util.List;
 public class MultiWrapperMain<MAIN extends MultiModel> implements
         MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>> {
+        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
+        , IMultiWrapperSubAndRelationTreeNode {
 
 
     /**
@@ -83,5 +84,30 @@ public class MultiWrapperMain<MAIN extends MultiModel> implements
     @Override
     public final <VAL> MultiWrapperMain<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
+    }
+
+    @Override
+    public String getTableNameThis() {
+        return getTableName();
+    }
+
+    @Override
+    public String getTableNameOther() {
+        return "";
+    }
+
+    @Override
+    public Class<?> getTableClassThis() {
+        return getClazz();
+    }
+
+    @Override
+    public String getRelationCode() {
+        return getTableName();
+    }
+
+    @Override
+    public MultiWrapperSelect getMultiWrapperSelectInfo() {
+        return this;
     }
 }

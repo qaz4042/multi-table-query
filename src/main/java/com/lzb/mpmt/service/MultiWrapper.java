@@ -143,7 +143,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
         }
         // 3. left join user_staff_address on user_staff.id = user_staff_address.staff_id
         // 加载默认的关系配置 将关系排序
-        relationTree = this.reloadRelations(wrapperMain.getTableName(), this.wrapperSubAndRelations);
+        relationTree = this.reloadRelations(wrapperMain, this.wrapperSubAndRelations);
         //关系列表需要,按树从顶向下排序
         this.wrapperSubAndRelations = new ArrayList<>();
         relationTree.consumerTopToBottom(relationNode -> {
@@ -177,17 +177,17 @@ public class MultiWrapper<MAIN extends MultiModel> {
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
 
-    private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+    private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
         //relationCode可能缺省,默认去关系表中加载
-        this.setRelationCodeAndTableName12(mainTableName, wrapperSubAndRelations);
+        this.setRelationCodeAndTableName12(wrapperMain.getTableName(), wrapperSubAndRelations);
 
         List<IMultiWrapperSubAndRelationTreeNode> relationsAndMain = new ArrayList<>(wrapperSubAndRelations);
-        relationsAndMain.add(new MultiWrapperSubAndRelationTreeNodeMain(mainTableName));
+        relationsAndMain.add(wrapperMain);
 
         //构建关系树  将用在
         // 1.在按顺序生成left join语句(否则会报错)
         // 2.按顺序映射查询结果到实体类上
-        return TreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperSubAndRelationTreeNodeMain);
+        return TreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperMain);
     }
 
     private void setRelationCodeAndTableName12(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
@@ -236,7 +236,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
                     }
                 }
         );
-        wrapperSubAndRelations.forEach(r-> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
+        wrapperSubAndRelations.forEach(r -> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {

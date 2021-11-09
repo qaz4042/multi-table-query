@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service;
 
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
@@ -90,5 +91,15 @@ public class MultiWrapperSubAndRelation<SUB extends MultiModel> implements IMult
         String sqlWhereProps = getWrapperSub().getSqlWhereProps();
         sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiConstant.Strings.EMPTY : " and " + sqlWhereProps;
         return joinType.getSql() + subTableName + " on " + relation.getTableName1() + "." + relation.getClass1KeyProp() + " = " + relation.getTableName2() + "." + relation.getClass2KeyProp() + sqlWhereProps;
+    }
+
+    @Override
+    public Class<?> getTableClassThis() {
+        return this.wrapperSub.getClazz();
+    }
+
+    @Override
+    public MultiWrapperSelect getMultiWrapperSelectInfo() {
+        return getWrapperSub();
     }
 }

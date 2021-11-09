@@ -1,5 +1,9 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
+import com.lzb.mpmt.service.multiwrapper.annotations.MutilTableId;
+import lombok.SneakyThrows;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -22,17 +26,22 @@ public class MultiRelationCaches {
     /**
      * 将resultSet数据set到表里,需要判断数据类型
      */
-    private static final Map<String, Type> relation_fieldTypeMap = new WeakHashMap<>(2048);
+    private static final Map<String, Class<?>> relation_fieldTypeMap = new WeakHashMap<>(4096);
 
     /**
-     * 将子表数据,set到主表去
+     * 将子表数据,get,set到主表去
      */
-    private static final Map<String, Method> relation_TableWithTable_setMethodMap = new WeakHashMap<>(2048);
+    private static final Map<String, Tuple2<Method, Method>> relation_TableWithTable_getSetMethodMap = new WeakHashMap<>(4096);
 
     /**
      * 判断表跟表是否是一对一,一对多关系
      */
-    private static final Map<String, Type> relation_TableWithTable_fieldTypeMap = new WeakHashMap<>(2048);
+    private static final Map<String, Type> relation_TableWithTable_fieldTypeMap = new WeakHashMap<>(4096);
+
+    /**
+     * 各个表的主键
+     */
+    private static final Map<Class<?>, Field> tableIdFieldMap = new WeakHashMap<>(4096);
 
     public static Method getRelation_setMethod(String relationCodeFieldName, Class<?> tableClass) {
         Method method = relation_setMethodMap.get(relationCodeFieldName);
@@ -54,10 +63,10 @@ public class MultiRelationCaches {
         return method;
     }
 
-    public static Map<String, Type> getRelation_fieldType(String relationCodeFieldName, Class<?> tableClass) {
-        Type type = relation_fieldTypeMap.get(relationCodeFieldName);
+    public static Class<?> getRelation_fieldType(String relationCode, String fieldName, Class<?> tableClass) {
+        String relationCodeFieldName= MultiUtil.firstToLowerCase(fieldName);
+        Class<?> type = relation_fieldTypeMap.get(relationCodeFieldName);
         if (type == null) {
-            String relationCode = relationCodeFieldName.split(",")[0];
             //初始化map
             Arrays.stream(tableClass.getDeclaredFields())
                     .filter(field -> publicNoStaticFinal(field.getModifiers()))
@@ -70,25 +79,31 @@ public class MultiRelationCaches {
             //todo 可能在这里抛异常不太合适
             throw new MultiException("找不到" + relationCodeFieldName + "对应的" + getPropName(relationCodeFieldName) + "属性");
         }
-        return relation_fieldTypeMap;
+        return type;
     }
 
 
-    public static Method getRelation_TableWithTable_setMethod(String relationCode, Class<?> tableClass) {
-        Method method = relation_TableWithTable_setMethodMap.get(relationCode);
-        if (method == null) {
+    public static Tuple2<Method, Method> getRelation_TableWithTable_getSetMethod(String relationCode, Class<?> tableClass) {
+        Tuple2<Method, Method> methods = relation_TableWithTable_getSetMethodMap.get(relationCode);
+        if (methods == null) {
             //初始化map
-            Arrays.stream(tableClass.getDeclaredFields())
-                    .filter(field -> publicNoStaticFinal(field.getModifiers()))
-                    .filter(m -> m.getName().equals(relationCode))
-                    .forEach(field -> relation_TableWithTable_setMethodMap.put(relationCode + "." + MultiUtil.firstToLowerCase(field.getName().substring(3)), field.getType()));
+            Method setMethod = Arrays.stream(tableClass.getDeclaredMethods())
+                    .filter(m -> publicNoStaticFinal(m.getModifiers()))
+                    .filter(m -> m.getName().equals("set" + MultiUtil.firstToUpperCase(relationCode)))
+                    .findAny().orElse(null);
+
+            Method getMethod = Arrays.stream(tableClass.getDeclaredMethods())
+                    .filter(m -> publicNoStaticFinal(m.getModifiers()))
+                    .filter(m -> m.getName().equals("get" + MultiUtil.firstToUpperCase(relationCode)))
+                    .findAny().orElse(null);
+            relation_TableWithTable_getSetMethodMap.put(relationCode, new Tuple2<>(getMethod, setMethod));
         }
-        method = relation_TableWithTable_setMethodMap.get(relationCode);
-        if (method == null) {
+        methods = relation_TableWithTable_getSetMethodMap.get(relationCode);
+        if (methods == null) {
             //todo 可能在这里抛异常不太合适
-            throw new MultiException("找不到" + relationCode + "对应的set" + MultiUtil.firstToUpperCase(getPropName(relationCode)));
+            throw new MultiException("找不到" + relationCode + "对应的get,set" + MultiUtil.firstToUpperCase(getPropName(relationCode)));
         }
-        return method;
+        return methods;
     }
 
     public static Type getRelation_TableWithTable_fieldType(String relationCode, Class<?> tableClass) {
@@ -105,6 +120,23 @@ public class MultiRelationCaches {
             throw new MultiException("找不到" + relationCode + "对应的set" + MultiUtil.firstToUpperCase(relationCode.split(",")[1]));
         }
         return type;
+    }
+
+    @SneakyThrows
+    public static Field getTableIdField(Class<?> tableClass) {
+        Field idField = tableIdFieldMap.get(tableClass);
+        if (idField == null) {
+            idField = Arrays.stream(tableClass.getDeclaredFields()).filter(f -> null != f.getAnnotation(MutilTableId.class)).findAny().orElse(null);
+            if (idField == null) {
+                idField = Arrays.stream(tableClass.getDeclaredFields()).filter(f -> "id".equals(f.getName())).findAny().orElse(null);
+                ;
+            }
+            if (idField == null) {
+                throw new MultiException("找不到id字段(或者@MutilTableId对应属性)" + tableClass);
+            }
+            tableIdFieldMap.put(tableClass, idField);
+        }
+        return idField;
     }
 
     private static boolean publicNoStaticFinal(int modifiers) {
