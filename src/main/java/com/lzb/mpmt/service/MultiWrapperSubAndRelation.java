@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Slf4j
 @SuppressWarnings("unused")
-public class MultiWrapperSubAndRelation<SUB extends MultiModel> implements IMultiWrapperSubAndRelationTreeNode {
+public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelationTreeNode {
 
     public static MultiTableRelationFactory MULTI_TABLE_RELATION_FACTORY;
 

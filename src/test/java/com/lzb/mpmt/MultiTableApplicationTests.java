@@ -5,16 +5,18 @@ import com.lzb.mpmt.demo.model.User;
 import com.lzb.mpmt.demo.model.UserAddress;
 import com.lzb.mpmt.demo.model.UserStaff;
 import com.lzb.mpmt.service.*;
-import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.jdbc.MysqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 //@SpringBootTest
 class MultiTableApplicationTests {
@@ -70,7 +72,12 @@ class MultiTableApplicationTests {
     }
 
     @Test
-    void testComplex() {
+    void complexWrapperQuery() {
+        List<UserStaff> query = MysqlExecutor.query(complexWrapper());
+        System.out.println(query);
+    }
+
+    private MultiWrapper<UserStaff> complexWrapper() {
         System.out.println("testComplex");
 
         //最复杂的情况
@@ -103,16 +110,16 @@ class MultiTableApplicationTests {
                         .gt(BaseModel::getCreateTime, new Date())
                         .gt(BaseModel::getUpdateTime, LocalDateTime.now())
                         .gt(BaseModel::getId, "1")
-                        .in(BaseModel::getId, "1","1","3")
+                        .in(BaseModel::getId, "1", "1", "3")
                         .likeDefault(User::getUsername, "1")
                 )
                 .leftJoin(MultiWrapperSub.lambda(UserAddress.class)
                         .select(UserAddress::getProvince)
                         .gt(UserAddress::getId, "1")
-                )
-                ;
+                );
 
         System.out.println(wrapper.computeSql());
+        return wrapper;
     }
 
 }

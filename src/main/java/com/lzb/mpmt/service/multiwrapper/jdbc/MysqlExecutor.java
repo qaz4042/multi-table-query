@@ -9,7 +9,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
+import javax.sql.rowset.CachedRowSet;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -19,7 +21,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class MysqlExecutor {
+@Service
+public abstract class MysqlExecutor {
 
     private static JdbcTemplate jdbcTemplate;
 
@@ -29,25 +32,28 @@ public class MysqlExecutor {
     }
 
     @SneakyThrows
-    public static <MAIN extends MultiModel> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
+    public static <MAIN> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
+        //todo test
+        ResultSetImpl resultSet1 = new ResultSetImpl();
+        MAIN main = buildReturn(wrapper, resultSet1, relationIdObjectMap);
         return jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
                 .stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @SneakyThrows
-    private static <MAIN extends MultiModel> MAIN buildReturn(MultiWrapper<MAIN> wrapper, ResultSet resultSet, Map<String, Object> relationIdObjectMap) {
+    private static <MAIN> MAIN buildReturn(MultiWrapper<MAIN> wrapper, ResultSet resultSet, Map<String, Object> relationIdObjectMap) {
         TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNodeTop = wrapper.getRelationTree();
         return buildReturnRecursion(null, relationTreeNodeTop, resultSet, relationIdObjectMap);
     }
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB extends MultiModel> MAIN_OR_SUB buildReturnRecursion(MAIN_OR_SUB parentEntity,
-                                                                                     TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
-                                                                                     ResultSet resultSet,
-                                                                                     Map<String, Object> relationIdObjectMap) {
+    private static <MAIN_OR_SUB> MAIN_OR_SUB buildReturnRecursion(MAIN_OR_SUB parentEntity,
+                                                                  TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
+                                                                  ResultSet resultSet,
+                                                                  Map<String, Object> relationIdObjectMap) {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
@@ -109,19 +115,19 @@ public class MysqlExecutor {
         return currEntity;
     }
 
-    private static boolean isCheckAndSetRepeat(ResultSet resultSet, Set<String> relationIdSet, String tableName, Field idField, String idFieldFullName) {
-        if (null == idField) {
-            //没重复
-            return false;
-        }
-        String relationIdVale = tableName + getValue(idFieldFullName, idField, resultSet);
-        boolean repeat = relationIdSet.contains(relationIdVale);
-        if (!repeat) {
-            //没重复,本次添加到结果集以后,下次就重复
-            relationIdSet.add(relationIdVale);
-        }
-        return repeat;
-    }
+//    private static boolean isCheckAndSetRepeat(ResultSet resultSet, Set<String> relationIdSet, String tableName, Field idField, String idFieldFullName) {
+//        if (null == idField) {
+//            //没重复
+//            return false;
+//        }
+//        String relationIdVale = tableName + getValue(idFieldFullName, idField, resultSet);
+//        boolean repeat = relationIdSet.contains(relationIdVale);
+//        if (!repeat) {
+//            //没重复,本次添加到结果集以后,下次就重复
+//            relationIdSet.add(relationIdVale);
+//        }
+//        return repeat;
+//    }
 
     @SuppressWarnings("unchecked")
     @SneakyThrows

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Slf4j
 @SuppressWarnings("unused")
-public class MultiWrapper<MAIN extends MultiModel> {
+public class MultiWrapper<MAIN> {
 
     /**
      * 主表信息
@@ -50,7 +50,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
     }
 
     @SafeVarargs
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, Class<? extends MultiModel>... subTableClasses) {
+    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, Class<?>... subTableClasses) {
         this.wrapperMain = wrapperMain;
         Arrays.stream(subTableClasses).forEach(subTableClass -> this.leftJoin(MultiWrapperSub.lambda(subTableClass)));
     }
@@ -61,7 +61,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
      *
      * @return MultiWrapper
      */
-    public static <MAIN extends MultiModel> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
+    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
         return main(wrapperMain, (MultiWrapperMainSubWhere<?>[]) null);
     }
 
@@ -73,7 +73,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
      *
      * @return MultiWrapper
      */
-    public static <MAIN extends MultiModel> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
+    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
         MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
         wrapper.setWrapperMain(wrapperMain);
         if (wrapperMainSubWhere != null) {
@@ -87,7 +87,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB extends MultiModel> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB> subTableWrapper) {
         return leftJoin(null, subTableWrapper);
     }
 
@@ -96,7 +96,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB extends MultiModel> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB> subTableWrapper) {
         return innerJoin(null, subTableWrapper);
     }
 
@@ -107,17 +107,17 @@ public class MultiWrapper<MAIN extends MultiModel> {
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
-    public <SUB extends MultiModel> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.left_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    public <SUB extends MultiModel> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.inner_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    private <SUB extends MultiModel> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationCode, subTableWrapper));
         return this;
     }
@@ -236,7 +236,7 @@ public class MultiWrapper<MAIN extends MultiModel> {
                     }
                 }
         );
-        wrapperSubAndRelations.forEach(r -> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
+//        wrapperSubAndRelations.forEach(r -> r.getWrapperSub().setIdFieldName(r.getRelationCode() + "." + MultiUtil.camelToUnderline(r.getWrapperSub().getIdField().getName())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {

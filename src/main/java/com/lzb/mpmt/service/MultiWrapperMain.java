@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMain<MAIN extends MultiModel> implements
+public class MultiWrapperMain<MAIN> implements
         MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
@@ -52,31 +52,31 @@ public class MultiWrapperMain<MAIN extends MultiModel> implements
     private Long limitOffset;
     private Long limitSize;
 
-    /**
-     * id字段名
-     */
-    private Field idField;
-    /**
-     * id字段名
-     */
-    private String idFieldName;
+//    /**
+//     * id字段名
+//     */
+//    private Field idField;
+//    /**
+//     * id字段名
+//     */
+//    private String idFieldName;
 
     /**
      * 类为了生成List<SUB>
      */
     private Class<MAIN> clazz;
 
-    public static <MAIN extends MultiModel> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
+    public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
-        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
+//        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
         wrapperMain.setTableName(tableName);
         wrapperMain.setClazz(clazz);
         //默认是id 用它来去重 setIdFieldName(null) 则不去重  setIdFieldName("code")则用code去去重
-        wrapperMain.setIdField(idField);
-        if (idField != null) {
-            wrapperMain.setIdFieldName(tableName + "." + MultiUtil.camelToUnderline(idField.getName()));
-        }
+//        wrapperMain.setIdField(idField);
+//        if (idField != null) {
+//            wrapperMain.setIdFieldName(tableName + "." + MultiUtil.camelToUnderline(idField.getName()));
+//        }
         return wrapperMain;
     }
 

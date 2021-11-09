@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperSub<SUB extends MultiModel> implements
+public class MultiWrapperSub<SUB> implements
         MultiWrapperWhere<SUB, MultiWrapperSub<SUB>>,
         MultiWrapperSelect<SUB, MultiWrapperSub<SUB>> {
 
@@ -37,15 +37,15 @@ public class MultiWrapperSub<SUB extends MultiModel> implements
      * select属性列表
      */
     private List<String> selectFields;
-
-    /**
-     * id字段名
-     */
-    private Field idField;
-    /**
-     * id字段名
-     */
-    private String idFieldName;
+//
+//    /**
+//     * id字段名
+//     */
+//    private Field idField;
+//    /**
+//     * id字段名
+//     */
+//    private String idFieldName;
 
     /**
      * 类为了生成List<SUB>
@@ -54,15 +54,15 @@ public class MultiWrapperSub<SUB extends MultiModel> implements
 
 
     // todo 可再把 class能确定的信息 比如 idField 放全局缓存
-    public static <SUB extends MultiModel> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
+    public static <SUB> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
         MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
         wrapperSub.setTableName(tableName);
         wrapperSub.setClazz(clazz);
         //默认是id 用它来去重 setIdFieldName(null) 则不去重  setIdFieldName("code")则用code去去重
 //        clazz.getDeclaredField("id").get(null)
-        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
-        wrapperSub.setIdField(idField); // IdFieldName 需要relationCode
+//        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
+//        wrapperSub.setIdField(idField); // IdFieldName 需要relationCode
         return wrapperSub;
     }
 
