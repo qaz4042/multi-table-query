@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 /***
  * 直接参考 PreparedStatement java.sql相关代码
  * {@link com.mysql.cj.ClientPreparedQueryBindings}
+ * @author Administrator
  */
 public class ClientPreparedQueryBindings {
 
@@ -95,6 +96,7 @@ public class ClientPreparedQueryBindings {
                 case '\'':
                 case '\\':
                     needsHexEscape = true;
+                default:
             }
 
             if (needsHexEscape) {

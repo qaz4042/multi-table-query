@@ -1,6 +1,5 @@
-package com.lzb.mpmt.service;
+package com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper;
 
-import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
@@ -10,7 +9,6 @@ import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -24,7 +22,6 @@ public class MultiWrapperMain<MAIN> implements
         MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
         , IMultiWrapperSubAndRelationTreeNode {
-
 
     /**
      * 下划线表名
@@ -59,7 +56,6 @@ public class MultiWrapperMain<MAIN> implements
 
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
-//        Field idField = MultiUtil.getField(clazz, MultiUtil.getFieldValue(clazz, MultiConstant.MultiStrings.ID_FIELD_NAME, MultiConstant.Strings.ID_FIELD_NAME_DEFAULT));
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
         wrapperMain.setTableName(tableName);
         wrapperMain.setClazz(clazz);
@@ -93,7 +89,7 @@ public class MultiWrapperMain<MAIN> implements
     }
 
     @Override
-    public MultiWrapperSelect getMultiWrapperSelectInfo() {
+    public MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo() {
         return this;
     }
 }

@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata;
+package com.lzb.mpmt.service.multiwrapper.entity;
 
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import lombok.AllArgsConstructor;

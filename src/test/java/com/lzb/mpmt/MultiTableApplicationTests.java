@@ -5,10 +5,14 @@ import com.lzb.mpmt.demo.model.BaseModel;
 import com.lzb.mpmt.demo.model.User;
 import com.lzb.mpmt.demo.model.UserAddress;
 import com.lzb.mpmt.demo.model.UserStaff;
-import com.lzb.mpmt.service.*;
+import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMain;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMainSubWhere;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSub;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSubAndRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.service.multiwrapper.jdbc.MysqlExecutor;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.executor.MultiSqlExecutor;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +64,7 @@ class MultiTableApplicationTests {
     @Test
     void testQuerySimple() {
         System.out.println("testSimple");
-        List<UserStaff> userStaffsSimple = MysqlExecutor.query(
+        List<UserStaff> userStaffsSimple = MultiSqlExecutor.query(
                 new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
         );
         System.out.println(JSONUtil.toJsonStr(userStaffsSimple));
@@ -68,7 +72,7 @@ class MultiTableApplicationTests {
 
     @Test
     void testQueryComplex() {
-        List<UserStaff> userStaffsComplex = MysqlExecutor.query(MultiWrapper
+        List<UserStaff> userStaffsComplex = MultiSqlExecutor.query(MultiWrapper
                 .main(
                         MultiWrapperMain.lambda(UserStaff.class)
                                 .select(UserStaff::getSex, UserStaff::getStaffName)

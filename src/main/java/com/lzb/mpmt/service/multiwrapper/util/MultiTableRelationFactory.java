@@ -1,8 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
 import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
-import lombok.Data;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import lombok.Getter;
 
 import java.util.HashMap;

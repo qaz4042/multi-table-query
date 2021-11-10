@@ -1,8 +1,8 @@
-package com.lzb.mpmt.service;
+package com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper;
 
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
@@ -76,7 +76,7 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     }
 
     @Override
-    public MultiWrapperSelect getMultiWrapperSelectInfo() {
+    public MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo() {
         return getWrapperSub();
     }
 }

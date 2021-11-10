@@ -1,8 +1,13 @@
-package com.lzb.mpmt.service;
+package com.lzb.mpmt.service.multiwrapper.wrapper;
 
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMain;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMainSubWhere;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSub;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.IMultiWrapperSubAndRelationTreeNode;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSubAndRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.joindata.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
@@ -162,10 +167,7 @@ public class MultiWrapper<MAIN> {
         String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
         String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
 
-        String sql = sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
-
-        log.info("sql: " + sql);
-        return sql;
+        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
 
     private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {

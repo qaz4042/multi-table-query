@@ -1,17 +1,20 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
 import cn.hutool.core.convert.BasicType;
+import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator
@@ -276,19 +279,68 @@ public class MultiUtil {
      * Date转LocalDate
      */
     public static LocalDateTime date2LocalDateTime(Date date) {
-        if(null == date) {
+        if (null == date) {
             return null;
         }
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static Object getEnumByValue(Class<?> type, Integer value) {
-        //todo
-        return null;
+    public static final Map<Class<? extends IMultiEnum>, Map<Serializable, IMultiEnum>> enumMap = new WeakHashMap<>(512);
+
+    public static <ENUM extends IMultiEnum, ENUMVAL extends Serializable> ENUM getEnumByValue(Class<ENUM> type, ENUMVAL value) {
+        Map<ENUMVAL, ENUM> integerIMultiEnumMap = enumMap.computeIfAbsent(type,
+                (key) -> {
+                    List<IMultiEnum> multiEnums = Arrays.stream(type.getEnumConstants()).map(o -> (ENUM) o).collect(Collectors.toList());
+                    return listToMap(multiEnums,
+                            IMultiEnum::getValue, o -> o);
+                });
+        return integerIMultiEnumMap.get(value);
     }
+
+
+    //todo 扩展实现 sum 功能
+
 
     public static Object getEnumByName(Class<?> type, String value) {
         //todo
         return null;
+    }
+
+
+    /**
+     * list 转 map
+     */
+    public static <T, KEY> Map<KEY, T> listToMap(Collection<T> list, Function<T, KEY> keyFun) {
+        return listToMap(list, keyFun, o -> o, true);
+    }
+
+
+    /**
+     * list 转 map
+     */
+    public static <T, KEY, Val> Map<KEY, Val> listToMap(Collection<T> list, Function<T, KEY> keyFun, Function<T, Val> valFun) {
+        return listToMap(list, keyFun, valFun, true);
+    }
+
+    /**
+     * list 转 map
+     * 例如   Map<String, User> userMap = listToMap(new ArrayList<User>(), User::getUsername);
+     * 把   [{id:1,username:'u1'},{id:2,username:'u2'},{id:3,username:'u3'}]
+     * 转成 {1:{id:1,username:'u1'},2:{id:2,username:'u2'},3:{id:3,username:'u3'}}
+     */
+    public static <T, KEY, Val> Map<KEY, Val> listToMap(Collection<T> list, Function<T, KEY> keyFun, Function<T, Val> valFun, boolean repeatReplace) {
+        Map<KEY, Val> map = new LinkedHashMap<>();
+        if (null != list) {
+            for (T t : list) {
+                if (null != t) {
+                    KEY key = keyFun.apply(t);
+                    if (map.keySet().contains(key) && !repeatReplace) {
+                        throw new MultiException("listToMap不能存在重复键值:" + key);
+                    }
+                    map.put(key, valFun.apply(t));
+                }
+            }
+        }
+        return map;
     }
 }

@@ -1,6 +1,7 @@
 package com.lzb.mpmt.demo.model;
 
 
+import com.lzb.mpmt.service.multiwrapper.annotations.MultiTableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 public class User extends BaseModel {
     private String username;
     private Integer sex;
+    @MultiTableField(exist = false)
     private Long parentId;
 
     private List<UserAddress> user_userAddress;

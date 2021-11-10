@@ -27,7 +27,12 @@ public class TreeNode<T> {
     private List<TreeNode<T>> children;
 
     public interface IEqualsKey<T extends IEqualsKey<T>> {
-        boolean parentKeyEqualsChildKey(T o);
+        /**
+         * 父子节点存在父子关系的判断
+         * @param   child 子节点
+         * @return  当前节点(作为父节点)与子节点,是否存在父子关系
+         */
+        boolean parentKeyEqualsChildKey(T child);
     }
 
     @Data

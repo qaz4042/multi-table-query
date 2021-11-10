@@ -1,7 +1,8 @@
-package com.lzb.mpmt.service.multiwrapper.jdbc;
+package com.lzb.mpmt.service.multiwrapper.executor;
 
-import com.lzb.mpmt.service.*;
-import com.lzb.mpmt.service.multiwrapper.enums.MutilEnum;
+import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
+import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.IMultiWrapperSubAndRelationTreeNode;
+import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -21,15 +22,19 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ *
+ * @author Administrator
+ */
 @Slf4j
 @Service
-public class MysqlExecutor {
+public class MultiSqlExecutor {
 
     private static JdbcTemplate jdbcTemplate;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        MysqlExecutor.jdbcTemplate = jdbcTemplate;
+        MultiSqlExecutor.jdbcTemplate = jdbcTemplate;
     }
 
     @SneakyThrows
@@ -38,7 +43,8 @@ public class MysqlExecutor {
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
         List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
                 .stream().filter(Objects::nonNull).collect(Collectors.toList());
-        log.info("查询结果:{}条", list.size());
+
+        log.info("Multi 查询结果{}条, sql:{}", list.size(), sql);
         return list;
     }
 
@@ -58,18 +64,19 @@ public class MysqlExecutor {
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
         Field currTableIdField = MultiRelationCaches.getTableIdField(currTableClass);
-        Object id = getValue(currTableIdField.getName(), currTableIdField, resultSet);
-        MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(currRelationCode + id);
+        String idFieldName = currRelationCode + "." + MultiUtil.camelToUnderline(currTableIdField.getName());
+        Object id = getValue(idFieldName, currTableIdField, resultSet);
+        MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(idFieldName + "_" + id);
         //要新增元素
         if (currEntity == null) {
             //重复则不在生成
             //noinspection deprecation
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
-            List<String> selectFields = currNode.getMultiWrapperSelectInfo().getSelectFields();
-            for (String selectField : selectFields) {
-                Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(currRelationCode, selectField, currTableClass);
-                Object value = getValue(selectField, fieldReturnType, resultSet);
-                MultiRelationCaches.getRelation_setMethod(currRelationCode, selectField, currTableClass).invoke(currEntity, value);
+            List<String> selectFieldNames = currNode.getMultiWrapperSelectInfo().getSelectFields();
+            for (String selectFieldName : selectFieldNames) {
+                Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(currRelationCode, selectFieldName, currTableClass);
+                Object value = getValue(currRelationCode + "." + selectFieldName, fieldReturnType, resultSet);
+                MultiRelationCaches.getRelation_setMethod(currRelationCode, selectFieldName, currTableClass).invoke(currEntity, value);
             }
 
             //顶层节点为null,不用出setSubEntitys(subEntitys);
@@ -100,6 +107,7 @@ public class MysqlExecutor {
             }
         }
 
+        relationIdObjectMap.put(idFieldName + "_" + id, currEntity);
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
         relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(finalCurrEntity, subNode, resultSet, relationIdObjectMap));
@@ -151,7 +159,7 @@ public class MysqlExecutor {
             return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName)).toLocalTime();
         }
         if (Enum.class.isAssignableFrom(type)) {
-            if (MutilEnum.class.isAssignableFrom(type)) {
+            if (IMultiEnum.class.isAssignableFrom(type)) {
                 Integer value = resultSet.getInt(fieldName);
                 return MultiUtil.getEnumByValue(type, value);
             } else {

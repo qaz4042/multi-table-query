@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service;
+package com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper;
 
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;

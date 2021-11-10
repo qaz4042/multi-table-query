@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service;
+package com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper;
 
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
@@ -11,31 +11,38 @@ import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey<IMultiWrapperSubAndRelationTreeNode> {
 
     /**
-     * 树节点关联信息
+     * @return 当前节点的当前表
      */
     String getTableNameThis();
+
+    /**
+     * @return 当前节点的当其他表
+     */
     String getTableNameOther();
 
+
+    // ----  以下是与树节点无关的额外信息 ----- start
     /**
-     * 额外信息
-     * 当前副表(或主表)对应类
+     * @return 当前副表(或主表)对应类
      */
     Class<?> getTableClassThis();
+
     /**
-     * 当前副表对应relationCode(或主表表名)
+     * @return 当前副表对应relationCode(或主表表名)
      */
     String getRelationCode();
+
     /**
-     * select信息
+     * @return select信息
      */
-    MultiWrapperSelect getMultiWrapperSelectInfo();
+    MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo();
 
+    // ----  以下是与树节点无关的额外信息 ----- end
 
     /**
-     * 父.id
-     *
-     * @param child
-     * @return
+     * 父子节点存在父子关系的判断
+     * @param   child 子节点
+     * @return  当前节点(作为父节点)与子节点,是否存在父子关系
      */
     @Override
     default boolean parentKeyEqualsChildKey(IMultiWrapperSubAndRelationTreeNode child) {
