@@ -1,5 +1,6 @@
 package com.lzb.mpmt.demo.model;
 
+import com.lzb.mpmt.test.enums.DemoConst;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class UserStaff extends BaseModel {
     private String staffName;
-    private Integer sex;
+    private DemoConst.SexEnum sex;
     private Long adminUserId;
 
     private User user_userStaff;

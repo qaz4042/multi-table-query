@@ -161,11 +161,13 @@ public class MultiSqlExecutor {
         if (Enum.class.isAssignableFrom(type)) {
             if (IMultiEnum.class.isAssignableFrom(type)) {
                 Integer value = resultSet.getInt(fieldName);
-                return MultiUtil.getEnumByValue(type, value);
+                //noinspection unchecked
+                return MultiUtil.getEnumByValue((Class<IMultiEnum>)type, value);
             } else {
                 //默认用枚举的name存取
                 String value = resultSet.getString(fieldName);
-                return MultiUtil.getEnumByName(type, value);
+                //noinspection unchecked
+                return MultiUtil.getEnumByName((Class<Enum>)type, value);
             }
         }
         throw new MultiException("未知的数据类型|" + fieldName + "|" + type);

@@ -3,6 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.util;
 import cn.hutool.core.convert.BasicType;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
+import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -285,24 +286,28 @@ public class MultiUtil {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static final Map<Class<? extends IMultiEnum>, Map<Serializable, IMultiEnum>> enumMap = new WeakHashMap<>(512);
+    public static final Map<Class<? extends IMultiEnum>, Map<? extends Serializable, ? extends IMultiEnum>> VALUE_ENUM_MAP_ALL = new WeakHashMap<>(512);
 
-    public static <ENUM extends IMultiEnum, ENUMVAL extends Serializable> ENUM getEnumByValue(Class<ENUM> type, ENUMVAL value) {
-        Map<ENUMVAL, ENUM> integerIMultiEnumMap = enumMap.computeIfAbsent(type,
+    @SuppressWarnings("unchecked")
+    public static <ENUM extends IMultiEnum, ENUMVALUE extends Serializable> ENUM getEnumByValue(Class<ENUM> type, ENUMVALUE value) {
+        Map<ENUMVALUE, ENUM> valueEnumMap = (Map<ENUMVALUE, ENUM>) VALUE_ENUM_MAP_ALL.computeIfAbsent(type,
                 (key) -> {
-                    List<IMultiEnum> multiEnums = Arrays.stream(type.getEnumConstants()).map(o -> (ENUM) o).collect(Collectors.toList());
+                    List<ENUM> multiEnums = Arrays.stream(type.getEnumConstants()).map(o -> (ENUM) o).collect(Collectors.toList());
                     return listToMap(multiEnums,
-                            IMultiEnum::getValue, o -> o);
+                            ENUM::getValue, o -> o);
                 });
-        return integerIMultiEnumMap.get(value);
+        return valueEnumMap.get(value);
     }
 
 
     //todo 扩展实现 sum 功能
 
-
-    public static Object getEnumByName(Class<?> type, String value) {
-        //todo
+    @SneakyThrows
+    public static <T extends Enum<T>> T getEnumByName(Class<T> type, String name) {
+        if (type.isEnum()) {
+            //noinspection unchecked
+            return (T) type.getDeclaredMethod("valueOf", String.class).invoke(null,name);
+        }
         return null;
     }
 
