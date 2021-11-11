@@ -48,8 +48,6 @@ class MultiTableApplicationTests {
         );
 
 
-        JSONUtil.toJsonStr(userStaffsSimple);
-
 //        //jackson序列化OK
 //        MultiEnumSerializeConfigJackson.addConfigs(objectMapper);
 //        System.out.println("" + objectMapper.writeValueAsString(userStaffsSimple));

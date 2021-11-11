@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
+ * 实体类，可以直接放枚举，枚举解析器
  * @author Administrator
  */
 @SuppressWarnings("ALL")
@@ -21,50 +22,17 @@ public class MultiEnumSerializeConfigJackson {
 
     public static void addConfigs(ObjectMapper objectMapper) {
         SimpleModule simpleModule = new SimpleModule();
-        //todo 待测试
-//        simpleModule.addSerializer(Enum.class, EnumSerializer.INSTANCE);
-//        simpleModule.addDeserializer(Enum.class, EnumDeserializer.INSTANCE);
+
+        //Enum已经默认去name()了
+        //simpleModule.addSerializer(Enum.class, EnumSerializer.INSTANCE);
+        //simpleModule.addDeserializer(Enum.class, EnumDeserializer.INSTANCE);
 
         //json值序列化
         simpleModule.addSerializer(IMultiEnum.class, MultiEnumSerializer.INSTANCE);
         simpleModule.addDeserializer(IMultiEnum.class, MultiEnumDeserializer.INSTANCE);
 
-
         objectMapper.registerModule(simpleModule);
     }
-
-
-    public static class EnumSerializer<T extends Enum<T>> extends JsonSerializer<T> {
-        public static final EnumSerializer INSTANCE = new EnumSerializer();
-
-        @Override
-        public void serialize(T val, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            jsonGenerator.writeString(val.name());
-        }
-    }
-
-    public static class EnumDeserializer<T extends Enum<T>> extends JsonDeserializer<T> implements ContextualDeserializer {
-        public static final EnumDeserializer<?> INSTANCE = new EnumDeserializer<>();
-        private Class<T> clazz;
-
-        public EnumDeserializer() {
-        }
-
-        @Override
-        public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
-            JavaType type = ctxt.getContextualType() != null
-                    ? ctxt.getContextualType()
-                    : property.getMember().getType();
-            //noinspection unchecked
-            return new MultiEnumDeserializer(type.getRawClass());
-        }
-
-        @Override
-        public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return MultiUtil.getEnumByName(clazz, p.getValueAsString());
-        }
-    }
-
 
     public static class MultiEnumSerializer<T extends IMultiEnum> extends JsonSerializer<T> {
         public static final MultiEnumSerializer INSTANCE = new MultiEnumSerializer();
