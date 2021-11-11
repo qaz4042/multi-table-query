@@ -10,7 +10,7 @@ public class DemoConst {
 
     @Getter
     @AllArgsConstructor
-    public enum SexEnum implements IMultiEnum {
+    public enum SexEnum implements IMultiEnum<Integer> {
         man(0, "男"),
         woman(1, "女"),
         ;

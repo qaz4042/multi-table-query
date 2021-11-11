@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper;
+package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;

@@ -1,7 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.executor;
 
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.IMultiWrapperSubAndRelationTreeNode;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import lombok.SneakyThrows;
@@ -115,12 +115,15 @@ public class MultiSqlExecutor {
     }
 
     // todo 抽出sql查询方法提供定制
+
     @SneakyThrows
     private static Object getValue(String fieldName, Field field, ResultSet resultSet) {
         Class<?> type = field.getType();
         return getValue(fieldName, type, resultSet);
     }
 
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) throws SQLException {
         if (Long.class.isAssignableFrom(type)) {
             return resultSet.getLong(fieldName);
@@ -161,7 +164,6 @@ public class MultiSqlExecutor {
         if (Enum.class.isAssignableFrom(type)) {
             if (IMultiEnum.class.isAssignableFrom(type)) {
                 Integer value = resultSet.getInt(fieldName);
-                //noinspection unchecked
                 return MultiUtil.getEnumByValue((Class<IMultiEnum>)type, value);
             } else {
                 //默认用枚举的name存取

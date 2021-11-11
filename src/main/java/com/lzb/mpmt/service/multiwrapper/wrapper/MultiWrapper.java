@@ -1,10 +1,10 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMain;
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperMainSubWhere;
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSub;
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.IMultiWrapperSubAndRelationTreeNode;
-import com.lzb.mpmt.service.multiwrapper.wrapper.subwrapper.MultiWrapperSubAndRelation;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
@@ -88,6 +88,7 @@ public class MultiWrapper<MAIN> {
 
     /***
      * join 副表信息
+     *
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
@@ -97,6 +98,7 @@ public class MultiWrapper<MAIN> {
 
     /***
      * join是有顺序的,前后两张表,必须有直接关联
+     *
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */

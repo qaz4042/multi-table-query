@@ -20,7 +20,8 @@ public enum WhereOptEnum {
     ge("%s >= '%s'", "age >= '18'"),
     lt("%s < '%s'", "age < '18'"),
     le("%s <= '%s'", "age <= '18'"),
-    likeDefault("%s like '%%%s%%'", "name like '%咔咔%'"), //%%转义为%
+    //%%转义为%
+    likeDefault("%s like '%%%s%%'", "name like '%咔咔%'"),
     ;
 
     private final String template;

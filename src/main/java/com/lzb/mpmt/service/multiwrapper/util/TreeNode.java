@@ -29,6 +29,7 @@ public class TreeNode<T> {
     public interface IEqualsKey<T extends IEqualsKey<T>> {
         /**
          * 父子节点存在父子关系的判断
+         *
          * @param   child 子节点
          * @return  当前节点(作为父节点)与子节点,是否存在父子关系
          */

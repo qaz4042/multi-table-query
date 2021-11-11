@@ -286,13 +286,13 @@ public class MultiUtil {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
-    public static final Map<Class<? extends IMultiEnum>, Map<? extends Serializable, ? extends IMultiEnum>> VALUE_ENUM_MAP_ALL = new WeakHashMap<>(512);
+    public static final Map<Class<? extends IMultiEnum<?>>, Map<? extends Serializable, ? extends IMultiEnum<?>>> VALUE_ENUM_MAP_ALL = new WeakHashMap<>(512);
 
     @SuppressWarnings("unchecked")
-    public static <ENUM extends IMultiEnum, ENUMVALUE extends Serializable> ENUM getEnumByValue(Class<ENUM> type, ENUMVALUE value) {
-        Map<ENUMVALUE, ENUM> valueEnumMap = (Map<ENUMVALUE, ENUM>) VALUE_ENUM_MAP_ALL.computeIfAbsent(type,
+    public static <ENUM extends IMultiEnum<ENUM_VALUE>, ENUM_VALUE extends Serializable> ENUM getEnumByValue(Class<ENUM> type, ENUM_VALUE value) {
+        Map<ENUM_VALUE, ENUM> valueEnumMap = (Map<ENUM_VALUE, ENUM>) VALUE_ENUM_MAP_ALL.computeIfAbsent(type,
                 (key) -> {
-                    List<ENUM> multiEnums = Arrays.stream(type.getEnumConstants()).map(o -> (ENUM) o).collect(Collectors.toList());
+                    List<ENUM> multiEnums = Arrays.stream(type.getEnumConstants()).collect(Collectors.toList());
                     return listToMap(multiEnums,
                             ENUM::getValue, o -> o);
                 });
@@ -339,7 +339,7 @@ public class MultiUtil {
             for (T t : list) {
                 if (null != t) {
                     KEY key = keyFun.apply(t);
-                    if (map.keySet().contains(key) && !repeatReplace) {
+                    if (map.containsKey(key) && !repeatReplace) {
                         throw new MultiException("listToMap不能存在重复键值:" + key);
                     }
                     map.put(key, valFun.apply(t));

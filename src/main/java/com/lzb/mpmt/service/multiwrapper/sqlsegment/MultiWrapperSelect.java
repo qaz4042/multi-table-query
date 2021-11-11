@@ -25,6 +25,7 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
     Class<T> getClazz();
     /***
      * 设置查询字段列表,不设置则默认*(全查询)
+     *
      * @param propFuncs 多个字段
      * @param <VAL> 字段泛型
      * @return 当前wrapper

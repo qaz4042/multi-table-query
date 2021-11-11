@@ -143,6 +143,8 @@ public class SerializedLambda implements Serializable {
     }
 
     /**
+     * 获取实例化方法的类型
+     *
      * @return 获取实例化方法的类型
      */
     public Class<?> getInstantiatedType() {
@@ -151,6 +153,8 @@ public class SerializedLambda implements Serializable {
     }
 
     /**
+     * 字符串形式
+     *
      * @return 字符串形式
      */
     @Override
