@@ -11,7 +11,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 类和类的关系  可以自动生成join语句 统一规范sql 按表名字排序
+ * 类和类的关系
+ * 可以在数据库中储存(推荐),也可以从枚举中读取
+ * 可以,统一按表名字排序(class1和class2,不同的Relation和Relation)
  *
  * @author Administrator
  */
@@ -20,7 +22,14 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 public class MultiTableRelation {
-    /***/
+    /***
+     * 唯一编号,推荐使用 tableName1__tableName2
+     * 对应实体中关系对象的变量名,例如(user__userStaff):
+     * public class User{
+     *   private String username;
+     *   private List<UserStaff> user__userStaff;
+     * }
+     */
     private String code;
 //    r1(User.class, UserStaff.class, ONE, MANY, true, false, User::getId);
 

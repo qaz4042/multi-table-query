@@ -238,9 +238,12 @@ public class MultiWrapper<MAIN> {
         if (tableName1.equals(subTableName)) {
             noCodeRelation.setTableNameThis(tableName1);
             noCodeRelation.setTableNameOther(tableName2);
+            noCodeRelation.setSubTableOneOrMany(multiTableRelation.getClass2OneOrMany());
         } else if (tableName2.equals(subTableName)) {
             noCodeRelation.setTableNameThis(tableName2);
             noCodeRelation.setTableNameOther(tableName1);
+            noCodeRelation.setTableNameOther(tableName1);
+            noCodeRelation.setSubTableOneOrMany(multiTableRelation.getClass1OneOrMany());
         } else {
             throw new MultiException("表关系" + multiTableRelation.getCode() + "(" + tableName1 + "," + tableName2 + ")其中之一必须和当前查询的表" + subTableName);
         }

@@ -1,4 +1,4 @@
-package com.lzb.mpmt.demo.model;
+package com.lzb.mpmt.test.model;
 
 import com.lzb.mpmt.service.multiwrapper.annotations.MultiTableId;
 import lombok.AllArgsConstructor;

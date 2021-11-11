@@ -1,4 +1,4 @@
-package com.lzb.mpmt.demo.model;
+package com.lzb.mpmt.test.model;
 
 
 import lombok.AllArgsConstructor;

@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
+import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
@@ -57,6 +58,10 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
      * relationCode对应的关系表2
      */
     private String tableNameOther;
+    /**
+     * This -> Other 的关系是one还是many
+     */
+    private ClassRelationOneOrManyEnum subTableOneOrMany;
 
     public String getSqlJoin(String mainTableName) {
         if (MULTI_TABLE_RELATION_FACTORY == null) {

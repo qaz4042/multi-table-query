@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
+import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
@@ -76,6 +77,11 @@ public class MultiWrapperMain<MAIN> implements
     @Override
     public String getTableNameOther() {
         return "";
+    }
+
+    @Override
+    public ClassRelationOneOrManyEnum getSubTableOneOrMany() {
+        return null;
     }
 
     @Override

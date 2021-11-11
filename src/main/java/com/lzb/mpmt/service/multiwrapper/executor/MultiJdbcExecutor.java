@@ -1,9 +1,12 @@
 package com.lzb.mpmt.service.multiwrapper.executor;
 
+import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.*;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +26,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *
  * @author Administrator
  */
 @Slf4j
 @Service
-public class MultiSqlExecutor {
+public class MultiJdbcExecutor {
 
     private static JdbcTemplate jdbcTemplate;
 
     @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        MultiSqlExecutor.jdbcTemplate = jdbcTemplate;
+        MultiJdbcExecutor.jdbcTemplate = jdbcTemplate;
     }
 
     @SneakyThrows
@@ -68,7 +70,8 @@ public class MultiSqlExecutor {
         Object id = getValue(idFieldName, currTableIdField, resultSet);
         MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(idFieldName + "_" + id);
         //要新增元素
-        if (currEntity == null) {
+        boolean noExist = currEntity == null;
+        if (noExist) {
             //重复则不在生成
             //noinspection deprecation
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
@@ -86,8 +89,14 @@ public class MultiSqlExecutor {
                 Method setMethod = getSetMethods.getT2();
                 Object subEntityExists = getMethod.invoke(parentEntity);
                 Class<?> returnType = getMethod.getReturnType();
+                MultiTableRelation relation = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(currNode.getRelationCode());
+
                 //列表
                 if (List.class.isAssignableFrom(returnType)) {
+                    if (!ClassRelationOneOrManyEnum.MANY.equals(currNode.getSubTableOneOrMany())) {
+//                        throw new MultiException(currNode.getTableNameThis() + "与" + currNode.getTableNameOther() + "不是1对多(或者多对对)关系,但" + currTableClass + "中" + currRelationCode + "为数组,定义不一致");
+                        log.warn(currNode.getTableNameThis() + "与" + currNode.getTableNameOther() + "不是1对多(或者多对对)关系,但" + currTableClass + "中" + currRelationCode + "为数组,定义不一致");
+                    }
                     if (subEntityExists == null) {
                         subEntityExists = new ArrayList<>(8);
                         setMethod.invoke(parentEntity, subEntityExists);
@@ -96,6 +105,9 @@ public class MultiSqlExecutor {
                 } else if (returnType.isArray()) {
                     throw new MultiException("暂时不支持array类型参数:" + getMethod);
                 } else {
+                    if (!ClassRelationOneOrManyEnum.MANY.equals(currNode.getSubTableOneOrMany())) {
+                        throw new MultiException(currNode.getTableNameThis() + "与" + currNode.getTableNameOther() + "不是1对1(或者多对对)关系,但" + currTableClass + "中" + currRelationCode + "为对象,定义不一致");
+                    }
                     //一对一元素
                     if (subEntityExists == null) {
                         subEntityExists = currEntity;
@@ -111,7 +123,7 @@ public class MultiSqlExecutor {
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
         relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(finalCurrEntity, subNode, resultSet, relationIdObjectMap));
-        return currEntity;
+        return noExist ? currEntity : null;
     }
 
     // todo 抽出sql查询方法提供定制
@@ -164,12 +176,12 @@ public class MultiSqlExecutor {
         if (Enum.class.isAssignableFrom(type)) {
             if (IMultiEnum.class.isAssignableFrom(type)) {
                 Integer value = resultSet.getInt(fieldName);
-                return MultiUtil.getEnumByValue((Class<IMultiEnum>)type, value);
+                return MultiUtil.getEnumByValue((Class<IMultiEnum>) type, value);
             } else {
                 //默认用枚举的name存取
                 String value = resultSet.getString(fieldName);
                 //noinspection unchecked
-                return MultiUtil.getEnumByName((Class<Enum>)type, value);
+                return MultiUtil.getEnumByName((Class<Enum>) type, value);
             }
         }
         throw new MultiException("未知的数据类型|" + fieldName + "|" + type);

@@ -11,6 +11,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Timestamp;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -251,11 +256,21 @@ public class MultiUtil {
         return camelToUnderline(methodName.substring(3));
     }
 
-    public static boolean isBasicType(Class<?> clazz) {
+    public static boolean isBasicDataType(Class<?> clazz) {
         if (null == clazz) {
             return false;
         } else {
-            return clazz.isEnum() || clazz.isPrimitive() || isPrimitiveWrapper(clazz);
+            return clazz.isEnum() || clazz.isPrimitive() || isPrimitiveWrapper(clazz)
+                    || String.class.equals(clazz)
+                    || Timestamp.class.equals(clazz)
+                    || Blob.class.equals(clazz)
+                    || Clob.class.equals(clazz)
+                    || BigDecimal.class.equals(clazz)
+                    || Date.class.equals(clazz)
+                    || LocalDateTime.class.equals(clazz)
+                    || LocalDate.class.equals(clazz)
+                    || LocalTime.class.equals(clazz)
+                    ;
         }
     }
 
@@ -301,12 +316,12 @@ public class MultiUtil {
 
 
     //todo 扩展实现 sum 功能
-
+    //统一json序列化
     @SneakyThrows
     public static <T extends Enum<T>> T getEnumByName(Class<T> type, String name) {
         if (type.isEnum()) {
             //noinspection unchecked
-            return (T) type.getDeclaredMethod("valueOf", String.class).invoke(null,name);
+            return (T) type.getDeclaredMethod("valueOf", String.class).invoke(null, name);
         }
         return null;
     }
@@ -348,4 +363,10 @@ public class MultiUtil {
         }
         return map;
     }
+
+    public static Class<?> getGenericFirst(Class<?> clazz) {
+        return (Class<?>) ((ParameterizedType) clazz.getGenericSuperclass()).getActualTypeArguments()[0];
+    }
+
+
 }

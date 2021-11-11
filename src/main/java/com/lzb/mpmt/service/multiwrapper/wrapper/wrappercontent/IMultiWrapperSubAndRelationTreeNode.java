@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
+import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 
@@ -26,6 +27,13 @@ public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey
 
 
     // ----  以下是与树节点无关的额外信息 ----- start
+    /**
+     * This -> Other 的关系是one还是many
+     *
+     * @return This -> Other 的关系是one还是many
+     */
+    ClassRelationOneOrManyEnum getSubTableOneOrMany() ;
+
     /**
      * 当前副表(或主表)对应类
      *

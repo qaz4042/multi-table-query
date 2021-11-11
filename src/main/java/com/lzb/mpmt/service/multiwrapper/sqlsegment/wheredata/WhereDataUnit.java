@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 
+import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum;
 import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.ClientPreparedQueryBindings;
@@ -40,6 +41,10 @@ public class WhereDataUnit implements IWhereData {
     private static Object formatValues(Object value) {
         if (null == value) {
             return null;
+        } else if (value instanceof IMultiEnum) {
+            value = ((IMultiEnum<?>) value).getValue();
+        } else if (value instanceof Enum) {
+            value = ((Enum<?>) value).name();
         } else if (value instanceof Date) {
             value = MultiConstant.DateTimes.DATE_FORMAT.format(value);
         } else if (value instanceof LocalDateTime) {

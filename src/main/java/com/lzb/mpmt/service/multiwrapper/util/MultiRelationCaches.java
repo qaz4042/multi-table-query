@@ -60,7 +60,7 @@ public class MultiRelationCaches {
             MultiUtil.getAllMethods(tableClass).stream()
                     .filter(field -> unStaticUnFinal(field.getModifiers()))
                     .filter(m -> m.getName().startsWith("set"))
-                    .filter(m -> m.getParameterTypes().length == 1 && MultiUtil.isBasicType(m.getParameterTypes()[0]))
+                    .filter(m -> m.getParameterTypes().length == 1 && MultiUtil.isBasicDataType(m.getParameterTypes()[0]))
                     .forEach(m -> {
                         RELATION_SET_METHOD_MAP.put(relationCode + "." + MultiUtil.methodNameToFieldName(m.getName()), m);
                     });
@@ -79,7 +79,7 @@ public class MultiRelationCaches {
             //初始化map
             TABLE_CLASS_FIELD_NAMES_MAP.put(tableClass, MultiUtil.getAllFields(tableClass).stream()
                     .filter(field -> unStaticUnFinal(field.getModifiers()))
-                    .filter(field -> MultiUtil.isBasicType(field.getType()))
+                    .filter(field -> MultiUtil.isBasicDataType(field.getType()))
                     .filter(field -> {
                         MultiTableField anno = field.getAnnotation(MultiTableField.class);
                         return null == anno || anno.exist();
@@ -101,7 +101,7 @@ public class MultiRelationCaches {
             //初始化map
             TABLE_CLASS_FIELD_NAMES_MAP.put(tableClass, MultiUtil.getAllFields(tableClass).stream()
                     .filter(field -> unStaticUnFinal(field.getModifiers()))
-                    .filter(field -> MultiUtil.isBasicType(field.getType()))
+                    .filter(field -> MultiUtil.isBasicDataType(field.getType()))
                     .filter(field -> {
                         MultiTableField anno = field.getAnnotation(MultiTableField.class);
                         return null == anno || anno.exist();
@@ -120,13 +120,13 @@ public class MultiRelationCaches {
             Method setMethod = MultiUtil.getAllMethods(tableClass).stream()
                     .filter(m -> unStaticUnFinal(m.getModifiers()))
                     .filter(m -> m.getName().equals("set" + fieldNameUpperFirst))
-                    .filter(m -> m.getParameterTypes().length == 1 && !MultiUtil.isBasicType(m.getParameterTypes()[0]))
+                    .filter(m -> m.getParameterTypes().length == 1 && !MultiUtil.isBasicDataType(m.getParameterTypes()[0]))
                     .findAny().orElse(null);
 
             Method getMethod = MultiUtil.getAllMethods(tableClass).stream()
                     .filter(m -> unStaticUnFinal(m.getModifiers()))
                     .filter(m -> m.getName().equals("get" + fieldNameUpperFirst))
-                    .filter(m -> !MultiUtil.isBasicType(m.getReturnType()))
+                    .filter(m -> !MultiUtil.isBasicDataType(m.getReturnType()))
                     .findAny().orElse(null);
             if (setMethod == null) {
                 throw new MultiException("找不到" + tableClass + "对应的set" + fieldNameUpperFirst);
@@ -148,7 +148,7 @@ public class MultiRelationCaches {
             MultiUtil.getAllFields(tableClass).stream()
                     .filter(field -> unStaticUnFinal(field.getModifiers()))
                     .filter(field -> field.getName().equals(relationCode))
-                    .filter(field -> !MultiUtil.isBasicType(field.getType()))
+                    .filter(field -> !MultiUtil.isBasicDataType(field.getType()))
                     .forEach(field -> RELATION_TABLE_WITH_TABLE_FIELD_TYPE_MAP.put(relationCode + "." + MultiUtil.camelToUnderline(field.getName()), field.getType()));
         }
         type = RELATION_TABLE_WITH_TABLE_FIELD_TYPE_MAP.get(relationCode);

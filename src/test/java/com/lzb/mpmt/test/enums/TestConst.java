@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.Test;
 
-public class DemoConst {
+public class TestConst {
 
     @Getter
     @AllArgsConstructor

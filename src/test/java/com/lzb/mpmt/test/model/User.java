@@ -1,8 +1,8 @@
-package com.lzb.mpmt.demo.model;
+package com.lzb.mpmt.test.model;
 
 
 import com.lzb.mpmt.service.multiwrapper.annotations.MultiTableField;
-import com.lzb.mpmt.test.enums.DemoConst;
+import com.lzb.mpmt.test.enums.TestConst;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 public class User extends BaseModel {
     private String username;
-    private DemoConst.SexEnum sex;
+    private TestConst.SexEnum sex;
     @MultiTableField(exist = false)
     private Long parentId;
 
