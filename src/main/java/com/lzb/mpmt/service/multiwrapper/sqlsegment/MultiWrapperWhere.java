@@ -32,6 +32,9 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         return (Wrapper) this;
     }
 
+    /***
+     * 一个层级上只要有一个or条件,认定本层所有条件都是or关系
+     */
     default <VAL> Wrapper or() {
         getWhereTree().setAndOr(WhereAndOrEnum.or);
         return (Wrapper) this;
