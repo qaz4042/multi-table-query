@@ -1,6 +1,5 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
-import cn.hutool.core.convert.BasicType;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 import lombok.SneakyThrows;
@@ -275,7 +274,7 @@ public class MultiUtil {
     }
 
     private static boolean isPrimitiveWrapper(Class<?> clazz) {
-        return null != clazz && BasicType.WRAPPER_PRIMITIVE_MAP.containsKey(clazz);
+        return null != clazz && WRAPPER_PRIMITIVE_MAP.containsKey(clazz);
     }
 
     public static final Map<Class<?>, Class<?>> WRAPPER_PRIMITIVE_MAP = new ConcurrentHashMap<>(8);
@@ -315,7 +314,6 @@ public class MultiUtil {
     }
 
 
-    //todo 扩展实现 sum 功能
     //统一json序列化
     @SneakyThrows
     public static <T extends Enum<T>> T getEnumByName(Class<T> type, String name) {

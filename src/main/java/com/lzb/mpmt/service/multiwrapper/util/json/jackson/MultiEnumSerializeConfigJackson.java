@@ -15,6 +15,7 @@ import java.io.Serializable;
 
 /**
  * 实体类，可以直接放枚举，枚举解析器
+ *
  * @author Administrator
  */
 @SuppressWarnings("ALL")

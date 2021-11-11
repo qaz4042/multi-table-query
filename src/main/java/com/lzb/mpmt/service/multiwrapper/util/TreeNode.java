@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
-import cn.hutool.json.JSONUtil;
+import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -79,7 +79,7 @@ public class TreeNode<T> {
 
     public void consumerTopToBottom(Consumer<T> consumer) {
         if (parent != null) {
-            log.warn("不是从树根节点开始执行topToBottom的:" + JSONUtil.toJsonStr(parent));
+            log.warn("不是从树根节点开始执行topToBottom的:" + JSONUtil.toString(parent));
         }
         this.consumerTopToBottomRecursion(consumer);
     }

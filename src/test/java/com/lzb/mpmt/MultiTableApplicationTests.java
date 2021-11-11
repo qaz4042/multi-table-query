@@ -1,9 +1,6 @@
 package com.lzb.mpmt;
 
-import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lzb.mpmt.service.multiwrapper.util.json.fastjson.config.MultiEnumSerializeConfigFastJsonFail;
-import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
+import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.test.model.BaseModel;
 import com.lzb.mpmt.test.model.User;
 import com.lzb.mpmt.test.model.UserAddress;
@@ -36,29 +33,24 @@ class MultiTableApplicationTests {
         MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY = new MultiTableRelationFactory(new MultiTableRelationServiceImpl());
     }
 
-    ObjectMapper objectMapper = new ObjectMapper();
     @Test
     @SneakyThrows
     void testQuerySimple() {
         System.out.println("testSimple");
 
         //2.简单查询
-        List<UserStaff> userStaffsSimple = MultiJdbcExecutor.query(
+        List<UserStaff> userStaffsSimple = MultiJdbcExecutor.list(
                 new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
         );
 
-
-//        //jackson序列化OK
-//        MultiEnumSerializeConfigJackson.addConfigs(objectMapper);
-//        System.out.println("" + objectMapper.writeValueAsString(userStaffsSimple));
-//        System.out.println(JSONUtil.toJsonStr(userStaffsSimple));
+        System.out.println(JSONUtil.toString(userStaffsSimple));
     }
 
     @Test
     void testQueryComplex() {
 
         //3.复杂查询
-        List<UserStaff> userStaffsComplex = MultiJdbcExecutor.query(MultiWrapper
+        List<UserStaff> userStaffsComplex = MultiJdbcExecutor.list(MultiWrapper
                 .main(
                         MultiWrapperMain.lambda(UserStaff.class)
                                 .select(UserStaff::getSex, UserStaff::getStaffName)
@@ -94,7 +86,9 @@ class MultiTableApplicationTests {
                         .select(UserAddress::getProvince)
                         .gt(UserAddress::getId, "1")
                 ));
-        System.out.println(JSONUtil.toJsonStr(userStaffsComplex));
+        System.out.println(JSONUtil.toString(userStaffsComplex));
     }
 
+    //1. 编写通用 sum功能  page功能  前端自定义参数功能
+    //2. 抽出jdbc层,可以自定义实现
 }

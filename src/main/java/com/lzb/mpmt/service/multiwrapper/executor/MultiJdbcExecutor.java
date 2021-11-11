@@ -2,6 +2,7 @@ package com.lzb.mpmt.service.multiwrapper.executor;
 
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.enums.MultiPageOrder;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
@@ -23,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +43,18 @@ public class MultiJdbcExecutor {
     }
 
     @SneakyThrows
-    public static <MAIN> List<MAIN> query(MultiWrapper<MAIN> wrapper) {
+    public static <MAIN> List<MAIN> list(MultiWrapper<MAIN> wrapper) {
+        String sql = wrapper.computeSql();
+        Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
+        List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
+                .stream().filter(Objects::nonNull).collect(Collectors.toList());
+
+        log.info("Multi 查询结果{}条, sql:{}", list.size(), sql);
+        return list;
+    }
+
+    @SneakyThrows
+    public static <MAIN> List<MAIN> page(MultiPageOrder page, MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
         List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
@@ -67,7 +81,7 @@ public class MultiJdbcExecutor {
         String currRelationCode = currNode.getRelationCode();
         Field currTableIdField = MultiRelationCaches.getTableIdField(currTableClass);
         String idFieldName = currRelationCode + "." + MultiUtil.camelToUnderline(currTableIdField.getName());
-        Object id = getValue(idFieldName, currTableIdField, resultSet);
+        Object id = getValue(idFieldName, currTableIdField.getType(), resultSet);
         MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(idFieldName + "_" + id);
         //要新增元素
         boolean noExist = currEntity == null;
@@ -126,54 +140,28 @@ public class MultiJdbcExecutor {
         return noExist ? currEntity : null;
     }
 
-    // todo 抽出sql查询方法提供定制
-
     @SneakyThrows
-    private static Object getValue(String fieldName, Field field, ResultSet resultSet) {
-        Class<?> type = field.getType();
-        return getValue(fieldName, type, resultSet);
-    }
-
-
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) throws SQLException {
-        if (Long.class.isAssignableFrom(type)) {
+    private static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) {
+        if (Long.class.equals(type)) {
             return resultSet.getLong(fieldName);
-        }
-        if (Integer.class.isAssignableFrom(type)) {
-            return resultSet.getInt(fieldName);
-        }
-        if (Float.class.isAssignableFrom(type)) {
-            return resultSet.getFloat(fieldName);
-        }
-        if (Double.class.isAssignableFrom(type)) {
-            return resultSet.getDouble(fieldName);
-        }
-        if (String.class.isAssignableFrom(type)) {
+        } else if (String.class.equals(type)) {
             return resultSet.getString(fieldName);
-        }
-        if (BigDecimal.class.isAssignableFrom(type)) {
+        } else if (Integer.class.equals(type)) {
+            return resultSet.getInt(fieldName);
+        } else if (BigDecimal.class.equals(type)) {
             return resultSet.getBigDecimal(fieldName);
-        }
-        if (Blob.class.isAssignableFrom(type)) {
-            return resultSet.getBlob(fieldName);
-        }
-        if (Boolean.class.isAssignableFrom(type)) {
-            return resultSet.getBoolean(fieldName);
-        }
-        if (Date.class.isAssignableFrom(type)) {
+        } else if (Date.class.equals(type)) {
             return resultSet.getDate(fieldName);
-        }
-        if (LocalDateTime.class.isAssignableFrom(type)) {
+        } else if (Boolean.class.equals(type)) {
+            return resultSet.getBoolean(fieldName);
+        } else if (LocalDateTime.class.equals(type)) {
             return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName));
-        }
-        if (LocalDate.class.isAssignableFrom(type)) {
+        } else if (LocalDate.class.equals(type)) {
             return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName)).toLocalDate();
-        }
-        if (LocalTime.class.isAssignableFrom(type)) {
+        } else if (LocalTime.class.equals(type)) {
             return MultiUtil.date2LocalDateTime(resultSet.getDate(fieldName)).toLocalTime();
-        }
-        if (Enum.class.isAssignableFrom(type)) {
+        } else if (Enum.class.isAssignableFrom(type)) {
             if (IMultiEnum.class.isAssignableFrom(type)) {
                 Integer value = resultSet.getInt(fieldName);
                 return MultiUtil.getEnumByValue((Class<IMultiEnum>) type, value);
@@ -183,6 +171,12 @@ public class MultiJdbcExecutor {
                 //noinspection unchecked
                 return MultiUtil.getEnumByName((Class<Enum>) type, value);
             }
+        } else if (Float.class.equals(type)) {
+            return resultSet.getFloat(fieldName);
+        } else if (Double.class.equals(type)) {
+            return resultSet.getDouble(fieldName);
+        } else if (Blob.class.equals(type)) {
+            return resultSet.getBlob(fieldName);
         }
         throw new MultiException("未知的数据类型|" + fieldName + "|" + type);
     }
