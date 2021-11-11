@@ -3,18 +3,16 @@ package com.lzb.mpmt.service.multiwrapper.util.json.fastjson.config;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
-import org.springframework.context.annotation.Bean;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
 
 /**
  * @author Administrator
+ * @deprecated 枚举泛型处理,定制失败 无效定制
  */
-public class MultiEnumSerializeConfigFastJson {
+public class MultiEnumSerializeConfigFastJsonFail {
 
     public static void addConfigs() {
         SerializeConfig globalInstance = SerializeConfig.getGlobalInstance();

@@ -7,10 +7,10 @@ import lombok.Getter;
 import org.junit.Test;
 
 public class TestConst {
-
+//implements IMultiEnum<Integer>
     @Getter
     @AllArgsConstructor
-    public enum SexEnum implements IMultiEnum<Integer> {
+    public enum SexEnum  {
         man(0, "男"),
         woman(1, "女"),
         ;

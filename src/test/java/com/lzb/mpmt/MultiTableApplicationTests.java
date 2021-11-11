@@ -1,8 +1,9 @@
 package com.lzb.mpmt;
 
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSON;
-import com.lzb.mpmt.service.multiwrapper.util.json.fastjson.config.MultiEnumSerializeConfigFastJson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lzb.mpmt.service.multiwrapper.util.json.fastjson.config.MultiEnumSerializeConfigFastJsonFail;
+import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
 import com.lzb.mpmt.test.model.BaseModel;
 import com.lzb.mpmt.test.model.User;
 import com.lzb.mpmt.test.model.UserAddress;
@@ -15,6 +16,7 @@ import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubA
 import com.lzb.mpmt.service.multiwrapper.executor.MultiJdbcExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import com.lzb.mpmt.test.service.MultiTableRelationServiceImpl;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +36,9 @@ class MultiTableApplicationTests {
         MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY = new MultiTableRelationFactory(new MultiTableRelationServiceImpl());
     }
 
+    ObjectMapper objectMapper = new ObjectMapper();
     @Test
+    @SneakyThrows
     void testQuerySimple() {
         System.out.println("testSimple");
 
@@ -43,8 +47,12 @@ class MultiTableApplicationTests {
                 new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
         );
 
-        MultiEnumSerializeConfigFastJson.addConfigs();
-        System.out.println("" + JSON.toJSONString(userStaffsSimple));
+
+        JSONUtil.toJsonStr(userStaffsSimple);
+
+//        //jackson序列化OK
+//        MultiEnumSerializeConfigJackson.addConfigs(objectMapper);
+//        System.out.println("" + objectMapper.writeValueAsString(userStaffsSimple));
 //        System.out.println(JSONUtil.toJsonStr(userStaffsSimple));
     }
 

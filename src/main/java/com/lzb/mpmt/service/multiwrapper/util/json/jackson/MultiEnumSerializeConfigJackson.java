@@ -21,12 +21,14 @@ public class MultiEnumSerializeConfigJackson {
 
     public static void addConfigs(ObjectMapper objectMapper) {
         SimpleModule simpleModule = new SimpleModule();
+        //todo 待测试
+//        simpleModule.addSerializer(Enum.class, EnumSerializer.INSTANCE);
+//        simpleModule.addDeserializer(Enum.class, EnumDeserializer.INSTANCE);
+
         //json值序列化
         simpleModule.addSerializer(IMultiEnum.class, MultiEnumSerializer.INSTANCE);
         simpleModule.addDeserializer(IMultiEnum.class, MultiEnumDeserializer.INSTANCE);
-        //todo 待测试
-        simpleModule.addSerializer(Enum.class, EnumSerializer.INSTANCE);
-        simpleModule.addDeserializer(Enum.class, EnumDeserializer.INSTANCE);
+
 
         objectMapper.registerModule(simpleModule);
     }
