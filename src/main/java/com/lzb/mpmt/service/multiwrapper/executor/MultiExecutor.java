@@ -57,7 +57,7 @@ public class MultiExecutor {
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
 
         if (multiProperties.getCheckRelationRequire()) {
-            //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启) MultiTableRelation relation = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(currNode.getRelationCode());
+            //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启) MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(currNode.getRelationCode());
             checkRequire(mains, wrapper);
         }
 
@@ -154,7 +154,7 @@ public class MultiExecutor {
 
     @SneakyThrows
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) {
+    public static Object getValue(String fieldName, Class<?> type, ResultSet resultSet) {
         if (Long.class.equals(type)) {
             return resultSet.getLong(fieldName);
         } else if (String.class.equals(type)) {

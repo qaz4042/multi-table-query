@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("unused")
 public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelationTreeNode {
 
-    public static MultiTableRelationFactory MULTI_TABLE_RELATION_FACTORY;
+//    public static MultiTableRelationFactory MULTI_TABLE_RELATION_FACTORY;
 
     /**
      * wrapperSub 为空表示主表临时对象
@@ -64,10 +64,10 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     private ClassRelationOneOrManyEnum subTableOneOrMany;
 
     public String getSqlJoin(String mainTableName) {
-        if (MULTI_TABLE_RELATION_FACTORY == null) {
+        if (MultiTableRelationFactory.INSTANCE == null) {
             throw new MultiException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");
         }
-        MultiTableRelation relation = MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
+        MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
         String subTableName = wrapperSub.getTableName();
 
         String sqlWhereProps = getWrapperSub().getSqlWhereProps();

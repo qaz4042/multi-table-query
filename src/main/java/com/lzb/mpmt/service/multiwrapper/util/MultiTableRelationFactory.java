@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 public class MultiTableRelationFactory {
-
+    public static MultiTableRelationFactory INSTANCE;
     private List<MultiTableRelation> relations;
     private Map<String, MultiTableRelation> relationCodeMap;
     private Map<String, Map<String, List<MultiTableRelation>>> relation2TableNameMap = new HashMap<>(256);
@@ -34,5 +34,7 @@ public class MultiTableRelationFactory {
         this.relation2TableNameMap.putAll(map1);
         this.relation2TableNameMap.putAll(map2);
         this.relation2TableNameMap = Collections.unmodifiableMap(relation2TableNameMap);
+
+        INSTANCE = this;
     }
 }

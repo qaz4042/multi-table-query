@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
+import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
@@ -8,10 +9,6 @@ import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubA
 import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
-import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
-import com.lzb.mpmt.service.multiwrapper.util.MultiException;
-import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
-import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -195,7 +192,7 @@ public class MultiWrapper<MAIN> {
         hasCodeRelations.forEach(relationHasCode -> {
             String subTableName = relationHasCode.getWrapperSub().getTableName();
             relationTableNames.add(relationHasCode.getWrapperSub().getTableName());
-            MultiTableRelation relation = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationHasCode.getRelationCode());
+            MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationHasCode.getRelationCode());
             this.fillTableThisAndOther(relationHasCode, subTableName, relation);
         });
 
@@ -204,7 +201,7 @@ public class MultiWrapper<MAIN> {
                     String subTableName = noCodeRelation.getWrapperSub().getTableName();
                     boolean hasRelation = false;
                     for (String relationTableName : relationTableNames) {
-                        List<MultiTableRelation> relations = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelation2TableNameMap()
+                        List<MultiTableRelation> relations = MultiTableRelationFactory.INSTANCE.getRelation2TableNameMap()
                                 .getOrDefault(subTableName, Collections.emptyMap())
                                 .getOrDefault(relationTableName, Collections.emptyList());
                         if (relations.size() > 1) {
@@ -274,7 +271,7 @@ public class MultiWrapper<MAIN> {
     }
 
     private MultiTableRelation getRelationByCode(String relationCode) {
-        return MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(relationCode);
+        return MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
     }
 
     public List<MAIN> list() {

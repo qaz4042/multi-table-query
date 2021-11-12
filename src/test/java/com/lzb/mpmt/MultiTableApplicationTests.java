@@ -1,20 +1,16 @@
 package com.lzb.mpmt;
 
+import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
-import com.lzb.mpmt.test.model.BaseModel;
-import com.lzb.mpmt.test.model.User;
-import com.lzb.mpmt.test.model.UserAddress;
-import com.lzb.mpmt.test.model.UserStaff;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
-import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
-import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
-import com.lzb.mpmt.test.service.MultiTableRelationServiceImpl;
+import com.lzb.mpmt.test.model.BaseModel;
+import com.lzb.mpmt.test.model.User;
+import com.lzb.mpmt.test.model.UserAddress;
+import com.lzb.mpmt.test.model.UserStaff;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -24,14 +20,6 @@ import java.util.List;
 
 @SpringBootTest(classes = MultiTableApplication.class)
 class MultiTableApplicationTests {
-
-    @BeforeEach
-    public void doBefore() {
-        System.out.println("BeforeEach");
-
-        // 1.实现 MultiTableRelationServiceImpl.loadRelation()
-        MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY = new MultiTableRelationFactory(new MultiTableRelationServiceImpl());
-    }
 
     @Test
     @SneakyThrows
