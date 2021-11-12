@@ -1,10 +1,8 @@
 package com.lzb.mpmt.test.enums;
 
 import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
-import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.junit.Test;
 
 public class TestConst {
     @Getter
