@@ -72,3 +72,5 @@
     数据库中,可以储存是枚举的name(),也可以储存IMultiEnum.getValue()(Integer)
 ####
     "sex": 0,
+
+### 3.demo-详见本项目的 test方法 (附sql脚本)

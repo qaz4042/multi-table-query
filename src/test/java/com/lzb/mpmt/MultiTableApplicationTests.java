@@ -21,63 +21,28 @@ import java.util.List;
 @SpringBootTest(classes = MultiTableApplication.class)
 class MultiTableApplicationTests {
 
+    /**
+     * 简单查询test
+     */
     @Test
     @SneakyThrows
     void testQuerySimple() {
-        System.out.println("testSimple");
 
-//        Thread.currentThread().
-//        long time1 = new Date().getTime();
-//        for (int i = 0; i < 200; i++) {
-//
-//        }
-//        long time2 = new Date().getTime();
-
-//        System.out.println("耗时:" + (time2 - time1));
-
-
-        for (int i = 0; i < 3; i++) {
-            // 在线程中重开一个线程执行其他操作
-            C c = new C();
-            Thread t = new Thread(c);
-            t.start();
-        }
-        Thread.sleep(4000);
+        List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        System.out.println("testQuerySimple=" + JSONUtil.toString(userStaffsSimple));
     }
 
-    //定义一个类C 实现java.lang.Runnable 接口 C类不是线程类
-    class C implements Runnable {
-        //C类 覆盖Runnable接口中的 run方法
-        @Override
-        public void run() {
-            //在run方法填写要执行的操作
-            for (int j = 0; j < 5; j++) {
-                System.out.println("111111"+j);
-                //2.简单查询
-                MultiWrapper<UserStaff> wrapper = new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class);
-                List<UserStaff> userStaffsSimple = MultiExecutor.list(
-                        wrapper
-                );
-                System.out.println("3333"+j);
-
-            }
-        }
-    }
-
-
+    /**
+     * 复杂查询test
+     */
     @Test
     void testQueryComplex() {
 
-        //3.复杂查询
+        //1.复杂查询
         List<UserStaff> userStaffsComplex = MultiExecutor.list(MultiWrapper
                 .main(
                         MultiWrapperMain.lambda(UserStaff.class)
                                 .select(UserStaff::getSex, UserStaff::getStaffName)
-                                .and(w ->
-                                        w.eq(true, UserStaff::getStaffName, "StaffName1")
-                                                .eq(true, UserStaff::getStaffName, "StaffName2")
-
-                                )
                                 .and(w ->
                                         w.eq(true, UserStaff::getStaffName, "StaffName3")
                                                 .or()
@@ -97,7 +62,6 @@ class MultiTableApplicationTests {
                         .select(User::getUsername)
                         .gt(BaseModel::getCreateTime, new Date())
                         .gt(BaseModel::getUpdateTime, LocalDateTime.now())
-                        .gt(BaseModel::getId, "1")
                         .in(BaseModel::getId, "1", "1", "3")
                         .likeDefault(User::getUsername, "1")
                 )
@@ -105,9 +69,8 @@ class MultiTableApplicationTests {
                         .select(UserAddress::getProvince)
                         .gt(UserAddress::getId, "1")
                 ));
-        System.out.println(JSONUtil.toString(userStaffsComplex));
+        System.out.println("testQueryComplex=" + JSONUtil.toString(userStaffsComplex));
     }
 
-    //1. 编写通用 sum功能  page功能  前端自定义参数功能
-    //2. 抽出jdbc层,可以自定义实现
+    //1. todo 编写通用 sum功能  page功能 .paramMap(paramMap) 前端自定义参数功能
 }
