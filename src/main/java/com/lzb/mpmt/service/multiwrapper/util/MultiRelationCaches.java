@@ -117,17 +117,18 @@ public class MultiRelationCaches {
         String fieldNameUpperFirst = MultiUtil.firstToUpperCase(MultiUtil.underlineToCamel(relationCode));
         if (methods == null) {
             //初始化map
+            Method getMethod = MultiUtil.getAllMethods(tableClass).stream()
+                    .filter(m -> unStaticUnFinal(m.getModifiers()))
+                    .filter(m -> m.getName().equals("get" + fieldNameUpperFirst))
+                    .filter(m -> !MultiUtil.isBasicDataType(m.getReturnType()))
+                    .findAny().orElse(null);
+
             Method setMethod = MultiUtil.getAllMethods(tableClass).stream()
                     .filter(m -> unStaticUnFinal(m.getModifiers()))
                     .filter(m -> m.getName().equals("set" + fieldNameUpperFirst))
                     .filter(m -> m.getParameterTypes().length == 1 && !MultiUtil.isBasicDataType(m.getParameterTypes()[0]))
                     .findAny().orElse(null);
 
-            Method getMethod = MultiUtil.getAllMethods(tableClass).stream()
-                    .filter(m -> unStaticUnFinal(m.getModifiers()))
-                    .filter(m -> m.getName().equals("get" + fieldNameUpperFirst))
-                    .filter(m -> !MultiUtil.isBasicDataType(m.getReturnType()))
-                    .findAny().orElse(null);
             if (setMethod == null) {
                 throw new MultiException("找不到" + tableClass + "对应的set" + fieldNameUpperFirst);
             }

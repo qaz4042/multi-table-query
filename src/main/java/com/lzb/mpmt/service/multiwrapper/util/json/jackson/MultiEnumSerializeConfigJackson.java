@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.util.json.jackson;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
@@ -21,7 +22,7 @@ import java.io.Serializable;
 @SuppressWarnings("ALL")
 public class MultiEnumSerializeConfigJackson {
 
-    public static void addEnumConfigs(ObjectMapper objectMapper) {
+    public static void addEnumAndNotNullConfigs(ObjectMapper objectMapper) {
         SimpleModule simpleModule = new SimpleModule();
 
         //Enum已经默认去name()了
@@ -33,6 +34,9 @@ public class MultiEnumSerializeConfigJackson {
         simpleModule.addDeserializer(IMultiEnum.class, MultiEnumDeserializer.INSTANCE);
 
         objectMapper.registerModule(simpleModule);
+
+        //null不序列化
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     public static class MultiEnumSerializer<T extends IMultiEnum> extends JsonSerializer<T> {

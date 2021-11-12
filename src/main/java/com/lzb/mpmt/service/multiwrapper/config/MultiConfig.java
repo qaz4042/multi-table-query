@@ -50,7 +50,7 @@ public class MultiConfig {
     @ConditionalOnBean(ObjectMapper.class)
     public ObjectMapper objectMapperAddConfigs(ObjectMapper objectMapper) {
         //实体类可以直接放置 实现了IMultiEnum的枚举
-        MultiEnumSerializeConfigJackson.addEnumConfigs(objectMapper);
+        MultiEnumSerializeConfigJackson.addEnumAndNotNullConfigs(objectMapper);
         return objectMapper;
     }
 }

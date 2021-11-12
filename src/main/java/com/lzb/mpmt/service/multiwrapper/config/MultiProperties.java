@@ -13,5 +13,5 @@ public class MultiProperties {
     /**
      * 是否检查关系里的一对多(多对多),一对一关系,并显式地抛异常
      */
-    Boolean checkRelationOneOrMany = true;
+    Boolean checkRelationOneOrMany = false;
 }

@@ -200,17 +200,17 @@ public class MultiWrapper<MAIN> {
                 {
                     String subTableName = noCodeRelation.getWrapperSub().getTableName();
                     boolean hasRelation = false;
-                    for (String relationTableName : relationTableNames) {
+                    for (String relationTableName1 : relationTableNames) {
                         List<MultiTableRelation> relations = MultiTableRelationFactory.INSTANCE.getRelation2TableNameMap()
                                 .getOrDefault(subTableName, Collections.emptyMap())
-                                .getOrDefault(relationTableName, Collections.emptyList());
+                                .getOrDefault(relationTableName1, Collections.emptyList());
                         if (relations.size() > 1) {
                             //有多种关系,需要重新确定
-                            throw new MultiException(relationTableName + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
+                            throw new MultiException(relationTableName1 + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
                         }
                         if (relations.size() < 1) {
                             //有多种关系,需要重新确定
-                            throw new MultiException(relationTableName + "和" + subTableName + "没有存在表关系,无法关联");
+                            throw new MultiException(relationTableName1 + "和" + subTableName + "没有存在表关系,无法关联");
                         }
                         MultiTableRelation relation = relations.get(0);
 
@@ -234,13 +234,14 @@ public class MultiWrapper<MAIN> {
         String tableName2 = multiTableRelation.getTableName2();
         if (tableName1.equals(subTableName)) {
             noCodeRelation.setTableNameThis(tableName1);
+            noCodeRelation.setTableNameThisOneOrMany(multiTableRelation.getClass1OneOrMany());
+            noCodeRelation.setTableNameOtherRequire(multiTableRelation.getClass1Require());
             noCodeRelation.setTableNameOther(tableName2);
-            noCodeRelation.setSubTableOneOrMany(multiTableRelation.getClass2OneOrMany());
         } else if (tableName2.equals(subTableName)) {
             noCodeRelation.setTableNameThis(tableName2);
+            noCodeRelation.setTableNameThisOneOrMany(multiTableRelation.getClass2OneOrMany());
+            noCodeRelation.setTableNameOtherRequire(multiTableRelation.getClass2Require());
             noCodeRelation.setTableNameOther(tableName1);
-            noCodeRelation.setTableNameOther(tableName1);
-            noCodeRelation.setSubTableOneOrMany(multiTableRelation.getClass1OneOrMany());
         } else {
             throw new MultiException("表关系" + multiTableRelation.getCode() + "(" + tableName1 + "," + tableName2 + ")其中之一必须和当前查询的表" + subTableName);
         }

@@ -80,8 +80,13 @@ public class MultiWrapperMain<MAIN> implements
     }
 
     @Override
-    public ClassRelationOneOrManyEnum getSubTableOneOrMany() {
+    public ClassRelationOneOrManyEnum getTableNameThisOneOrMany() {
         return null;
+    }
+
+    @Override
+    public Boolean getTableNameOtherRequire() {
+        return false;
     }
 
     @Override

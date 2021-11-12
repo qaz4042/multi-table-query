@@ -25,6 +25,18 @@ public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey
      */
     String getTableNameOther();
 
+    /**
+     * 父子节点存在父子关系的判断
+     *
+     * @param   child 子节点
+     * @return  当前节点(作为父节点)与子节点,是否存在父子关系
+     */
+    @Override
+    default boolean parentKeyEqualsChildKey(IMultiWrapperSubAndRelationTreeNode child) {
+        String tableNameOtherParent = getTableNameThis();
+        return tableNameOtherParent.equals(child.getTableNameOther());
+    }
+
 
     // ----  以下是与树节点无关的额外信息 ----- start
     /**
@@ -32,7 +44,13 @@ public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey
      *
      * @return This -> Other 的关系是one还是many
      */
-    ClassRelationOneOrManyEnum getSubTableOneOrMany() ;
+    ClassRelationOneOrManyEnum getTableNameThisOneOrMany() ;
+    /**
+     * 关系中 是否是否,表1一定该有数据/表2一定该有数据
+     *
+     * @return 关系中 是否是否,表1一定该有数据/表2一定该有数据
+     */
+    Boolean getTableNameOtherRequire() ;
 
     /**
      * 当前副表(或主表)对应类
@@ -56,16 +74,4 @@ public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey
     MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo();
 
     // ----  以下是与树节点无关的额外信息 ----- end
-
-    /**
-     * 父子节点存在父子关系的判断
-     *
-     * @param   child 子节点
-     * @return  当前节点(作为父节点)与子节点,是否存在父子关系
-     */
-    @Override
-    default boolean parentKeyEqualsChildKey(IMultiWrapperSubAndRelationTreeNode child) {
-        String tableNameOtherParent = getTableNameThis();
-        return tableNameOtherParent.equals(child.getTableNameOther());
-    }
 }

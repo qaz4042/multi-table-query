@@ -61,7 +61,11 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     /**
      * This -> Other 的关系是one还是many
      */
-    private ClassRelationOneOrManyEnum subTableOneOrMany;
+    private ClassRelationOneOrManyEnum tableNameThisOneOrMany;
+    /**
+     * 关系中 是否是否,表1一定该有数据/表2一定该有数据
+     */
+    private Boolean tableNameOtherRequire;
 
     public String getSqlJoin(String mainTableName) {
         if (MultiTableRelationFactory.INSTANCE == null) {

@@ -17,7 +17,7 @@ public class JSONUtil {
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
-        MultiEnumSerializeConfigJackson.addEnumConfigs(objectMapper);
+        MultiEnumSerializeConfigJackson.addEnumAndNotNullConfigs(objectMapper);
         JSONUtil.objectMapper = objectMapper;
     }
 
