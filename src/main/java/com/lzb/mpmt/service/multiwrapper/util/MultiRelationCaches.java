@@ -86,6 +86,7 @@ public class MultiRelationCaches {
                     })
                     .peek(field -> RELATION_FIELD_TYPE_MAP.put(relationCode + "." + MultiUtil.camelToUnderline(field.getName()), field.getType()))
                     .map(Field::getName)
+                    .map(MultiUtil::camelToUnderline)
                     .collect(Collectors.toList()));
         }
         type = RELATION_FIELD_TYPE_MAP.get(relationCodeFieldName);

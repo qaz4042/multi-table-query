@@ -26,12 +26,16 @@ class MultiTableApplicationTests {
     void testQuerySimple() {
         System.out.println("testSimple");
 
-        //2.简单查询
-        List<UserStaff> userStaffsSimple = MultiExecutor.list(
-                new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
-        );
+        long time1 = new Date().getTime();
+        for (int i = 0; i < 200; i++) {
+            //2.简单查询
+            List<UserStaff> userStaffsSimple = MultiExecutor.list(
+                    new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
+            );
+        }
+        long time2 = new Date().getTime();
 
-        System.out.println(JSONUtil.toString(userStaffsSimple));
+        System.out.println("耗时:" + (time2 - time1));
     }
 
     @Test

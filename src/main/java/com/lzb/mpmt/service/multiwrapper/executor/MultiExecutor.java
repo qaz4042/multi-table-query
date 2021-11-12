@@ -52,7 +52,7 @@ public class MultiExecutor {
         //执行sql
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
         List<MAIN> mains = executor.executeSql(sql, (resultSet) -> {
-            Tuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion(null, "", null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
+            Tuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion("", null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
             MAIN main = mainAndIsNew.getT1();
             return mainAndIsNew.getT2() ? main : null;
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -122,23 +122,25 @@ public class MultiExecutor {
     /**
      * 递归构造子表对象
      *
-     * @param <MAIN_OR_SUB>          父表对象的泛型
-     * @param parentRelationTreeNode
-     * @param parentCodeAppendId
-     * @param parentEntity           父表对象
-     * @param relationTreeNode       父表和子表当前的关系(.chlidren()是子表和他的子表的关系)
-     * @param resultSet              sql执行后的每一行结果集
-     * @param relationIdObjectMap    已经构造好的对象,如果有id,需要按id合并子表信息到list中
-     * @param parentIsNew
+     * @param <MAIN_OR_SUB>       父表对象的泛型
+     * @param parentCodeAppendId  父实体的唯一code+ID(多层级)
+     * @param parentEntity        父表对象
+     * @param relationTreeNode    父表和子表当前的关系(.chlidren()是子表和他的子表的关系)
+     * @param resultSet           sql执行后的每一行结果集
+     * @param relationIdObjectMap 已经构造好的对象,如果有id,需要按id合并子表信息到list中
+     * @param parentIsNew         父节点是不是新增节点
      * @return 新的父表对象信息(旧的副表对象信息)
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> Tuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(IMultiWrapperSubAndRelationTreeNode parentRelationTreeNode,
-                                                                                   String parentCodeAppendId, MAIN_OR_SUB parentEntity,
-                                                                                   TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
-                                                                                   ResultSet resultSet,
-                                                                                   Map<String, Object> relationIdObjectMap, boolean parentIsNew) {
+    private static <MAIN_OR_SUB> Tuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(
+            String parentCodeAppendId,
+            MAIN_OR_SUB parentEntity,
+            TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
+            ResultSet resultSet,
+            Map<String, Object> relationIdObjectMap,
+            boolean parentIsNew
+    ) {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
@@ -170,7 +172,7 @@ public class MultiExecutor {
         relationIdObjectMap.put(relationIdObjectMapKey, currEntity);
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
-        relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(currNode, relationIdObjectMapKey, finalCurrEntity, subNode, resultSet, relationIdObjectMap, isNew));
+        relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(relationIdObjectMapKey, finalCurrEntity, subNode, resultSet, relationIdObjectMap, isNew));
         return new Tuple2<>(currEntity, isNew);
     }
 
