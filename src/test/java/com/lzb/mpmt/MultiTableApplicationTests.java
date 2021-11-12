@@ -26,17 +26,44 @@ class MultiTableApplicationTests {
     void testQuerySimple() {
         System.out.println("testSimple");
 
-        long time1 = new Date().getTime();
-        for (int i = 0; i < 200; i++) {
-            //2.简单查询
-            List<UserStaff> userStaffsSimple = MultiExecutor.list(
-                    new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
-            );
-        }
-        long time2 = new Date().getTime();
+//        Thread.currentThread().
+//        long time1 = new Date().getTime();
+//        for (int i = 0; i < 200; i++) {
+//
+//        }
+//        long time2 = new Date().getTime();
 
-        System.out.println("耗时:" + (time2 - time1));
+//        System.out.println("耗时:" + (time2 - time1));
+
+
+        for (int i = 0; i < 3; i++) {
+            // 在线程中重开一个线程执行其他操作
+            C c = new C();
+            Thread t = new Thread(c);
+            t.start();
+        }
+        Thread.sleep(4000);
     }
+
+    //定义一个类C 实现java.lang.Runnable 接口 C类不是线程类
+    class C implements Runnable {
+        //C类 覆盖Runnable接口中的 run方法
+        @Override
+        public void run() {
+            //在run方法填写要执行的操作
+            for (int j = 0; j < 5; j++) {
+                System.out.println("111111"+j);
+                //2.简单查询
+                MultiWrapper<UserStaff> wrapper = new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class);
+                List<UserStaff> userStaffsSimple = MultiExecutor.list(
+                        wrapper
+                );
+                System.out.println("3333"+j);
+
+            }
+        }
+    }
+
 
     @Test
     void testQueryComplex() {

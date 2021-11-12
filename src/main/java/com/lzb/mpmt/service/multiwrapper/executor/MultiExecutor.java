@@ -48,7 +48,6 @@ public class MultiExecutor {
     @SneakyThrows
     public static <MAIN> List<MAIN> list(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
-
         //执行sql
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
         List<MAIN> mains = executor.executeSql(sql, (resultSet) -> {
@@ -57,8 +56,7 @@ public class MultiExecutor {
             return mainAndIsNew.getT2() ? main : null;
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        //todo
-        System.out.println(JSONUtil.toString(mains));
+//        System.out.println(JSONUtil.toString(mains));
 
         log.info("Multi 查询结果{}条, sql:{}", mains.size(), sql);
 
