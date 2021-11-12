@@ -21,7 +21,7 @@ import java.io.Serializable;
 @SuppressWarnings("ALL")
 public class MultiEnumSerializeConfigJackson {
 
-    public static void addConfigs(ObjectMapper objectMapper) {
+    public static void addEnumConfigs(ObjectMapper objectMapper) {
         SimpleModule simpleModule = new SimpleModule();
 
         //Enum已经默认去name()了

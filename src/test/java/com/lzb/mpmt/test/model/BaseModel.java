@@ -12,7 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @SuperBuilder
 @Data
-public class BaseModel {
+public abstract class BaseModel {
     @MultiTableId
     private Long id;
     private Date createTime;

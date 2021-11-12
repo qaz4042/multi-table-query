@@ -5,11 +5,14 @@ import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.test.model.User;
 import com.lzb.mpmt.test.model.UserStaff;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Service
 public class MultiTableRelationServiceImpl implements IMultiTableRelationService {
+
     @Override
     public List<MultiTableRelation> loadRelation() {
         //可以查询数据库/枚举信息

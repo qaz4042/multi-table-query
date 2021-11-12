@@ -173,8 +173,8 @@ public class MultiWrapper<MAIN> {
     }
 
     private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
-        //relationCode可能缺省,默认去关系表中加载
-        this.setRelationCodeAndTableName12(wrapperMain.getTableName(), wrapperSubAndRelations);
+        //relationCode可能缺省,去关系表中加载
+        this.fillRelationCodeAndTableThisOther(wrapperMain.getTableName(), wrapperSubAndRelations);
 
         List<IMultiWrapperSubAndRelationTreeNode> relationsAndMain = new ArrayList<>(wrapperSubAndRelations);
         relationsAndMain.add(wrapperMain);
@@ -185,7 +185,7 @@ public class MultiWrapper<MAIN> {
         return TreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperMain);
     }
 
-    private void setRelationCodeAndTableName12(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+    private void fillRelationCodeAndTableThisOther(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
         List<MultiWrapperSubAndRelation<?>> hasCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null != relation.getRelationCode()).collect(Collectors.toList());
         List<MultiWrapperSubAndRelation<?>> noCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null == relation.getRelationCode()).collect(Collectors.toList());
 

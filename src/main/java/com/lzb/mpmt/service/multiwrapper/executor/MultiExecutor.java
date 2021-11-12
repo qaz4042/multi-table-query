@@ -1,17 +1,15 @@
 package com.lzb.mpmt.service.multiwrapper.executor;
 
-import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.config.MultiProperties;
 import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.service.multiwrapper.enums.MultiPageOrder;
+import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
+import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
-import com.lzb.mpmt.service.multiwrapper.util.*;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -19,13 +17,10 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,49 +28,67 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class MultiJdbcExecutor {
+public class MultiExecutor {
 
-    private static JdbcTemplate jdbcTemplate;
+    private static IMultiSqlExecutor executor;
+    private static MultiProperties multiProperties;
 
     @Autowired
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        MultiJdbcExecutor.jdbcTemplate = jdbcTemplate;
+    public void setExecutor(IMultiSqlExecutor executor) {
+        MultiExecutor.executor = executor;
     }
+
+    @Autowired
+    public void setMultiProperties(MultiProperties multiProperties) {
+        MultiExecutor.multiProperties = multiProperties;
+    }
+
 
     @SneakyThrows
     public static <MAIN> List<MAIN> list(MultiWrapper<MAIN> wrapper) {
         String sql = wrapper.computeSql();
+
+        //执行sql
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
-        List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
-                .stream().filter(Objects::nonNull).collect(Collectors.toList());
+        List<MAIN> mains = executor.executeSql(sql, (resultSet) -> {
+            Tuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion(null, wrapper.getRelationTree(), resultSet, relationIdObjectMap);
+            MAIN main = mainAndIsNew.getT1();
+            return mainAndIsNew.getT2() ? main : null;
+        }).stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-        log.info("Multi 查询结果{}条, sql:{}", list.size(), sql);
-        return list;
+        if (multiProperties.getCheckRelationRequire()) {
+            //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启) MultiTableRelation relation = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(currNode.getRelationCode());
+            checkRequire(mains, wrapper);
+        }
+
+        log.info("Multi 查询结果{}条, sql:{}", mains.size(), sql);
+        return mains;
     }
 
-    @SneakyThrows
-    public static <MAIN> List<MAIN> page(MultiPageOrder page, MultiWrapper<MAIN> wrapper) {
-        String sql = wrapper.computeSql();
-        Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
-        List<MAIN> list = jdbcTemplate.query(sql, (resultSet, i) -> buildReturn(wrapper, resultSet, relationIdObjectMap))
-                .stream().filter(Objects::nonNull).collect(Collectors.toList());
+    private static <MAIN> void checkRequire(List<MAIN> mains, MultiWrapper<MAIN> wrapper) {
 
-        log.info("Multi 查询结果{}条, sql:{}", list.size(), sql);
-        return list;
     }
 
-    @SneakyThrows
-    private static <MAIN> MAIN buildReturn(MultiWrapper<MAIN> wrapper, ResultSet resultSet, Map<String, Object> relationIdObjectMap) {
-        TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNodeTop = wrapper.getRelationTree();
-        return buildReturnRecursion(null, relationTreeNodeTop, resultSet, relationIdObjectMap);
-    }
+//    @SneakyThrows
+//    public static <MAIN> List<MAIN> page(MultiPageOrder page, MultiWrapper<MAIN> wrapper) {
+//    }
 
+    /**
+     * 递归构造子表对象
+     *
+     * @param parentEntity        父表对象
+     * @param relationTreeNode    父表和子表当前的关系(.chlidren()是子表和他的子表的关系)
+     * @param resultSet           sql执行后的每一行结果集
+     * @param relationIdObjectMap 已经构造好的对象,如果有id,需要按id合并子表信息到list中
+     * @param <MAIN_OR_SUB>       父表对象的泛型
+     * @return 新的父表对象信息(旧的副表对象信息)
+     */
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> MAIN_OR_SUB buildReturnRecursion(MAIN_OR_SUB parentEntity,
-                                                                  TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
-                                                                  ResultSet resultSet,
-                                                                  Map<String, Object> relationIdObjectMap) {
+    private static <MAIN_OR_SUB> Tuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(MAIN_OR_SUB parentEntity,
+                                                                                   TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
+                                                                                   ResultSet resultSet,
+                                                                                   Map<String, Object> relationIdObjectMap) {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
@@ -84,8 +97,8 @@ public class MultiJdbcExecutor {
         Object id = getValue(idFieldName, currTableIdField.getType(), resultSet);
         MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(idFieldName + "_" + id);
         //要新增元素
-        boolean noExist = currEntity == null;
-        if (noExist) {
+        boolean isNew = currEntity == null;
+        if (isNew) {
             //重复则不在生成
             //noinspection deprecation
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
@@ -103,7 +116,6 @@ public class MultiJdbcExecutor {
                 Method setMethod = getSetMethods.getT2();
                 Object subEntityExists = getMethod.invoke(parentEntity);
                 Class<?> returnType = getMethod.getReturnType();
-                MultiTableRelation relation = MultiWrapperSubAndRelation.MULTI_TABLE_RELATION_FACTORY.getRelationCodeMap().get(currNode.getRelationCode());
 
                 //列表
                 if (List.class.isAssignableFrom(returnType)) {
@@ -119,7 +131,7 @@ public class MultiJdbcExecutor {
                 } else if (returnType.isArray()) {
                     throw new MultiException("暂时不支持array类型参数:" + getMethod);
                 } else {
-                    if (!ClassRelationOneOrManyEnum.MANY.equals(currNode.getSubTableOneOrMany())) {
+                    if (multiProperties.getCheckRelationOneOrMany() && !ClassRelationOneOrManyEnum.MANY.equals(currNode.getSubTableOneOrMany())) {
                         throw new MultiException(currNode.getTableNameThis() + "与" + currNode.getTableNameOther() + "不是1对1(或者多对对)关系,但" + currTableClass + "中" + currRelationCode + "为对象,定义不一致");
                     }
                     //一对一元素
@@ -137,7 +149,7 @@ public class MultiJdbcExecutor {
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
         relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(finalCurrEntity, subNode, resultSet, relationIdObjectMap));
-        return noExist ? currEntity : null;
+        return new Tuple2<>(currEntity, isNew);
     }
 
     @SneakyThrows

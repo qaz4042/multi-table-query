@@ -10,7 +10,7 @@ import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
-import com.lzb.mpmt.service.multiwrapper.executor.MultiJdbcExecutor;
+import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import com.lzb.mpmt.test.service.MultiTableRelationServiceImpl;
 import lombok.SneakyThrows;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-@SpringBootTest
+@SpringBootTest(classes = MultiTableApplication.class)
 class MultiTableApplicationTests {
 
     @BeforeEach
@@ -39,7 +39,7 @@ class MultiTableApplicationTests {
         System.out.println("testSimple");
 
         //2.简单查询
-        List<UserStaff> userStaffsSimple = MultiJdbcExecutor.list(
+        List<UserStaff> userStaffsSimple = MultiExecutor.list(
                 new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
         );
 
@@ -50,7 +50,7 @@ class MultiTableApplicationTests {
     void testQueryComplex() {
 
         //3.复杂查询
-        List<UserStaff> userStaffsComplex = MultiJdbcExecutor.list(MultiWrapper
+        List<UserStaff> userStaffsComplex = MultiExecutor.list(MultiWrapper
                 .main(
                         MultiWrapperMain.lambda(UserStaff.class)
                                 .select(UserStaff::getSex, UserStaff::getStaffName)

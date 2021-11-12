@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Administrator
  */
 @SpringBootApplication
-public class MybatisPlusMultiTableApplication {
+public class MultiTableApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MybatisPlusMultiTableApplication.class, args);
+        SpringApplication.run(MultiTableApplication.class, args);
     }
 
 }

@@ -15,5 +15,4 @@ public enum ClassRelationOneOrManyEnum {
     MANY("在关系里为一对多/多对多里面的多"),
     ;
     private final String label;
-
 }
