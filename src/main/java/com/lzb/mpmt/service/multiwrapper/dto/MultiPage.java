@@ -19,6 +19,7 @@ public class MultiPage<T> {
     private List<T> records;
     private Object attach;
 
+
     /**
      * 统一数字类型的字段的求和结果
      * key: relationCode.filedName 转驼峰
