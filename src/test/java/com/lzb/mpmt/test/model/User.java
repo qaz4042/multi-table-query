@@ -20,6 +20,6 @@ public class User extends BaseModel {
     @MultiTableField(exist = false)
     private Long parentId;
 
-    private List<UserAddress> user_userAddress;
+    private List<UserAddress> userAndUserAddress;
 
 }

@@ -44,7 +44,7 @@ public class MultiRelationCaches {
     /**
      * 将子表数据,get,set到主表去
      */
-    private static final Map<String, Tuple2<Method, Method>> RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP = new WeakHashMap<>(4096);
+    private static final Map<String, MultiTuple2<Method, Method>> RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP = new WeakHashMap<>(4096);
 
     /**
      * 判断表跟表是否是一对一,一对多关系
@@ -113,9 +113,10 @@ public class MultiRelationCaches {
     }
 
 
-    public static Tuple2<Method, Method> getRelation_TableWithTable_getSetMethod(String relationCode, Class<?> tableClass) {
-        Tuple2<Method, Method> methods = RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP.get(relationCode);
-        String fieldNameUpperFirst = MultiUtil.firstToUpperCase(MultiUtil.underlineToCamel(relationCode));
+    public static MultiTuple2<Method, Method> getRelation_TableWithTable_getSetMethod(String relationCode, Class<?> tableClass) {
+        MultiTuple2<Method, Method> methods = RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP.get(relationCode);
+//        String fieldNameUpperFirst = MultiUtil.firstToUpperCase(MultiUtil.underlineToCamel(relationCode));
+        String fieldNameUpperFirst = MultiUtil.firstToUpperCase(relationCode);
         if (methods == null) {
             //初始化map
             Method getMethod = MultiUtil.getAllMethods(tableClass).stream()
@@ -136,7 +137,7 @@ public class MultiRelationCaches {
             if (getMethod == null) {
                 throw new MultiException("找不到" + tableClass + "对应的get" + fieldNameUpperFirst);
             }
-            RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP.put(relationCode, new Tuple2<>(getMethod, setMethod));
+            RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP.put(relationCode, new MultiTuple2<>(getMethod, setMethod));
         }
         methods = RELATION_TABLE_WITH_TABLE_GET_SET_METHOD_MAP.get(relationCode);
 

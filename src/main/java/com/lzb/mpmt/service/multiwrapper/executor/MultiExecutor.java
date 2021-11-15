@@ -52,7 +52,7 @@ public class MultiExecutor {
         //执行sql
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
         List<MAIN> mains = executor.executeSql(sql, (resultSet) -> {
-            Tuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion("", null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
+            MultiTuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion("", null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
             MAIN main = mainAndIsNew.getT1();
             return mainAndIsNew.getT2() ? main : null;
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -95,11 +95,11 @@ public class MultiExecutor {
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> void checkRequireRecursion(String currTableName, List<MAIN_OR_SUB> currDatas, List<TreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
+    private static <MAIN_OR_SUB> void checkRequireRecursion(String currTableName, List<MAIN_OR_SUB> currDatas, List<MultiTreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
         if (MultiUtil.isEmpty(currDatas)) {
             return;
         }
-        for (TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode : subRelationNodes) {
+        for (MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode : subRelationNodes) {
             IMultiWrapperSubAndRelationTreeNode curr = relationTreeNode.getCurr();
             String relationCode = curr.getRelationCode();
             String tableNameThis = curr.getTableNameThis();
@@ -157,10 +157,10 @@ public class MultiExecutor {
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> Tuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(
+    private static <MAIN_OR_SUB> MultiTuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(
             String parentCodeAppendId,
             MAIN_OR_SUB parentEntity,
-            TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
+            MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
             ResultSet resultSet,
             Map<String, Object> relationIdObjectMap,
             boolean parentIsNew
@@ -168,7 +168,7 @@ public class MultiExecutor {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
-        String currTableNameThis = currNode.getTableNameThis();
+//        String currTableNameThis = currNode.getTableNameThis();
         Field currTableIdField = MultiRelationCaches.getTableIdField(currTableClass);
         String idFieldName = currRelationCode + "." + MultiUtil.camelToUnderline(currTableIdField.getName());
         Object id = getValue(idFieldName, currTableIdField.getType(), resultSet);
@@ -197,12 +197,12 @@ public class MultiExecutor {
         //副表信息,要递推填充下去
         MAIN_OR_SUB finalCurrEntity = currEntity;
         relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(relationIdObjectMapKey, finalCurrEntity, subNode, resultSet, relationIdObjectMap, isNew));
-        return new Tuple2<>(currEntity, isNew);
+        return new MultiTuple2<>(currEntity, isNew);
     }
 
     @SneakyThrows
     private static <MAIN_OR_SUB> void setCurrEntityInToParent(IMultiWrapperSubAndRelationTreeNode currNode, MAIN_OR_SUB parentEntity, Class<?> currTableClass, String currRelationCode, MAIN_OR_SUB currEntity) {
-        Tuple2<Method, Method> getSetMethods = MultiRelationCaches.getRelation_TableWithTable_getSetMethod(currRelationCode, parentEntity.getClass());
+        MultiTuple2<Method, Method> getSetMethods = MultiRelationCaches.getRelation_TableWithTable_getSetMethod(currRelationCode, parentEntity.getClass());
         Method getMethod = getSetMethods.getT1();
         Method setMethod = getSetMethods.getT2();
         Object subEntityExists = getMethod.invoke(parentEntity);

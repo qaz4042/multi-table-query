@@ -1,6 +1,14 @@
 # 快捷多表查询框架
 ### 1.基础(70%)单库查询都可以简单做到 (不用强行手写xxxMapper.xml)
 ####
+    public class UserStaff {
+        private String staffName;
+        private TestConst.SexEnum sex;
+        private Long adminUserId;
+        //UserStaff对应user 是 一对一 反过来是一对多(List<UserStaff> user_userStaff)
+        private User user_userStaff;
+    }
+####
     List<UserStaff> userStaffsSimple = MultiExecutor.list(
             new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
     );

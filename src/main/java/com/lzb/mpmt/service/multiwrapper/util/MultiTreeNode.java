@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public class TreeNode<T> {
+public class MultiTreeNode<T> {
     private T parent;
     private T curr;
-    private List<TreeNode<T>> children;
+    private List<MultiTreeNode<T>> children;
 
     public interface IEqualsKey<T extends IEqualsKey<T>> {
         /**
@@ -39,7 +39,7 @@ public class TreeNode<T> {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Key implements TreeNode.IEqualsKey<Key> {
+    public static class Key implements MultiTreeNode.IEqualsKey<Key> {
         Long id;
 
         @Override
@@ -48,15 +48,15 @@ public class TreeNode<T> {
         }
     }
 
-    public static <T, KEY extends IEqualsKey<KEY>> TreeNode<T> buildTreeLong(List<T> list, Function<T, Long> keyPropFun, Function<T, Long> parentKeyPropFun) {
+    public static <T, KEY extends IEqualsKey<KEY>> MultiTreeNode<T> buildTreeLong(List<T> list, Function<T, Long> keyPropFun, Function<T, Long> parentKeyPropFun) {
         return buildTree(list, u -> null == keyPropFun.apply(u) ? null : new Key(keyPropFun.apply(u)), u -> null == parentKeyPropFun.apply(u) ? null : new Key(parentKeyPropFun.apply(u)));
     }
 
-    public static <T, KEY extends IEqualsKey<KEY>> TreeNode<T> buildTree(List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun) {
+    public static <T, KEY extends IEqualsKey<KEY>> MultiTreeNode<T> buildTree(List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun) {
         return buildTree(list, keyPropFun, parentKeyPropFun, o -> null == parentKeyPropFun.apply(o));
     }
 
-    public static <T, KEY extends IEqualsKey<KEY>> TreeNode<T> buildTree(List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun, Function<T, Boolean> isParentFun) {
+    public static <T, KEY extends IEqualsKey<KEY>> MultiTreeNode<T> buildTree(List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun, Function<T, Boolean> isParentFun) {
         List<T> listNew = new ArrayList<>(list);
         List<T> parents = listNew.stream().filter(isParentFun::apply).collect(Collectors.toList());
         if (parents.size() != 1) {
@@ -66,15 +66,15 @@ public class TreeNode<T> {
         return buildTreeUnderTopRecursion(null, parents.get(0), listNew, keyPropFun, parentKeyPropFun);
     }
 
-    public static <T, KEY extends IEqualsKey<KEY>> TreeNode<T> buildTreeUnderTopRecursion(T parent, T curr, List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun) {
+    public static <T, KEY extends IEqualsKey<KEY>> MultiTreeNode<T> buildTreeUnderTopRecursion(T parent, T curr, List<T> list, Function<T, KEY> keyPropFun, Function<T, KEY> parentKeyPropFun) {
         KEY currKey = keyPropFun.apply(curr);
         if (currKey == null) {
             throw new MultiException("所有树节点的key不允许为空" + parent);
         }
         List<T> childrenT = list.stream().filter(o -> currKey.parentKeyEqualsChildKey(parentKeyPropFun.apply(o))).collect(Collectors.toList());
-        List<TreeNode<T>> children = childrenT.stream().map(childT -> buildTreeUnderTopRecursion(curr, childT, list, keyPropFun, parentKeyPropFun)).collect(Collectors.toList());
+        List<MultiTreeNode<T>> children = childrenT.stream().map(childT -> buildTreeUnderTopRecursion(curr, childT, list, keyPropFun, parentKeyPropFun)).collect(Collectors.toList());
         list.removeAll(childrenT);
-        return new TreeNode<T>(parent, curr, children);
+        return new MultiTreeNode<T>(parent, curr, children);
     }
 
     public void consumerTopToBottom(Consumer<T> consumer) {

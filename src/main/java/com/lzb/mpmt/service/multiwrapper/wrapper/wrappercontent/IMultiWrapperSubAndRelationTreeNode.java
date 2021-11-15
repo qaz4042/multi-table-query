@@ -2,14 +2,14 @@ package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
-import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
+import com.lzb.mpmt.service.multiwrapper.util.MultiTreeNode;
 
 /**
  * 副表,和主副表对应关系信息
  *
  * @author Administrator
  */
-public interface IMultiWrapperSubAndRelationTreeNode extends TreeNode.IEqualsKey<IMultiWrapperSubAndRelationTreeNode> {
+public interface IMultiWrapperSubAndRelationTreeNode extends MultiTreeNode.IEqualsKey<IMultiWrapperSubAndRelationTreeNode> {
 
     /**
      * 当前节点的当前表

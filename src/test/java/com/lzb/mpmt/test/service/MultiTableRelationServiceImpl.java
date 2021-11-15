@@ -19,7 +19,7 @@ public class MultiTableRelationServiceImpl implements IMultiTableRelationService
         //todo可以查询数据库/枚举信息
 
         return Arrays.asList(MultiTableRelation.builder()
-                        .code("user__user_staff")
+                        .code("userAndUserStaff")
                         .class1(User.class)
                         .tableName1("user")
                         .class1KeyProp("id")
@@ -32,7 +32,7 @@ public class MultiTableRelationServiceImpl implements IMultiTableRelationService
                         .class2Require(false)
                         .build(),
                 MultiTableRelation.builder()
-                        .code("user__user_address")
+                        .code("userAndUserAddress")
                         .class1(User.class)
                         .tableName1("user")
                         .class1KeyProp("id")

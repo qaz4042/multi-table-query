@@ -15,5 +15,5 @@ public class UserStaff extends BaseModel {
     private TestConst.SexEnum sex;
     private Long adminUserId;
 
-    private User user_userStaff;
+    private User userAndUserStaff;
 }

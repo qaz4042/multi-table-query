@@ -38,7 +38,7 @@ public class MultiWrapper<MAIN> {
     /***
      * 计算SQL时,初始化表关系树
      */
-    private TreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
+    private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
 
     /**
      * 副表信息
@@ -169,7 +169,7 @@ public class MultiWrapper<MAIN> {
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
 
-    private TreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+    private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
         //relationCode可能缺省,去关系表中加载
         this.fillRelationCodeAndTableThisOther(wrapperMain.getTableName(), wrapperSubAndRelations);
 
@@ -179,7 +179,7 @@ public class MultiWrapper<MAIN> {
         //构建关系树  将用在
         // 1.在按顺序生成left join语句(否则会报错)
         // 2.按顺序映射查询结果到实体类上
-        return TreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperMain);
+        return MultiTreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperMain);
     }
 
     private void fillRelationCodeAndTableThisOther(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
