@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
-import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.TreeNode;
 

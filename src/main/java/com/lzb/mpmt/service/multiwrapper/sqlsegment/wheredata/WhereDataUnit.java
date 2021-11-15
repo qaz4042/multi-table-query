@@ -1,8 +1,8 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
-import com.lzb.mpmt.service.multiwrapper.enums.WhereOptEnum;
-import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.WhereOptEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.ClientPreparedQueryBindings;
 import lombok.AllArgsConstructor;
 import lombok.Data;

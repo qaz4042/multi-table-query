@@ -74,3 +74,11 @@
     "sex": 0,
 
 ### 3.demo-详见本项目的 test方法 (附sql脚本)
+
+### 4.调试环境
+    mysql5.6
+    spring-jdbc
+    jdk11(jdk8应该兼容)
+
+### license
+    Apache Licence 2.0

@@ -1,7 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 
-import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 
 /**
  * @author Administrator

@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
 import lombok.SneakyThrows;
 
@@ -34,7 +35,7 @@ public class MultiUtil {
         return null == list || list.isEmpty();
     }
 
-    public static Boolean isEmpty(Object... list) {
+    public static Boolean isEmpty(Object[] list) {
         return null == list || list.length == 0;
     }
 

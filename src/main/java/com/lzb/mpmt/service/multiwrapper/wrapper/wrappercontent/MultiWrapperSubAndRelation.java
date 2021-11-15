@@ -1,10 +1,10 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
-import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
-import com.lzb.mpmt.service.multiwrapper.util.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;

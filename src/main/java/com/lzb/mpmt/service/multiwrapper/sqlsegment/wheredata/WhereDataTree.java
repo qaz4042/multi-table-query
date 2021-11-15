@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 
-import com.lzb.mpmt.service.multiwrapper.enums.WhereAndOrEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.WhereAndOrEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

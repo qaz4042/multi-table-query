@@ -1,6 +1,6 @@
 package com.lzb.mpmt.test.enums;
 
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

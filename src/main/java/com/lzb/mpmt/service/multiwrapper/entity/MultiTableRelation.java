@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.entity;
 
-import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

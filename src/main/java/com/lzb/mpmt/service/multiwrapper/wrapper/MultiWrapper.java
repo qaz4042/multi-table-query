@@ -6,7 +6,7 @@ import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
-import com.lzb.mpmt.service.multiwrapper.enums.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import lombok.Data;

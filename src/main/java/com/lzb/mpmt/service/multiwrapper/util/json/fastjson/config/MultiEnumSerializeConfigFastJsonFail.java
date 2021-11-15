@@ -3,7 +3,7 @@
 //import com.alibaba.fastjson.serializer.JSONSerializer;
 //import com.alibaba.fastjson.serializer.ObjectSerializer;
 //import com.alibaba.fastjson.serializer.SerializeConfig;
-//import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+//import com.lzb.mpmt.service.multiwrapper.enums.MultiConst.IMultiEnum;
 //
 //import java.io.Serializable;
 //import java.lang.reflect.Type;

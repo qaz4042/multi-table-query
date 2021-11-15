@@ -6,10 +6,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
-import org.springframework.context.annotation.Bean;
 
 import java.io.IOException;
 import java.io.Serializable;

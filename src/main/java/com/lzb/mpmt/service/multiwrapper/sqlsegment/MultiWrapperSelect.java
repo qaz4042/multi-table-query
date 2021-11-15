@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 import com.lzb.mpmt.service.multiwrapper.util.MultiRelationCaches;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
 
@@ -23,6 +24,7 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
     void setSelectFields(List<String> list);
 
     Class<T> getClazz();
+
     /***
      * 设置查询字段列表,不设置则默认*(全查询)
      *
@@ -31,7 +33,7 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
      * @return 当前wrapper
      */
     default <VAL> Wrapper select(MultiFunction<T, VAL>... propFuncs) {
-        if (null != propFuncs && propFuncs.length > 0) {
+        if (!MultiUtil.isEmpty(propFuncs)) {
             if (null == getTableName()) {
                 this.setTableName(SerializedLambda.resolveCache(propFuncs[0]).getTableName());
             }

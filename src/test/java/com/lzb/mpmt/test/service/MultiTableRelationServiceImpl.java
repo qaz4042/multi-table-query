@@ -2,7 +2,7 @@ package com.lzb.mpmt.test.service;
 
 import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
-import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.test.model.User;
 import com.lzb.mpmt.test.model.UserAddress;
 import com.lzb.mpmt.test.model.UserStaff;

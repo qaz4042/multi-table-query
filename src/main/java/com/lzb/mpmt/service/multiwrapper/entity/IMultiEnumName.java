@@ -1,6 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.enums;
-
-import java.io.Serializable;
+package com.lzb.mpmt.service.multiwrapper.entity;
 
 /**
  * 枚举实现

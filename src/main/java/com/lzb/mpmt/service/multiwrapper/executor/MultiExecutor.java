@@ -1,8 +1,9 @@
 package com.lzb.mpmt.service.multiwrapper.executor;
 
 import com.lzb.mpmt.service.multiwrapper.config.MultiProperties;
-import com.lzb.mpmt.service.multiwrapper.enums.ClassRelationOneOrManyEnum;
-import com.lzb.mpmt.service.multiwrapper.enums.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.dto.IMultiPage;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
@@ -65,6 +66,31 @@ public class MultiExecutor {
             checkRequireRecursion(wrapper.getWrapperMain().getTableName(), mains, wrapper.getRelationTree().getChildren());
         }
         return mains;
+    }
+
+    @SneakyThrows
+    public static <MAIN> MAIN getOne(MultiWrapper<MAIN> wrapper) {
+        List<MAIN> list = list(wrapper);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @SneakyThrows
+    public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
+        Map<String, Map<String, Object>> aggregateMap = aggregate(wrapper);
+        List<MAIN> list = list(wrapper);
+        //独立 count (如果wrapper里面有可以直接取)
+        page.setRecords(list);
+        page.setTotal((Long) aggregateMap.get("count").get("common"));
+        page.setAggregateMap(aggregateMap);
+        return page;
+    }
+
+    @SneakyThrows
+    public static <MAIN> Map<String, Map<String, Object>> aggregate(MultiWrapper<MAIN> wrapper) {
+
+        //todo
+        return null;
     }
 
     @SuppressWarnings("unchecked")
