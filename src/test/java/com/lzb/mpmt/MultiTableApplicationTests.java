@@ -27,7 +27,6 @@ class MultiTableApplicationTests {
     @Test
     @SneakyThrows
     void testQuerySimple() {
-
         List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
         System.out.println("testQuerySimple=" + JSONUtil.toString(userStaffsSimple));
     }

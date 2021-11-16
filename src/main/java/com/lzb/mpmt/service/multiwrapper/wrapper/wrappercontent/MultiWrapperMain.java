@@ -1,6 +1,9 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
 
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.aggregate.MultiAggregateInfo;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
@@ -10,6 +13,9 @@ import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,7 +27,8 @@ import java.util.List;
 public class MultiWrapperMain<MAIN> implements
         MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>>,
         MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>
+        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>,
+        MultiWrapperAggregate<MAIN, MultiWrapperMain<MAIN>>
         , IMultiWrapperSubAndRelationTreeNode {
 
     /**
@@ -54,6 +61,25 @@ public class MultiWrapperMain<MAIN> implements
      * 类为了生成List<SUB>
      */
     private Class<MAIN> clazz;
+
+    /**
+     * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
+     */
+    private List<MultiAggregateInfo> multiAggregateInfos = Collections.emptyList();
+
+    /**
+     * 是否全部按默认字段去聚合
+     */
+    private List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = new ArrayList<>(4);
+
+    public MultiWrapperMain<MAIN> aggregateAll(MultiConstant.MultiAggregateTypeEnum... aggregateTypeEnums) {
+        aggregateAllTypes.addAll(Arrays.asList(aggregateTypeEnums));
+        return this;
+    }
+    public MultiWrapperMain<MAIN> count() {
+        aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.COUNT);
+        return this;
+    }
 
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());

@@ -6,7 +6,7 @@
         private TestConst.SexEnum sex;
         private Long adminUserId;
         //UserStaff对应user 是 一对一 反过来是一对多(List<UserStaff> user_userStaff)
-        private User user_userStaff;
+        private User userAndUserStaff;
     }
 ####
     List<UserStaff> userStaffsSimple = MultiExecutor.list(

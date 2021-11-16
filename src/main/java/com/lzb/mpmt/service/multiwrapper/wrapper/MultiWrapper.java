@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
@@ -128,21 +129,39 @@ public class MultiWrapper<MAIN> {
     /**
      * 输出最终sql
      */
+    public String computeAggregateSql() {
+        String mainTableName = wrapperMain.getTableName();
+        if (mainTableName == null) {
+            throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+        }
+        this.loadRelations();
+
+        // sum/avg全部数字型字段 count(1) countDistinct全部字段
+        List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = wrapperMain.getAggregateAllTypes();
+        if (aggregateAllTypes.size() > 0) {
+            List<String> selectPropsList = this.wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(o.getRelationCode())).collect(Collectors.toList());
+            selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getTableName()));
+        }
+
+        String sqlSelect = "select " + "";
+        String sqlFromLimit = "from " + mainTableName;
+        String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
+        String sqlWhere = this.getSqlWhere();
+
+        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+    }
+
+    /**
+     * 输出最终sql
+     */
     public String computeSql() {
         String mainTableName = wrapperMain.getTableName();
         if (mainTableName == null) {
             throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
         }
-        // 1.1 解析 主表和副表的关系树
-        relationTree = this.reloadRelations(wrapperMain, this.wrapperSubAndRelations);
 
-        // 1.2 关系统一按树自顶向下排列
-        this.wrapperSubAndRelations = new ArrayList<>();
-        relationTree.consumerTopToBottom(relationNode -> {
-            if (relationNode instanceof MultiWrapperSubAndRelation) {
-                wrapperSubAndRelations.add((MultiWrapperSubAndRelation<?>) relationNode);
-            }
-        });
+        // 1. 解析 关系
+        this.loadRelations();
 
         // 2.1. 解析 select要查出的字段语句片段
         // select user_staff.* from user_staff
@@ -155,9 +174,14 @@ public class MultiWrapper<MAIN> {
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
 
-
         String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
+        String sqlWhere = this.getSqlWhere();
+
+        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+    }
+
+    private String getSqlWhere() {
         // 4. 解析 where条件语句片段
         //    where user_staff.state = 0
         //      and user_staff_address.del_flag = 0
@@ -165,13 +189,27 @@ public class MultiWrapper<MAIN> {
         whereWrappers.add(0, wrapperMain);
         String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
         String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
+        return sqlWhere;
+    }
 
-        return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+    private void loadRelations() {
+        if (relationTree == null) {
+            // 1.1 解析 主表和副表的关系树
+            relationTree = this.reloadRelations(wrapperMain, this.wrapperSubAndRelations);
+
+            // 1.2 关系统一按树自顶向下排列
+            this.wrapperSubAndRelations = new ArrayList<>();
+            relationTree.consumerTopToBottom(relationNode -> {
+                if (relationNode instanceof MultiWrapperSubAndRelation) {
+                    wrapperSubAndRelations.add((MultiWrapperSubAndRelation<?>) relationNode);
+                }
+            });
+        }
     }
 
     private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> reloadRelations(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
         //relationCode可能缺省,去关系表中加载
-        this.fillRelationCodeAndTableThisOther(wrapperMain.getTableName(), wrapperSubAndRelations);
+        this.fillRelationCodeAndTableThisOther(wrapperMain, wrapperSubAndRelations);
 
         List<IMultiWrapperSubAndRelationTreeNode> relationsAndMain = new ArrayList<>(wrapperSubAndRelations);
         relationsAndMain.add(wrapperMain);
@@ -182,7 +220,9 @@ public class MultiWrapper<MAIN> {
         return MultiTreeNode.buildTree(relationsAndMain, o -> o, o -> o, o -> o instanceof MultiWrapperMain);
     }
 
-    private void fillRelationCodeAndTableThisOther(String mainTableName, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+    private void fillRelationCodeAndTableThisOther(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+        String mainTableName = wrapperMain.getTableName();
+
         List<MultiWrapperSubAndRelation<?>> hasCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null != relation.getRelationCode()).collect(Collectors.toList());
         List<MultiWrapperSubAndRelation<?>> noCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null == relation.getRelationCode()).collect(Collectors.toList());
 
@@ -227,6 +267,10 @@ public class MultiWrapper<MAIN> {
                     }
                 }
         );
+
+        // AggregateInfos 聚合信息中填充relationCode
+        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainTableName));
+        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {

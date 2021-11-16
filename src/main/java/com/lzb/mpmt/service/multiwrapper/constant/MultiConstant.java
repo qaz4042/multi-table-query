@@ -3,8 +3,11 @@ package com.lzb.mpmt.service.multiwrapper.constant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Function;
 
 public class MultiConstant {
 
@@ -71,18 +74,22 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum MultiAggregateTypeEnum {
-        SUM("求和"),
-        AVG("求平均值"),
-        COUNT("计数"),//默认对主表进行计数
-        COUNT_DISTINCT("计数去重"),
-        MAX("最大值"),//默认对主表进行计数
-        MIN("最小值"),//默认对主表进行计数,
+        SUM("求和", Number.class::isAssignableFrom),
+        AVG("求平均值", Number.class::isAssignableFrom),
+        COUNT("计数", c -> false),//默认对主表count(*)进行计数
+        COUNT_DISTINCT("计数去重", c -> true),
+        MAX("最大值", c -> true),//默认对主表进行计数
+        MIN("最小值", c -> true),//默认对主表进行计数,
         //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
-        GROUP_CONCAT("分组组合拼接"),
+        GROUP_CONCAT("分组组合拼接", c -> true),
 //        JSON_ARRAYAGG("组装成JsonArray"),  //JSON_ARRAYAGG(col or expr) 　　将结果集聚合为单个JSON数组，其元素由参数列的值组成。此数组中元素的顺序未定义。该函数作用于计算为单个值的列或表达式。
 //        JSON_OBJECTAGG("组装成JsonObject"), //JSON_OBJECTAGG(key,value)     两个列名或表达式作为参数，第一个用作键，第二个用作值，并返回包含键值对的JSON对象。
         ;
         private final String label;
+        /**
+         * 聚合函数只适配的字段,对应java类型
+         */
+        private final Function<Class<?>, Boolean> fieldTypeFilter;
     }
 
 
