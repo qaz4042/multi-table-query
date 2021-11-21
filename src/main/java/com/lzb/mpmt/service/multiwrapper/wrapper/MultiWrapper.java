@@ -1,7 +1,9 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.*;
+import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
@@ -16,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 多表联查器
@@ -136,19 +139,44 @@ public class MultiWrapper<MAIN> {
         }
         this.loadRelations();
 
+        //全部字段聚合 select sum(t1.amount),sum(t2.qty) ...
         // sum/avg全部数字型字段 count(1) countDistinct全部字段
-        List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = wrapperMain.getAggregateAllTypes();
+        List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = this.wrapperMain.getAggregateAllTypes();
+        List<String> aggregateFieldAss = new ArrayList<>(32);
         if (aggregateAllTypes.size() > 0) {
-            List<String> selectPropsList = this.wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(o.getRelationCode())).collect(Collectors.toList());
-            selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getTableName()));
+            aggregateFieldAss.addAll(
+                    aggregateAllTypes.stream().flatMap(aggregateAllType ->
+                            Stream.of(
+                                    this.computeAggregateFieldAssOne(this.wrapperMain, mainTableName, aggregateAllType),
+                                    this.wrapperSubAndRelations.stream().flatMap(
+                                            multiWrapperSubAndRelation -> this.computeAggregateFieldAssOne(multiWrapperSubAndRelation.getWrapperSub(), multiWrapperSubAndRelation.getRelationCode(), aggregateAllType)
+                                    )
+                            ).flatMap(l -> l)
+                    ).collect(Collectors.toList())
+            );
+            System.out.println(JSONUtil.toString(aggregateFieldAss));
+            //过滤掉非数字的属性
+
         }
 
-        String sqlSelect = "select " + "";
+        //指定字段聚合
+
+
+        String sqlSelect = "select " + aggregateFieldAss;
         String sqlFromLimit = "from " + mainTableName;
         String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
         String sqlWhere = this.getSqlWhere();
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+    }
+
+    private Stream<String> computeAggregateFieldAssOne(MultiWrapperSelect<?, ?> multiWrapperSelect, String relationCode, MultiConstant.MultiAggregateTypeEnum aggregateAllType) {
+        return multiWrapperSelect.getSelectFieldNames().stream()
+                .filter(fieldName -> {
+                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(relationCode, fieldName, wrapperMain.getClazz());
+                            return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
+                        }
+                ).map(fieldName -> aggregateAllType.name() + "(" + relationCode + "." + fieldName + ") as " + aggregateAllType.name() + "_" + relationCode + "_" + fieldName);
     }
 
     /**

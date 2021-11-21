@@ -41,12 +41,14 @@ public interface IMultiPage<T> {
      * @return 总条数
      */
     Long getTotal();
+
     /**
      * 统计信息
      * 例如 {'user__userWallet.enableBalance':"1000"}
+     *
      * @return 统计信息
      */
-    Map<String, Map<String, Object>> getAggregateMap();
+    MultiAggregateResult getAggregateResult();
     /**
      * 附加信息
      * @return 附加信息
@@ -58,6 +60,6 @@ public interface IMultiPage<T> {
     void setOrders(String orders);
     void setRecords(List<T> records);
     void setTotal(Long total) ;
-    void setAggregateMap(Map<String, Map<String, Object>> aggregateMap);
+    void setAggregateResult(MultiAggregateResult aggregateResult) ;
     void setAttach(Object attach);
 }

@@ -3,6 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.executor;
 import com.lzb.mpmt.service.multiwrapper.config.MultiProperties;
 import com.lzb.mpmt.service.multiwrapper.dto.IMultiPage;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
 import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.*;
@@ -77,20 +78,23 @@ public class MultiExecutor {
     @SuppressWarnings("ConstantConditions")
     @SneakyThrows
     public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
-        Map<String, Map<String, Object>> aggregateMap = aggregate(wrapper);
+        MultiAggregateResult aggregateResult = aggregate(wrapper);
         List<MAIN> list = list(wrapper);
         //独立 count (如果wrapper里面有可以直接取)
         page.setRecords(list);
-        page.setTotal((Long) aggregateMap.get("count").get("common"));
-        page.setAggregateMap(aggregateMap);
+        page.setTotal(aggregateResult.getCount());
+        page.setAggregateResult(aggregateResult);
         return page;
     }
 
     @SneakyThrows
-    public static <MAIN> Map<String, Map<String, Object>> aggregate(MultiWrapper<MAIN> wrapper) {
-
-        //todo
-        return null;
+    public static <MAIN> MultiAggregateResult aggregate(MultiWrapper<MAIN> wrapper) {
+        String aggregateSql = wrapper.computeAggregateSql();
+        return executor.executeSql(aggregateSql, (resultSet) -> {
+            System.out.println();
+            return MultiAggregateResult.builder()
+                    .build();
+        }).stream().filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     @SuppressWarnings("unchecked")

@@ -49,13 +49,28 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
      * @return sqlSelectProps
      */
     default String getSqlSelectProps(String relationCode) {
-        List<String> selectProps = getSelectFields();
+        List<String> selectFieldNames = getSelectFields();
         //默认用全字段去查询,不用*,方便后续多表字段对应
-        if (null == selectProps) {
-            selectProps = MultiRelationCaches.getFieldNamesByClass(getClazz());
-            setSelectFields(selectProps);
+        if (null == selectFieldNames) {
+            selectFieldNames = MultiRelationCaches.getFieldNamesByClass(getClazz());
+            setSelectFields(selectFieldNames);
         }
-        return selectProps.stream().map(fieldName -> "  " + getTableName() + "." + fieldName + " as " + "`" + relationCode + "." + fieldName + "`")
+        return selectFieldNames.stream().map(fieldName -> "  " + getTableName() + "." + fieldName + " as " + "`" + relationCode + "." + fieldName + "`")
                 .collect(Collectors.joining(",\n"));
+    }
+
+    /**
+     * 获取select的全字段
+     *
+     * @return sqlSelectProps
+     */
+    default List<String> getSelectFieldNames() {
+        List<String> selectFieldNames = getSelectFields();
+        //默认用全字段去查询,不用*,方便后续多表字段对应
+        if (null == selectFieldNames) {
+            selectFieldNames = MultiRelationCaches.getFieldNamesByClass(getClazz());
+            setSelectFields(selectFieldNames);
+        }
+        return selectFieldNames;
     }
 }

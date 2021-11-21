@@ -43,7 +43,7 @@ public class MultiPage<T> implements IMultiPage<T> {
      * 例如
      * {    "sum":{"user__userWallet.enableBalance":"1000"}   }
      */
-    private Map<String, Map<String, Object>> aggregateMap;
+    private MultiAggregateResult aggregateResult;
     /**
      * 附加信息
      */

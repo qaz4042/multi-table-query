@@ -1,5 +1,6 @@
 package com.lzb.mpmt;
 
+import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
 import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest(classes = MultiTableApplication.class)
 class MultiTableApplicationTests {
@@ -29,6 +31,16 @@ class MultiTableApplicationTests {
     void testQuerySimple() {
         List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
         System.out.println("testQuerySimple=" + JSONUtil.toString(userStaffsSimple));
+    }
+
+    /**
+     * 基本聚合查询 todo 开发中
+     */
+    @Test
+    @SneakyThrows
+    void testQueryAggregate() {
+        MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
     }
 
     /**
