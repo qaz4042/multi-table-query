@@ -137,7 +137,7 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
      *
      * @return where条件中的字段条件信息(拼接后)
      */
-    default List<> getSqlWhereProps(String relationCode) {
+    default String getSqlWhereProps(String relationCode) {
         return getWhereTree().getSqlWhereProps(relationCode);
     }
 

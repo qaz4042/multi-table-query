@@ -74,7 +74,8 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
         MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
         String subTableName = wrapperSub.getTableName();
 
-        String sqlWhereProps = getWrapperSub().getSqlWhereProps();
+        //todo
+        String sqlWhereProps = getWrapperSub().getSqlWhereProps("");
         sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiConstant.Strings.EMPTY : " and " + sqlWhereProps;
 
 

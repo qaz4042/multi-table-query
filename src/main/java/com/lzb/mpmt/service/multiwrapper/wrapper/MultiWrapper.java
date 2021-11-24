@@ -244,7 +244,8 @@ public class MultiWrapper<MAIN> {
         //      and user_staff_address.del_flag = 0
         List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>();
         whereWrappers.add(0, wrapperMain);
-        String wherePropsAppend = whereWrappers.stream().map(where -> where.getSqlWhereProps()).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
+        //todo
+        String wherePropsAppend = whereWrappers.stream().map(where -> where.getSqlWhereProps("")).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
         return MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
     }
 
