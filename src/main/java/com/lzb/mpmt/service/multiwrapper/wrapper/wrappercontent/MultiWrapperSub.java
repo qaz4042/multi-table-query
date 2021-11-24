@@ -69,8 +69,10 @@ public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SU
 
 
     public <VAL> MultiWrapperSub<SUB, MAIN_WHERE> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
-        //noinspection unchecked
-        MAIN_WHERE mainWhere = (MAIN_WHERE) new MultiWrapperSubMainWhere<SUB>();
+        if (this.mainWhere == null) {
+            //noinspection unchecked
+            this.mainWhere = (MAIN_WHERE) new MultiWrapperSubMainWhere<SUB>();
+        }
         mainWhereConsumer.accept(mainWhere);
         return this;
     }

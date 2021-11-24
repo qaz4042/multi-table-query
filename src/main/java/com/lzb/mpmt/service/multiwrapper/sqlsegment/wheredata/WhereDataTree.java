@@ -25,9 +25,9 @@ public class WhereDataTree implements IWhereData {
     private List<IWhereData> whereDatas = new ArrayList<>(8);
 
     @Override
-    public String getSqlWhereProps(String tableName) {
+    public String getSqlWhereProps(String relationCode) {
         return whereDatas.stream().map(o -> {
-            String sqlWhereProps = o.getSqlWhereProps(tableName);
+            String sqlWhereProps = o.getSqlWhereProps(relationCode);
             if (o instanceof WhereDataTree && ((WhereDataTree) o).getWhereDatas().size() > 0) {
                 sqlWhereProps = "(" + sqlWhereProps + ")";
             }
