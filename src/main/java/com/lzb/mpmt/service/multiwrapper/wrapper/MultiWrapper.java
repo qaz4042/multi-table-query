@@ -37,19 +37,20 @@ public class MultiWrapper<MAIN> {
      * 主表信息
      */
     private MultiWrapperMain<MAIN> wrapperMain;
-    private List<MultiWrapperMainSubWhere<?>> wrapperMainSubWheres = Collections.emptyList();
-
-    /***
-     * 计算SQL时,初始化表关系树
-     */
-    private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
+//    private List<MultiWrapperMainSubWhere<?>> wrapperMainSubWheres = Collections.emptyList();
 
     /**
      * 副表信息
      */
     private List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations = new ArrayList<>(8);
 
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?>... subTableWrappers) {
+
+    /**
+     * 计算SQL时,初始化表关系树
+     */
+    private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
+
+    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?, ?>... subTableWrappers) {
         this.wrapperMain = wrapperMain;
         //默认leftJoin
         Arrays.stream(subTableWrappers).forEach(this::leftJoin);
@@ -67,25 +68,27 @@ public class MultiWrapper<MAIN> {
      * @return MultiWrapper
      */
     public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
-        return main(wrapperMain, (MultiWrapperMainSubWhere<?>[]) null);
-    }
-
-    /**
-     * 主表信息
-     * 例如 select * from user_staff u
-     * left join user_staff_address a on a.staff_id = u.id
-     * where user_staff_address.del_flag = 0
-     *
-     * @return MultiWrapper
-     */
-    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
         MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
         wrapper.setWrapperMain(wrapperMain);
-        if (wrapperMainSubWhere != null) {
-            wrapper.setWrapperMainSubWheres(Arrays.stream(wrapperMainSubWhere).filter(Objects::nonNull).collect(Collectors.toList()));
-        }
         return wrapper;
     }
+
+//    /**
+//     * 主表信息
+//     * 例如 select * from user_staff u
+//     * left join user_staff_address a on a.staff_id = u.id
+//     * where user_staff_address.del_flag = 0
+//     *
+//     * @return MultiWrapper
+//     */
+//    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
+//        MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
+//        wrapper.setWrapperMain(wrapperMain);
+//        if (wrapperMainSubWhere != null) {
+//            wrapper.setWrapperMainSubWheres(Arrays.stream(wrapperMainSubWhere).filter(Objects::nonNull).collect(Collectors.toList()));
+//        }
+//        return wrapper;
+//    }
 
     /***
      * join 副表信息
@@ -93,7 +96,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB, ?> subTableWrapper) {
         return leftJoin(null, subTableWrapper);
     }
 
@@ -103,7 +106,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB, ?> subTableWrapper) {
         return innerJoin(null, subTableWrapper);
     }
 
@@ -114,17 +117,17 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.left_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.inner_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
         wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationCode, subTableWrapper));
         return this;
     }
@@ -154,29 +157,21 @@ public class MultiWrapper<MAIN> {
                             ).flatMap(l -> l)
                     ).collect(Collectors.toList())
             );
-            System.out.println(JSONUtil.toString(aggregateFieldAss));
+            System.out.println("aggregateFieldAss" + JSONUtil.toString(aggregateFieldAss));
             //过滤掉非数字的属性
 
         }
+        if (MultiUtil.isEmpty(aggregateFieldAss)) {
+            throw new MultiException("没有可以(要)聚合的列,无法查询");
+        }
 
         //指定字段聚合
-
-
-        String sqlSelect = "select " + aggregateFieldAss;
-        String sqlFromLimit = "from " + mainTableName;
-        String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
+        String sqlSelect = "select " + String.join(",\n", aggregateFieldAss);
+        String sqlFromLimit = "\nfrom " + mainTableName;
+        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
         String sqlWhere = this.getSqlWhere();
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
-    }
-
-    private Stream<String> computeAggregateFieldAssOne(MultiWrapperSelect<?, ?> multiWrapperSelect, String relationCode, MultiConstant.MultiAggregateTypeEnum aggregateAllType) {
-        return multiWrapperSelect.getSelectFieldNames().stream()
-                .filter(fieldName -> {
-                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(relationCode, fieldName, wrapperMain.getClazz());
-                            return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
-                        }
-                ).map(fieldName -> aggregateAllType.name() + "(" + relationCode + "." + fieldName + ") as " + aggregateAllType.name() + "_" + relationCode + "_" + fieldName);
     }
 
     /**
@@ -202,22 +197,55 @@ public class MultiWrapper<MAIN> {
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
 
-        String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
+        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
+//        String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
         String sqlWhere = this.getSqlWhere();
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
 
+
+    private Stream<String> computeAggregateFieldAssOne(MultiWrapperSelect<?, ?> multiWrapperSelect, String relationCode, MultiConstant.MultiAggregateTypeEnum aggregateAllType) {
+        return multiWrapperSelect.getSelectFieldNames().stream()
+                .filter(fieldName -> {
+                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(relationCode, fieldName, multiWrapperSelect.getClazz());
+                            return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
+                        }
+                ).map(fieldName -> {
+                    String aggregate = aggregateAllType.name() + "(" + relationCode + "." + fieldName + ")";
+                    if (MultiConstant.MultiAggregateTypeEnum.SUM.equals(aggregateAllType)) {
+                        aggregate = "IFNULL(" + aggregate + ", 0)";
+                    }
+                    return aggregate + " as '" + aggregateAllType.name() + "." + relationCode + "." + fieldName + "'";
+                });
+    }
+
+
+    private List<String> getSqlJoin(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree) {
+        String relationCode = relationTree.getCurr().getRelationCode();
+        List<String> leftJoins = relationTree.getChildren().stream().map(r -> {
+            String subRelationCode = r.getCurr().getRelationCode();
+            MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
+            boolean thisIs1 = r.getCurr().getTableNameThis().equals(relation.getTableName1());
+            return " left join " + r.getCurr().getTableNameThis() + " " + subRelationCode + " on "
+                    + subRelationCode + "." + (thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
+                    + "="
+                    + relationCode + "." + (thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
+        }).collect(Collectors.toList());
+        List<String> leftJoinsSub = relationTree.getChildren().stream().flatMap(child -> getSqlJoin(child).stream()).collect(Collectors.toList());
+        leftJoins.addAll(leftJoinsSub);
+        return leftJoins;
+    }
+
     private String getSqlWhere() {
         // 4. 解析 where条件语句片段
         //    where user_staff.state = 0
         //      and user_staff_address.del_flag = 0
-        List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>(wrapperMainSubWheres);
+        List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>();
         whereWrappers.add(0, wrapperMain);
-        String wherePropsAppend = whereWrappers.stream().map(MultiWrapperWhere::getSqlWhereProps).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
-        String sqlWhere = MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
-        return sqlWhere;
+        String wherePropsAppend = whereWrappers.stream().map(where -> where.getSqlWhereProps()).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
+        return MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
     }
 
     private void loadRelations() {
@@ -298,7 +326,8 @@ public class MultiWrapper<MAIN> {
 
         // AggregateInfos 聚合信息中填充relationCode
         wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainTableName));
-        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
+        //todo 初始化relationCode
+//        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {

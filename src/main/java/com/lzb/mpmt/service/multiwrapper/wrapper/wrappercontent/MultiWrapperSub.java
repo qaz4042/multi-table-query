@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author Administrator
@@ -19,9 +20,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperSub<SUB> implements
-        MultiWrapperWhere<SUB, MultiWrapperSub<SUB>>,
-        MultiWrapperSelect<SUB, MultiWrapperSub<SUB>>,
+public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> implements
+        MultiWrapperWhere<SUB, MultiWrapperSub<SUB, MAIN_WHERE>>,
+        MultiWrapperSelect<SUB, MultiWrapperSub<SUB, MAIN_WHERE>>,
         MultiWrapperAggregate<SUB, MultiWrapperMain<SUB>> {
 
 
@@ -45,14 +46,16 @@ public class MultiWrapperSub<SUB> implements
      */
     private Class<SUB> clazz;
 
+    private MAIN_WHERE mainWhere;
+
     /**
      * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
      */
     private List<MultiAggregateInfo> multiAggregateInfos = Collections.emptyList();
 
-    public static <SUB> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
+    public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB, MAIN_WHERE> lambda(Class<SUB> clazz) {
         String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
-        MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
+        MultiWrapperSub<SUB, MAIN_WHERE> wrapperSub = new MultiWrapperSub<>();
         wrapperSub.setTableName(tableName);
         wrapperSub.setClazz(clazz);
         return wrapperSub;
@@ -60,7 +63,15 @@ public class MultiWrapperSub<SUB> implements
 
     @SafeVarargs
     @Override
-    public final <VAL> MultiWrapperSub<SUB> select(MultiFunction<SUB, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperSub<SUB, MAIN_WHERE> select(MultiFunction<SUB, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
+    }
+
+
+    public <VAL> MultiWrapperSub<SUB, MAIN_WHERE> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
+        //noinspection unchecked
+        MAIN_WHERE mainWhere = (MAIN_WHERE) new MultiWrapperSubMainWhere<SUB>();
+        mainWhereConsumer.accept(mainWhere);
+        return this;
     }
 }

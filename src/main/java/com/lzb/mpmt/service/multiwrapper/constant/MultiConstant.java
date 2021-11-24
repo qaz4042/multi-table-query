@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -63,7 +64,7 @@ public class MultiConstant {
         inner_join("inner join "),
         right_join("right join "),
         ;
-        private final String sql;
+        private final String joinSqlSegment;
     }
 
     /**
@@ -74,7 +75,7 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum MultiAggregateTypeEnum {
-        SUM("求和", Number.class::isAssignableFrom),
+        SUM("求和", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
         AVG("求平均值", Number.class::isAssignableFrom),
         COUNT("计数", c -> false),//默认对主表count(*)进行计数
         COUNT_DISTINCT("计数去重", c -> true),

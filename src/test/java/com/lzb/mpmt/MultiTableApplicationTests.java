@@ -1,5 +1,6 @@
 package com.lzb.mpmt;
 
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
 import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
@@ -39,7 +40,8 @@ class MultiTableApplicationTests {
     @Test
     @SneakyThrows
     void testQueryAggregate() {
-        MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
+                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM), User.class, UserAddress.class));
         System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
     }
 
@@ -65,9 +67,7 @@ class MultiTableApplicationTests {
                                 .likeDefault(true, UserStaff::getStaffName, "111")
                                 .notIn(true, UserStaff::getStaffName, "111", "11122", "1112")
                                 .limit(0, 20)
-                        ,
-                        MultiWrapperMainSubWhere.lambda(User.class)
-                                .eq(User::getSex, 1)
+
                 )
                 .leftJoin(MultiWrapperSub.lambda(User.class)
                         .select(User::getUsername)
@@ -75,6 +75,9 @@ class MultiTableApplicationTests {
                         .gt(BaseModel::getUpdateTime, LocalDateTime.now())
                         .in(BaseModel::getId, "1", "1", "3")
                         .likeDefault(User::getUsername, "1")
+                        .mainWhere(mainWhere ->
+                                mainWhere.eq(User::getSex, 1)
+                        )
                 )
                 .leftJoin(MultiWrapperSub.lambda(UserAddress.class)
                         .select(UserAddress::getProvince)

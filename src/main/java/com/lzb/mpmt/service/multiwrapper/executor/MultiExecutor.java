@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.executor;
 
 import com.lzb.mpmt.service.multiwrapper.config.MultiProperties;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.dto.IMultiPage;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
@@ -10,6 +11,9 @@ import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,14 +91,56 @@ public class MultiExecutor {
         return page;
     }
 
+    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+    public static class MultiAggregateResultMap {
+        private MultiConstant.MultiAggregateTypeEnum aggregateType;
+        private String relationCode;
+        private String fieldName;
+
+        public MultiAggregateResultMap(String append) {
+            String[] split = append.split("\\.");
+            aggregateType = MultiConstant.MultiAggregateTypeEnum.valueOf(split[0]);
+            relationCode = split[1];
+            fieldName = split[2];
+        }
+    }
+
     @SneakyThrows
     public static <MAIN> MultiAggregateResult aggregate(MultiWrapper<MAIN> wrapper) {
         String aggregateSql = wrapper.computeAggregateSql();
-        return executor.executeSql(aggregateSql, (resultSet) -> {
-            System.out.println();
-            return MultiAggregateResult.builder()
-                    .build();
-        }).stream().filter(Objects::nonNull).findFirst().orElse(null);
+        log.info("aggregateSql, sql:\n{}", aggregateSql);
+        Map<String, ?> objectMap = executor.executeSql(aggregateSql);
+
+        MultiAggregateResult aggregateResult = new MultiAggregateResult();
+        Map<MultiAggregateResultMap, Object> map = objectMap.entrySet().stream().collect(Collectors.toMap(e -> new MultiAggregateResultMap(e.getKey()), Map.Entry::getValue));
+        map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
+            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + MultiUtil.underlineToCamel(e.getKey().getFieldName()), Map.Entry::getValue));
+            switch (aggregateType) {
+                case SUM:
+                    aggregateResult.setSum(keyValueMap);
+                    break;
+                case AVG:
+                    aggregateResult.setAvg(keyValueMap);
+                    break;
+                case COUNT:
+                    aggregateResult.setCount(0L);//todo
+                    break;
+                case COUNT_DISTINCT:
+                    aggregateResult.setCountDistinct(keyValueMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> null == e.getValue() ? 0 : Long.parseLong(e.getValue().toString()))));
+                    break;
+                case MAX:
+                    aggregateResult.setMax(keyValueMap);
+                    break;
+                case MIN:
+                    aggregateResult.setMin(keyValueMap);
+                    break;
+                case GROUP_CONCAT:
+                    break;
+            }
+        });
+        return aggregateResult;
     }
 
     @SuppressWarnings("unchecked")

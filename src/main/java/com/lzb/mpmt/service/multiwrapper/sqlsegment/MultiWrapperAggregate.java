@@ -48,7 +48,7 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
         getMultiAggregateInfos().add(
                 MultiAggregateInfo.builder()
                         .aggregateType(MultiConstant.MultiAggregateTypeEnum.SUM)
-//                        .relationCode()//todo 加载完把relationCode,set进去
+//                        .relationCode()//关系树加载完后,把relationCode,set进去
                         .fieldName(lambdaData.getFieldName())
                         .alias(alias)
                         .build()

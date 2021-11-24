@@ -55,7 +55,7 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
             selectFieldNames = MultiRelationCaches.getFieldNamesByClass(getClazz());
             setSelectFields(selectFieldNames);
         }
-        return selectFieldNames.stream().map(fieldName -> "  " + getTableName() + "." + fieldName + " as " + "`" + relationCode + "." + fieldName + "`")
+        return selectFieldNames.stream().map(fieldName -> "  " + relationCode + "." + fieldName + " as " + "`" + relationCode + "." + fieldName + "`")
                 .collect(Collectors.joining(",\n"));
     }
 

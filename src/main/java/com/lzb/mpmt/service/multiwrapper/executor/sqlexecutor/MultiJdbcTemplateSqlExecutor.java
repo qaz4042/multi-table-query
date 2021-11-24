@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -22,5 +23,10 @@ public class MultiJdbcTemplateSqlExecutor implements IMultiSqlExecutor {
     @Override
     public <T> List<T> executeSql(String sql, Function<ResultSet, T> function) {
         return jdbcTemplate.query(sql, (rs, i) -> function.apply(rs));
+    }
+
+    @Override
+    public Map<String, Object> executeSql(String sql) {
+        return jdbcTemplate.queryForMap(sql);
     }
 }

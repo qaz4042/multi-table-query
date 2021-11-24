@@ -16,7 +16,7 @@
 //
 //    public static void addConfigs() {
 //        SerializeConfig globalInstance = SerializeConfig.getGlobalInstance();
-//        // todo 应用失败 是通过具体类去匹配解析器的,不是通过 class.isAssignableFrom()去判断,所有取不到我们的解析器
+//        //  应用失败 是通过具体类去匹配解析器的,不是通过 class.isAssignableFrom()去判断,所有取不到我们的解析器
 //        globalInstance.put(Enum.class, EnumSerializerConfig.instance);
 //        globalInstance.put(IMultiEnum.class, MultiEnumSerializerConfig.instance);
 //    }
