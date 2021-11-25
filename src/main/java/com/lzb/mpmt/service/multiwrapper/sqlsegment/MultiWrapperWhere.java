@@ -150,7 +150,7 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
      * @param opt       等于/大于 等条件判断
      * @param <VAL>     字段的泛型
      */
-    private <VAL> void addWhereTreeData(Boolean condition, MultiFunction<T, VAL> prop, Object values, WhereOptEnum opt) {
+    default <VAL> void addWhereTreeData(Boolean condition, MultiFunction<T, VAL> prop, Object values, WhereOptEnum opt) {
         if (!condition) {
             return;
         }

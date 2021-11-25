@@ -21,10 +21,6 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
 
     void setTableName(String tableName);
 
-    List<String> getSelectFields();
-
-    void setSelectFields(List<String> list);
-
     List<MultiAggregateInfo> getMultiAggregateInfos();
 
     default <VAL> Wrapper sum(MultiFunction<T, VAL> propFunc) {
@@ -56,27 +52,6 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
         return (Wrapper) this;
     }
 
-
-//    default Wrapper sumAll(){
-//
-//    }
-
-//    sum("求和"),
-//
-//    avg("求平均值"),
-//
-//    count("计数"),//默认对主表进行计数
-//
-//    countDistinct("计数去重"),
-//
-//    max("最大值"),//默认对主表进行计数
-//
-//    min("最小值"),//默认对主表进行计数,
-//
-//    //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
-//    group_concat("分组组合拼接"),
-
-
     default String getSqlAggregate() {
         return this.getMultiAggregateInfos().stream().map(aggregateInfo ->
                 {
@@ -87,13 +62,4 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
                 }
         ).collect(Collectors.joining(","));
     }
-
-    /**
-     * long转字符串
-     */
-    private String valToStr(Long l, String appendLast) {
-        return l == null ? MultiConstant.Strings.EMPTY : l + appendLast;
-    }
-
-
 }

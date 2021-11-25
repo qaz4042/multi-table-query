@@ -37,7 +37,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
     /**
      * long转字符串
      */
-    private String valToStr(Long l, String appendLast) {
+    default String valToStr(Long l, String appendLast) {
         return l == null ? MultiConstant.Strings.EMPTY : l + appendLast;
     }
 
