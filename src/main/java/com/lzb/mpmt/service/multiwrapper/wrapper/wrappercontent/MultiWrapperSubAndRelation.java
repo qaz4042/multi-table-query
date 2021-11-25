@@ -67,20 +67,20 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
      */
     private Boolean tableNameOtherRequire;
 
-    public String getSqlJoin(String mainTableName) {
-        if (MultiTableRelationFactory.INSTANCE == null) {
-            throw new MultiException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");
-        }
-        MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
-        String subTableName = wrapperSub.getTableName();
-
-        //todo
-        String sqlWhereProps = getWrapperSub().getSqlWhereProps("");
-        sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiConstant.Strings.EMPTY : " and " + sqlWhereProps;
-
-
-        return joinType.getJoinSqlSegment() + subTableName + " " + this.getRelationCode() + " on " + relation.getTableName1() + "." + relation.getClass1KeyProp() + " = " + relation.getTableName2() + "." + relation.getClass2KeyProp() + sqlWhereProps;
-    }
+//    public String getSqlJoin(String parentRelationCode) {
+//        if (MultiTableRelationFactory.INSTANCE == null) {
+//            throw new MultiException("请先初始化表关系 MultiWrapperSubAndRelation.MultiTableRelationFactory");
+//        }
+//        MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
+//        String subTableName = wrapperSub.getTableName();
+//
+//        //todo
+//        String sqlWhereProps = getWrapperSub().getSqlWhereProps(this.getRelationCode());
+//        sqlWhereProps = MultiUtil.isEmpty(sqlWhereProps) ? MultiConstant.Strings.EMPTY : " and " + sqlWhereProps;
+//
+//
+//        return joinType.getJoinSqlSegment() + subTableName + " " + this.getRelationCode() + " on " + relation.getTableName1() + "." + relation.getClass1KeyProp() + " = " + relation.getTableName2() + "." + relation.getClass2KeyProp() + sqlWhereProps;
+//    }
 
     @Override
     public Class<?> getTableClassThis() {

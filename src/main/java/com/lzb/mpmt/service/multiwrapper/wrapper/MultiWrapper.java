@@ -4,13 +4,8 @@ import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
-import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubAndRelation;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.*;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperWhere;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -209,6 +204,7 @@ public class MultiWrapper<MAIN> {
     private Stream<String> computeAggregateFieldAssOne(MultiWrapperSelect<?, ?> multiWrapperSelect, String relationCode, MultiConstant.MultiAggregateTypeEnum aggregateAllType) {
         return multiWrapperSelect.getSelectFieldNames().stream()
                 .filter(fieldName -> {
+                            //过滤部分字段
                             Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(relationCode, fieldName, multiWrapperSelect.getClazz());
                             return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
                         }
@@ -225,14 +221,21 @@ public class MultiWrapper<MAIN> {
     private List<String> getSqlJoin(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree) {
         String relationCode = relationTree.getCurr().getRelationCode();
         List<String> leftJoins = relationTree.getChildren().stream().map(r -> {
-            String subRelationCode = r.getCurr().getRelationCode();
-            MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
-            boolean thisIs1 = r.getCurr().getTableNameThis().equals(relation.getTableName1());
-            return " left join " + r.getCurr().getTableNameThis() + " " + subRelationCode + " on "
-                    + subRelationCode + "." + (thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
-                    + "="
-                    + relationCode + "." + (thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
-        }).collect(Collectors.toList());
+            if (r.getCurr() instanceof MultiWrapperSubAndRelation) {
+                //noinspection rawtypes
+                MultiWrapperSubAndRelation curr = (MultiWrapperSubAndRelation) r.getCurr();
+                String subRelationCode = curr.getRelationCode();
+                MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
+                boolean thisIs1 = curr.getTableNameThis().equals(relation.getTableName1());
+                String leftJsonOn = " left join " + curr.getTableNameThis() + " " + subRelationCode + " on "
+                        + subRelationCode + "." + (thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
+                        + "="
+                        + relationCode + "." + (thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
+                String sqlWhereSub = curr.getWrapperSub().getSqlWhereProps(curr.getRelationCode());
+                return leftJsonOn + (MultiUtil.isEmpty(sqlWhereSub) ? "" : " and " + sqlWhereSub);
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
         List<String> leftJoinsSub = relationTree.getChildren().stream().flatMap(child -> getSqlJoin(child).stream()).collect(Collectors.toList());
         leftJoins.addAll(leftJoinsSub);
         return leftJoins;
@@ -242,11 +245,31 @@ public class MultiWrapper<MAIN> {
         // 4. 解析 where条件语句片段
         //    where user_staff.state = 0
         //      and user_staff_address.del_flag = 0
-        List<MultiWrapperWhere<?, ?>> whereWrappers = new ArrayList<>();
-        whereWrappers.add(0, wrapperMain);
-        //todo
-        String wherePropsAppend = whereWrappers.stream().map(where -> where.getSqlWhereProps("")).filter(s -> !MultiUtil.isEmpty(s)).collect(Collectors.joining("\n  and "));
-        return MultiUtil.isEmpty(wherePropsAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + wherePropsAppend;
+        List<String> sqlWheres = new ArrayList<>();
+
+        String sqlWhereMain = this.wrapperMain.getSqlWhereProps(wrapperMain.getRelationCode());
+        List<String> sqlWhereSubMain = this.getSqlMainWhMerePropsMainRecursion(this.relationTree);
+        sqlWheres.add(sqlWhereMain);
+        sqlWheres.addAll(sqlWhereSubMain);
+
+        String sqlWhereAppend = String.join("\n and ", sqlWheres);
+        return MultiUtil.isEmpty(sqlWhereAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + sqlWhereAppend;
+    }
+
+    private List<String> getSqlMainWhMerePropsMainRecursion(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> treeNode) {
+        List<String> sqlChildren = treeNode.getChildren().stream().map(treeNodeChild -> {
+            IMultiWrapperSubAndRelationTreeNode curr = treeNodeChild.getCurr();
+            if (curr instanceof MultiWrapperSubAndRelation) {
+                MultiWrapperSubMainWhere<?> mainWhere = ((MultiWrapperSubAndRelation<?>) curr).getWrapperSub().getMainWhere();
+                if (mainWhere != null) {
+                    return mainWhere.getSqlWhereProps(curr.getRelationCode());
+                }
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> sqlGrandChildren = treeNode.getChildren().stream().flatMap(treeNodeChild -> getSqlMainWhMerePropsMainRecursion(treeNodeChild).stream()).filter(Objects::nonNull).collect(Collectors.toList());
+        sqlChildren.addAll(sqlGrandChildren);
+        return sqlChildren;
     }
 
     private void loadRelations() {

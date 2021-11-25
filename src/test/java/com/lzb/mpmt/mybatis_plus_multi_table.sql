@@ -11,7 +11,7 @@
  Target Server Version : 50734
  File Encoding         : 65001
 
- Date: 12/11/2021 16:02:29
+ Date: 25/11/2021 14:51:52
 */
 
 SET NAMES utf8mb4;
@@ -53,14 +53,16 @@ CREATE TABLE `user`  (
   `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `sex` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `parent_id` int(11) NULL DEFAULT NULL,
+  `balance` decimal(10, 2) NULL DEFAULT NULL,
+  `numbers` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = COMPACT;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, '2021-11-09 22:21:56', '2021-11-09 22:21:56', 'username1', '1', 1);
-INSERT INTO `user` VALUES (2, '2021-11-09 22:21:56', '2021-11-09 22:21:56', 'username2', '1', 2);
+INSERT INTO `user` VALUES (1, '2021-11-09 22:21:56', '2021-11-09 22:21:56', 'username1', '1', 1, NULL, NULL);
+INSERT INTO `user` VALUES (2, '2021-11-09 22:21:56', '2021-11-09 22:21:56', 'username2', '1', 2, 1.00, NULL);
 
 -- ----------------------------
 -- Table structure for user_address

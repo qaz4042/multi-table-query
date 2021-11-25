@@ -17,9 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest(classes = MultiTableApplication.class)
 class MultiTableApplicationTests {
@@ -41,7 +40,7 @@ class MultiTableApplicationTests {
     @SneakyThrows
     void testQueryAggregate() {
         MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
-                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM), User.class, UserAddress.class));
+                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM,MultiConstant.MultiAggregateTypeEnum.AVG), User.class, UserAddress.class));
         System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
     }
 

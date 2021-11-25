@@ -114,7 +114,7 @@ public class MultiExecutor {
         Map<String, ?> objectMap = executor.executeSql(aggregateSql);
 
         MultiAggregateResult aggregateResult = new MultiAggregateResult();
-        Map<MultiAggregateResultMap, Object> map = objectMap.entrySet().stream().collect(Collectors.toMap(e -> new MultiAggregateResultMap(e.getKey()), Map.Entry::getValue));
+        Map<MultiAggregateResultMap, ? extends Map.Entry<String, ?>> map = MultiUtil.listToMap(objectMap.entrySet(), e -> new MultiAggregateResultMap(e.getKey()));
         map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
             Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + MultiUtil.underlineToCamel(e.getKey().getFieldName()), Map.Entry::getValue));
             switch (aggregateType) {
