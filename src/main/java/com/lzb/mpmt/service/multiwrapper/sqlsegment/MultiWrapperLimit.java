@@ -30,7 +30,7 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
         if (null == getLimitSize()) {
             return tableName;
         } else {
-            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitOffset(), MultiConstant.Strings.EMPTY) + ") " + tableName;
+            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitSize(), MultiConstant.Strings.EMPTY) + ") " + tableName;
         }
     }
 

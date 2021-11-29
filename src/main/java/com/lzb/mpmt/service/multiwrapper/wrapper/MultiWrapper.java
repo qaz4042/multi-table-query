@@ -140,34 +140,35 @@ public class MultiWrapper<MAIN> {
         //全部字段聚合 select sum(t1.amount),sum(t2.qty) ...
         // sum/avg全部数字型字段 count(1) countDistinct全部字段
         List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = this.wrapperMain.getAggregateAllTypes();
-        List<String> aggregateFieldAss = new ArrayList<>(32);
+        List<String> aggregateFieldAll = new ArrayList<>(32);
         if (aggregateAllTypes.size() > 0) {
-            aggregateFieldAss.addAll(
+            aggregateFieldAll.addAll(
                     aggregateAllTypes.stream().flatMap(aggregateAllType ->
-                            Stream.of(
-                                    this.computeAggregateFieldAssOne(this.wrapperMain, mainTableName, aggregateAllType),
-                                    this.wrapperSubAndRelations.stream().flatMap(
-                                            multiWrapperSubAndRelation -> this.computeAggregateFieldAssOne(multiWrapperSubAndRelation.getWrapperSub(), multiWrapperSubAndRelation.getRelationCode(), aggregateAllType)
-                                    )
-                            ).flatMap(l -> l)
+                            MultiConstant.MultiAggregateTypeEnum.COUNT.equals(aggregateAllType) ? Stream.of("count(DISTINCT " + mainTableName + ".id) as 'COUNT. . '") :
+                                    Stream.of(
+                                            this.computeAggregateFieldAssOne(this.wrapperMain, mainTableName, aggregateAllType),
+                                            this.wrapperSubAndRelations.stream().flatMap(
+                                                    multiWrapperSubAndRelation -> this.computeAggregateFieldAssOne(multiWrapperSubAndRelation.getWrapperSub(), multiWrapperSubAndRelation.getRelationCode(), aggregateAllType)
+                                            )
+                                    ).flatMap(l -> l)
                     ).collect(Collectors.toList())
             );
-            System.out.println("aggregateFieldAss" + JSONUtil.toString(aggregateFieldAss));
+            System.out.println("aggregateFieldAss" + JSONUtil.toString(aggregateFieldAll));
             //过滤掉非数字的属性
-
         }
-        if (MultiUtil.isEmpty(aggregateFieldAss)) {
+        if (MultiUtil.isEmpty(aggregateFieldAll)) {
             throw new MultiException("没有可以(要)聚合的列,无法查询");
         }
 
         //指定字段聚合
-        String sqlSelect = "select " + String.join(",\n", aggregateFieldAss);
+        String sqlSelect = "select " + String.join(",\n", aggregateFieldAll);
         String sqlFromLimit = "\nfrom " + mainTableName;
         String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
         String sqlWhere = this.getSqlWhere();
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
     }
+
 
     /**
      * 输出最终sql

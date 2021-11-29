@@ -1,7 +1,9 @@
 package com.lzb.mpmt;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.dto.IMultiPage;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
+import com.lzb.mpmt.service.multiwrapper.dto.MultiPage;
 import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
@@ -34,13 +36,23 @@ class MultiTableApplicationTests {
     }
 
     /**
+     * 简单查询test
+     */
+    @Test
+    @SneakyThrows
+    void testQueryPage() {
+        IMultiPage<UserStaff> page = MultiExecutor.page(new MultiPage<>(1, 10), new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        System.out.println("testQueryPage=" + JSONUtil.toString(page));
+    }
+
+    /**
      * 基本聚合查询 todo 开发中
      */
     @Test
     @SneakyThrows
     void testQueryAggregate() {
         MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
-                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM,MultiConstant.MultiAggregateTypeEnum.AVG), User.class, UserAddress.class));
+                .count(), User.class, UserAddress.class));
         System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
     }
 

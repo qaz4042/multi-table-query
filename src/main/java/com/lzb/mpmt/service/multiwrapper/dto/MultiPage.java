@@ -12,7 +12,13 @@ import java.util.Map;
  */
 @Data
 public class MultiPage<T> implements IMultiPage<T> {
+    public MultiPage() {
+    }
 
+    public MultiPage(long currPage, long pageSize) {
+        this.pageSize = pageSize;
+        this.currPage = currPage;
+    }
     /* ------------- 入参 ------------- */
     /**
      * 每页大小

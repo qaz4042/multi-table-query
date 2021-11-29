@@ -82,6 +82,7 @@ public class MultiExecutor {
     @SuppressWarnings("ConstantConditions")
     @SneakyThrows
     public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
+        wrapper.getWrapperMain().count().limit((page.getCurrPage() - 1) * page.getPageSize(), page.getPageSize());
         MultiAggregateResult aggregateResult = aggregate(wrapper);
         List<MAIN> list = list(wrapper);
         //独立 count (如果wrapper里面有可以直接取)
@@ -125,7 +126,7 @@ public class MultiExecutor {
                     aggregateResult.setAvg(keyValueMap);
                     break;
                 case COUNT:
-                    aggregateResult.setCount(0L);//todo
+                    aggregateResult.setCount(Long.parseLong(list.get(0).getValue().getValue().toString()));
                     break;
                 case COUNT_DISTINCT:
                     aggregateResult.setCountDistinct(keyValueMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> null == e.getValue() ? 0 : Long.parseLong(e.getValue().toString()))));
