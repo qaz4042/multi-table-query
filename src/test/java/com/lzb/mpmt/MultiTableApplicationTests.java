@@ -36,7 +36,7 @@ class MultiTableApplicationTests {
     }
 
     /**
-     * 简单查询test
+     * 分页查询
      */
     @Test
     @SneakyThrows
@@ -46,13 +46,13 @@ class MultiTableApplicationTests {
     }
 
     /**
-     * 基本聚合查询 todo 开发中
+     * 基本聚合查询 todo 指定字段聚合
      */
     @Test
     @SneakyThrows
     void testQueryAggregate() {
         MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
-                .count(), User.class, UserAddress.class));
+                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM,MultiConstant.MultiAggregateTypeEnum.AVG), User.class, UserAddress.class));
         System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
     }
 
