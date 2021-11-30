@@ -11,9 +11,7 @@ import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.IMultiWrapperSubAndRelationTreeNode;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,7 +231,7 @@ public class MultiExecutor {
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
             List<String> selectFieldNames = currNode.getMultiWrapperSelectInfo().getSelectFields();
             for (String selectFieldName : selectFieldNames) {
-                Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(currRelationCode, selectFieldName, currTableClass);
+                Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(selectFieldName, currTableClass);
                 Object value = getValue(currRelationCode + "." + selectFieldName, fieldReturnType, resultSet);
                 MultiRelationCaches.getRelation_setMethod(currRelationCode, selectFieldName, currTableClass).invoke(currEntity, value);
             }

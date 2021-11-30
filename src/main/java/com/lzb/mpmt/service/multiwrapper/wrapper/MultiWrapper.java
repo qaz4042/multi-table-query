@@ -206,7 +206,7 @@ public class MultiWrapper<MAIN> {
         return multiWrapperSelect.getSelectFieldNames().stream()
                 .filter(fieldName -> {
                             //过滤部分字段
-                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(relationCode, fieldName, multiWrapperSelect.getClazz());
+                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(fieldName, multiWrapperSelect.getClazz());
                             return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
                         }
                 ).map(fieldName -> {

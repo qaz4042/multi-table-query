@@ -37,9 +37,9 @@ public class MultiRelationCaches {
     private static final Map<String, Method> RELATION_SET_METHOD_MAP = new WeakHashMap<>(2048);
 
     /**
-     * 将resultSet数据set到表里,需要判断数据类型
+     * 将resultSet数据set到实体里,需要判断数据类型
      */
-    private static final Map<String, Class<?>> RELATION_FIELD_TYPE_MAP = new WeakHashMap<>(4096);
+    private static final Map<Class<?>, Map<String, Field>> CLASS_FIELD_MAP_MAP = new WeakHashMap<>(4096);
 
     /**
      * 将子表数据,get,set到主表去
@@ -72,44 +72,29 @@ public class MultiRelationCaches {
         return method;
     }
 
-    public static Class<?> getRelation_fieldType(String relationCode, String fieldName, Class<?> tableClass) {
-        String relationCodeFieldName = relationCode + "." + fieldName;
-        Class<?> type = RELATION_FIELD_TYPE_MAP.get(relationCodeFieldName);
-        if (type == null) {
-            //初始化map
-            TABLE_CLASS_FIELD_NAMES_MAP.put(tableClass, MultiUtil.getAllFields(tableClass).stream()
-                    .filter(field -> unStaticUnFinal(field.getModifiers()))
-                    .filter(field -> MultiUtil.isBasicDataType(field.getType()))
-                    .filter(field -> {
-                        MultiTableField anno = field.getAnnotation(MultiTableField.class);
-                        return null == anno || anno.exist();
-                    })
-                    .peek(field -> RELATION_FIELD_TYPE_MAP.put(relationCode + "." + MultiUtil.camelToUnderline(field.getName()), field.getType()))
-                    .map(Field::getName)
-                    .map(MultiUtil::camelToUnderline)
-                    .collect(Collectors.toList()));
-        }
-        type = RELATION_FIELD_TYPE_MAP.get(relationCodeFieldName);
+    public static Class<?> getRelation_fieldType(String fieldName, Class<?> tableClass) {
+        Map<String, Field> map = computeIfAbsentClassFieldMap(tableClass);
+        Field fieldNow = map.get(fieldName);
+        Class<?> type = null == fieldNow ? null : fieldNow.getType();
         if (type == null) {
             throw new MultiException("找不到" + tableClass + "对应的" + fieldName + "属性");
         }
         return type;
     }
 
+    private static Map<String, Field> computeIfAbsentClassFieldMap(Class<?> tableClass) {
+        return CLASS_FIELD_MAP_MAP.computeIfAbsent(tableClass, (key) -> MultiUtil.getAllFields(tableClass).stream()
+                .filter(field -> unStaticUnFinal(field.getModifiers()))
+                .filter(field -> MultiUtil.isBasicDataType(field.getType()))
+                .filter(field -> {
+                    MultiTableField anno = field.getAnnotation(MultiTableField.class);
+                    return null == anno || anno.exist();
+                })
+                .collect(Collectors.toMap(f -> MultiUtil.camelToUnderline(f.getName()), f -> f)));
+    }
+
     public static List<String> getFieldNamesByClass(Class<?> tableClass) {
-        List<String> fields = TABLE_CLASS_FIELD_NAMES_MAP.get(tableClass);
-        if (fields == null) {
-            //初始化map
-            TABLE_CLASS_FIELD_NAMES_MAP.put(tableClass, MultiUtil.getAllFields(tableClass).stream()
-                    .filter(field -> unStaticUnFinal(field.getModifiers()))
-                    .filter(field -> MultiUtil.isBasicDataType(field.getType()))
-                    .filter(field -> {
-                        MultiTableField anno = field.getAnnotation(MultiTableField.class);
-                        return null == anno || anno.exist();
-                    }).map(field->MultiUtil.camelToUnderline(field.getName())).collect(Collectors.toList()));
-        }
-        fields = TABLE_CLASS_FIELD_NAMES_MAP.get(tableClass);
-        return fields;
+        return computeIfAbsentClassFieldMap(tableClass).values().stream().map(f -> MultiUtil.camelToUnderline(f.getName())).collect(Collectors.toList());
     }
 
 
