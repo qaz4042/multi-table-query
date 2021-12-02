@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,6 +91,12 @@ public class MultiUtil {
         }
     }
 
+
+    public static void assertNoNull(Object o, String errorMessage, Object... params) {
+        if (null == o) {
+            throw new MultiException(MessageFormat.format(errorMessage, params));
+        }
+    }
 
     /**
      * Return the default ClassLoader to use: typically the thread context

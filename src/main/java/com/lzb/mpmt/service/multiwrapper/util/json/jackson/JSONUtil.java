@@ -3,6 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.util.json.jackson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzb.mpmt.service.multiwrapper.util.MultiException;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,17 +32,13 @@ public class JSONUtil {
 
     @SneakyThrows
     public static <T> T fromString(String str, Class<T> clazz) {
-        if (objectMapper == null) {
-            throw new MultiException("请先引入jackson框架,确保spring注入了com.fasterxml.jackson.databind.ObjectMapper");
-        }
+        MultiUtil.assertNoNull(objectMapper,"请先引入jackson框架,确保spring注入了com.fasterxml.jackson.databind.ObjectMapper");
         return objectMapper.readValue(str, clazz);
     }
 
     @SneakyThrows
     public static <T> T fromString(String str, TypeReference<T> typeReference) {
-        if (objectMapper == null) {
-            throw new MultiException("请先引入jackson框架,确保spring注入了com.fasterxml.jackson.databind.ObjectMapper");
-        }
+        MultiUtil.assertNoNull(objectMapper,"请先引入jackson框架,确保spring注入了com.fasterxml.jackson.databind.ObjectMapper");
         return objectMapper.readValue(str, typeReference);
     }
 }

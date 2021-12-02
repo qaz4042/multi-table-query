@@ -130,7 +130,7 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum WhereOptEnum {
-        /***/
+        /** todo  改成 MessageFormat 更友好 */
         eq("%s = '%s'", "age = 18"),
         isNull("%s is null", "age is null"),
         isNotNull("%s is not null", "age is not null"),

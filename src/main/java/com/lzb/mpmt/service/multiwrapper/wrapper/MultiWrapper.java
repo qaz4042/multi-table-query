@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -132,9 +134,8 @@ public class MultiWrapper<MAIN> {
      */
     public String computeAggregateSql() {
         String mainTableName = wrapperMain.getTableName();
-        if (mainTableName == null) {
-            throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
-        }
+        MultiUtil.assertNoNull(mainTableName,"请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+
         this.loadRelations();
 
         //全部字段聚合 select sum(t1.amount),sum(t2.qty) ...
@@ -175,9 +176,7 @@ public class MultiWrapper<MAIN> {
      */
     public String computeSql() {
         String mainTableName = wrapperMain.getTableName();
-        if (mainTableName == null) {
-            throw new MultiException("请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
-        }
+        MultiUtil.assertNoNull(mainTableName, "请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
 
         // 1. 解析 关系
         this.loadRelations();
@@ -203,10 +202,13 @@ public class MultiWrapper<MAIN> {
 
 
     private Stream<String> computeAggregateFieldAssOne(MultiWrapperSelect<?, ?> multiWrapperSelect, String relationCode, MultiConstant.MultiAggregateTypeEnum aggregateAllType) {
+        Map<String, MultiTuple2<Field, Method>> classInfos = MultiRelationCaches.getClassInfos(multiWrapperSelect.getClazz());
         return multiWrapperSelect.getSelectFieldNames().stream()
                 .filter(fieldName -> {
                             //过滤部分字段
-                            Class<?> relation_fieldType = MultiRelationCaches.getRelation_fieldType(fieldName, multiWrapperSelect.getClazz());
+                            MultiTuple2<Field, Method> fieldInfo = classInfos.get(fieldName);
+                            MultiUtil.assertNoNull(fieldInfo, "{0}不存在{1}属性", multiWrapperSelect.getClazz(), fieldName);
+                            Class<?> relation_fieldType = fieldInfo.getT1().getType();
                             return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
                         }
                 ).map(fieldName -> {

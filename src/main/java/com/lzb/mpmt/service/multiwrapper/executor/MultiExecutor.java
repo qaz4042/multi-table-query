@@ -74,10 +74,12 @@ public class MultiExecutor {
     @SneakyThrows
     public static <MAIN> MAIN getOne(MultiWrapper<MAIN> wrapper) {
         List<MAIN> list = list(wrapper);
+        if (list.size() > 1) {
+            log.warn("getOne查询出两条数据:" + wrapper.computeSql());
+        }
         return list.isEmpty() ? null : list.get(0);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @SneakyThrows
     public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
         wrapper.getWrapperMain().count().limit((page.getCurrPage() - 1) * page.getPageSize(), page.getPageSize());
@@ -156,7 +158,7 @@ public class MultiExecutor {
             Boolean subTableRequire = curr.getTableNameOtherRequire();
 
             for (MAIN_OR_SUB currData : currDatas) {
-                Method getMethod = MultiRelationCaches.getRelation_TableWithTable_getSetMethod(relationCode, tableClassThis).getT1();
+                Method getMethod = MultiRelationCaches.getTableWithTable_getSetMethod(relationCode, tableClassThis).getT1();
                 Object subValues = getMethod.invoke(currData);
                 if (subTableRequire) {
                     //检查当前
@@ -187,10 +189,6 @@ public class MultiExecutor {
     private static <MAIN_OR_SUB> void throwRequireException(String tableNameThis, String relationCode, MAIN_OR_SUB currData) {
         throw new MultiException(tableNameThis + "表在" + relationCode + "关系中,需要另一张表一定有数据,但没有|" + tableNameThis + "表数据:" + JSONUtil.toString(currData));
     }
-
-//    @SneakyThrows
-//    public static <MAIN> List<MAIN> page(MultiPageOrder page, MultiWrapper<MAIN> wrapper) {
-//    }
 
     /**
      * 递归构造子表对象
@@ -229,14 +227,23 @@ public class MultiExecutor {
             //重复则不在生成
             //noinspection deprecation
             currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
+
+            Map<String, MultiTuple2<Field, Method>> classInfos = MultiRelationCaches.getClassInfos(currTableClass);
+            MultiUtil.assertNoNull(classInfos, "找不到{0}对应的类", currTableClass);
+
             List<String> selectFieldNames = currNode.getMultiWrapperSelectInfo().getSelectFields();
             for (String selectFieldName : selectFieldNames) {
-                Class<?> fieldReturnType = MultiRelationCaches.getRelation_fieldType(selectFieldName, currTableClass);
+
+                MultiTuple2<Field, Method> filedInfos = classInfos.get(selectFieldName);
+                MultiUtil.assertNoNull(filedInfos, "找不到{0}对应的属性{1}", currTableClass, selectFieldName);
+
+                Class<?> fieldReturnType = filedInfos.getT1().getType();
+                Method fieldSetMethod = filedInfos.getT2();
                 Object value = getValue(currRelationCode + "." + selectFieldName, fieldReturnType, resultSet);
-                MultiRelationCaches.getRelation_setMethod(currRelationCode, selectFieldName, currTableClass).invoke(currEntity, value);
+                fieldSetMethod.invoke(currEntity, value);
             }
 
-            //顶层节点为null,不用出setSubEntitys(subEntitys);
+            //顶层节点为null,不用出setSubEntity(subEntity);
             if (parentEntity != null) {
                 setCurrEntityInToParent(currNode, parentEntity, currTableClass, currRelationCode, currEntity);
             }
@@ -251,7 +258,7 @@ public class MultiExecutor {
 
     @SneakyThrows
     private static <MAIN_OR_SUB> void setCurrEntityInToParent(IMultiWrapperSubAndRelationTreeNode currNode, MAIN_OR_SUB parentEntity, Class<?> currTableClass, String currRelationCode, MAIN_OR_SUB currEntity) {
-        MultiTuple2<Method, Method> getSetMethods = MultiRelationCaches.getRelation_TableWithTable_getSetMethod(currRelationCode, parentEntity.getClass());
+        MultiTuple2<Method, Method> getSetMethods = MultiRelationCaches.getTableWithTable_getSetMethod(currRelationCode, parentEntity.getClass());
         Method getMethod = getSetMethods.getT1();
         Method setMethod = getSetMethods.getT2();
         Object subEntityExists = getMethod.invoke(parentEntity);
@@ -269,6 +276,7 @@ public class MultiExecutor {
                 subEntityExists = new ArrayList<>(8);
                 setMethod.invoke(parentEntity, subEntityExists);
             }
+            //noinspection unchecked
             ((Collection<MAIN_OR_SUB>) subEntityExists).add(currEntity);
         } else if (returnType.isArray()) {
             throw new MultiException("暂时不支持array类型参数:" + getMethod);
