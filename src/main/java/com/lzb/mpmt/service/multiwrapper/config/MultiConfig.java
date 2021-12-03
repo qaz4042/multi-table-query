@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcTemplateSqlExecutor;
-import com.lzb.mpmt.service.multiwrapper.util.MultiTableRelationFactory;
+import com.lzb.mpmt.service.multiwrapper.util.MultiClassRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -35,9 +35,9 @@ public class MultiConfig {
      * @return IMultiSqlExecutor
      */
     @Bean
-    @ConditionalOnMissingBean(MultiTableRelationFactory.class)
-    public MultiTableRelationFactory multiTableRelationFactory(IMultiTableRelationService multiTableRelationService) {
-        return new MultiTableRelationFactory(multiTableRelationService);
+    @ConditionalOnMissingBean(MultiClassRelationFactory.class)
+    public MultiClassRelationFactory multiTableRelationFactory(IMultiTableRelationService multiTableRelationService) {
+        return new MultiClassRelationFactory(multiTableRelationService);
     }
 
 

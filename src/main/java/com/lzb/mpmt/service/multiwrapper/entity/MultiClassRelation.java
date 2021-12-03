@@ -21,9 +21,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class MultiTableRelation {
+public class MultiClassRelation {
     /***
-     * 唯一编号,推荐使用 tableName1__tableName2
+     * 唯一编号,推荐使用 className1__className2
      * 对应实体中关系对象的变量名,例如(user__userStaff):
      * public class User{
      *   private String username;
@@ -33,16 +33,19 @@ public class MultiTableRelation {
     private String code;
 //    r1(User.class, UserStaff.class, ONE, MANY, true, false, User::getId);
 
-    /***
-     * 两张表名
+    /**
+     * 两张表名 (仅做展示用)
      */
     private Class<?> class1;
     private Class<?> class2;
-    private String tableName1;
-    private String tableName2;
+    /**
+     * 两张表对应实体名称
+     */
+    private String className1;
+    private String className2;
 
-    public Set<String> getTableNames() {
-        return new HashSet<>(Arrays.asList(tableName1, tableName2));
+    public Set<String> getClassNames() {
+        return new HashSet<>(Arrays.asList(className1, className2));
     }
 
     /***

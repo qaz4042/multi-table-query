@@ -9,10 +9,10 @@ public interface IWhereData {
     /**
      * 获取where内的属性信息
      *
-     * @param tableName 表名
+     * @param className 表名
      * @return sqlWhereProps
      */
-    default String getSqlWhereProps(String tableName) {
+    default String getSqlWhereProps(String className) {
         return MultiConstant.Strings.EMPTY;
     }
 }

@@ -31,8 +31,8 @@ public class WhereDataUnit implements IWhereData {
 
 
     @Override
-    public String getSqlWhereProps(String tableName) {
-        return String.format(opt.getTemplate(), tableName + "." + propName + " ", formatValues(values));
+    public String getSqlWhereProps(String className) {
+        return String.format(opt.getTemplate(), className + "." + propName + " ", formatValues(values));
     }
 
     /***

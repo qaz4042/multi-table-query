@@ -15,7 +15,7 @@ public class MultiWrapperMainSubWhere<MAIN> implements MultiWrapperWhere<MAIN, M
 
 
     /** 下划线表名 */
-    private String tableName;
+    private String className;
 
     /** where条件 */
     private WhereDataTree whereTree = new WhereDataTree();

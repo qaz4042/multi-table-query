@@ -34,7 +34,7 @@ public class MultiWrapperMain<MAIN> implements
     /**
      * 下划线表名
      */
-    private String tableName;
+    private String className;
 
     /**
      * where条件
@@ -82,9 +82,9 @@ public class MultiWrapperMain<MAIN> implements
     }
 
     public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
-        String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
+        String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
         MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
-        wrapperMain.setTableName(tableName);
+        wrapperMain.setClassName(className);
         wrapperMain.setClazz(clazz);
         return wrapperMain;
     }
@@ -96,22 +96,22 @@ public class MultiWrapperMain<MAIN> implements
     }
 
     @Override
-    public String getTableNameThis() {
-        return getTableName();
+    public String getClassNameThis() {
+        return getClassName();
     }
 
     @Override
-    public String getTableNameOther() {
+    public String getClassNameOther() {
         return "";
     }
 
     @Override
-    public ClassRelationOneOrManyEnum getTableNameThisOneOrMany() {
+    public ClassRelationOneOrManyEnum getClassNameThisOneOrMany() {
         return null;
     }
 
     @Override
-    public Boolean getTableNameOtherRequire() {
+    public Boolean getClassNameOtherRequire() {
         return false;
     }
 
@@ -122,7 +122,7 @@ public class MultiWrapperMain<MAIN> implements
 
     @Override
     public String getRelationCode() {
-        return getTableName();
+        return getClassName();
     }
 
     @Override

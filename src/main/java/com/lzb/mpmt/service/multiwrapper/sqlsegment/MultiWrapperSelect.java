@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"unused", "unchecked", "AlibabaAbstractMethodOrInterfaceMethodMustUseJavadoc"})
 public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wrapper>> {
-    String getTableName();
+    String getClassName();
 
-    void setTableName(String tableName);
+    void setClassName(String className);
 
     List<String> getSelectFields();
 
@@ -34,10 +34,10 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
      */
     default <VAL> Wrapper select(MultiFunction<T, VAL>... propFuncs) {
         if (!MultiUtil.isEmpty(propFuncs)) {
-            if (null == getTableName()) {
-                this.setTableName(SerializedLambda.resolveCache(propFuncs[0]).getTableName());
+            if (null == getClassName()) {
+                this.setClassName(MultiUtil.firstToLowerCase(SerializedLambda.resolveCache(propFuncs[0]).getClazz().getSimpleName()));
             }
-            this.setSelectFields(Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getFieldName()).collect(Collectors.toList()));
+            this.setSelectFields(Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getPropName()).collect(Collectors.toList()));
         }
         return (Wrapper) this;
     }

@@ -29,7 +29,7 @@ public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SU
     /**
      * 下划线表名
      */
-    private String tableName;
+    private String className;
 
     /**
      * where条件
@@ -54,9 +54,9 @@ public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SU
     private List<MultiAggregateInfo> multiAggregateInfos = Collections.emptyList();
 
     public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB, MAIN_WHERE> lambda(Class<SUB> clazz) {
-        String tableName = MultiUtil.camelToUnderline(clazz.getSimpleName());
+        String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
         MultiWrapperSub<SUB, MAIN_WHERE> wrapperSub = new MultiWrapperSub<>();
-        wrapperSub.setTableName(tableName);
+        wrapperSub.setClassName(className);
         wrapperSub.setClazz(clazz);
         return wrapperSub;
     }

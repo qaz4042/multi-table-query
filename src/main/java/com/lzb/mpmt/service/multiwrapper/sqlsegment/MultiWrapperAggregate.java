@@ -3,6 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.aggregate.MultiAggregateInfo;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
@@ -17,9 +18,9 @@ import java.util.stream.Collectors;
 public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<T, Wrapper>> {
 
 
-    String getTableName();
+    String getClassName();
 
-    void setTableName(String tableName);
+    void setClassName(String className);
 
     List<MultiAggregateInfo> getMultiAggregateInfos();
 
@@ -37,15 +38,15 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
     default <VAL> Wrapper sum(MultiFunction<T, VAL> propFunc, String alias) {
         assert null != propFunc;
         SerializedLambdaData lambdaData = SerializedLambda.resolveCache(propFunc);
-        if (null == getTableName()) {
-            this.setTableName(lambdaData.getTableName());
+        if (null == getClassName()) {
+            this.setClassName(MultiUtil.firstToLowerCase(lambdaData.getClazz().getSimpleName()));
         }
 
         getMultiAggregateInfos().add(
                 MultiAggregateInfo.builder()
                         .aggregateType(MultiConstant.MultiAggregateTypeEnum.SUM)
 //                        .relationCode()//关系树加载完后,把relationCode,set进去
-                        .fieldName(lambdaData.getFieldName())
+                        .propName(lambdaData.getPropName())
                         .alias(alias)
                         .build()
         );
@@ -57,7 +58,7 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
                 {
                     String alias = aggregateInfo.getAlias();
                     alias = null == alias ? "" : " as " + alias;
-                    return aggregateInfo.getAggregateType().name() + "(" + aggregateInfo.getRelationCode() + "." + aggregateInfo.getFieldName() + ")"
+                    return aggregateInfo.getAggregateType().name() + "(" + aggregateInfo.getRelationCode() + "." + aggregateInfo.getPropName() + ")"
                             + alias;
                 }
         ).collect(Collectors.joining(","));

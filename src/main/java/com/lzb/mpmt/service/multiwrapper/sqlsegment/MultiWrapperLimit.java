@@ -26,11 +26,11 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
     }
 
 
-    default String getSqlFromLimit(String tableName) {
+    default String getSqlFromLimit(String className) {
         if (null == getLimitSize()) {
-            return tableName;
+            return className;
         } else {
-            return "(select * from " + tableName + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitSize(), MultiConstant.Strings.EMPTY) + ") " + tableName;
+            return "(select * from " + className + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitSize(), MultiConstant.Strings.EMPTY) + ") " + className;
         }
     }
 

@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
@@ -17,9 +18,9 @@ import java.util.function.Consumer;
 @SuppressWarnings({"unused", "unchecked", "AlibabaAbstractMethodOrInterfaceMethodMustUseJavadoc"})
 public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapper>> {
 
-    String getTableName();
+    String getClassName();
 
-    void setTableName(String tableName);
+    void setClassName(String className);
 
     WhereDataTree getWhereTree();
 
@@ -155,10 +156,10 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
             return;
         }
         SerializedLambdaData resolve = SerializedLambda.resolveCache(prop);
-        if (null == getTableName()) {
-            setTableName(resolve.getTableName());
+        if (null == getClassName()) {
+            setClassName(MultiUtil.firstToLowerCase(resolve.getClazz().getSimpleName()));
         }
-        String propNameUnderline = resolve.getFieldName();
-        getWhereTree().getWhereDatas().add(new WhereDataUnit(propNameUnderline, opt, values));
+//        String propNameUnderline = resolve.getFieldName();
+        getWhereTree().getWhereDatas().add(new WhereDataUnit(resolve.getPropName(), opt, values));
     }
 }

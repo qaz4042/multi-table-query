@@ -92,10 +92,11 @@ public class MultiUtil {
     }
 
 
-    public static void assertNoNull(Object o, String errorMessage, Object... params) {
+    public  static <T> T assertNoNull(T o, String errorMessage, Object... params) {
         if (null == o) {
             throw new MultiException(MessageFormat.format(errorMessage, params));
         }
+        return o;
     }
 
     /**
@@ -191,54 +192,54 @@ public class MultiUtil {
     }
 
 
-    /**
-     * 字符串驼峰转下划线格式
-     *
-     * @param param 需要转换的字符串
-     * @return 转换好的字符串
-     */
-    public static String camelToUnderline(String param) {
-        if (null == param || param.length() == 0) {
-            return MultiConstant.Strings.EMPTY;
-        }
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (Character.isUpperCase(c) && i > 0) {
-                sb.append(MultiConstant.Strings.UNDERLINE);
-            }
-            sb.append(Character.toLowerCase(c));
-        }
-        return sb.toString();
-    }
+//    /**
+//     * 字符串驼峰转下划线格式
+//     *
+//     * @param param 需要转换的字符串
+//     * @return 转换好的字符串
+//     */
+//    public static String camelToUnderline(String param) {
+//        if (null == param || param.length() == 0) {
+//            return MultiConstant.Strings.EMPTY;
+//        }
+//        int len = param.length();
+//        StringBuilder sb = new StringBuilder(len);
+//        for (int i = 0; i < len; i++) {
+//            char c = param.charAt(i);
+//            if (Character.isUpperCase(c) && i > 0) {
+//                sb.append(MultiConstant.Strings.UNDERLINE);
+//            }
+//            sb.append(Character.toLowerCase(c));
+//        }
+//        return sb.toString();
+//    }
 
 
-    /**
-     * 字符串下划线转驼峰格式
-     *
-     * @param param 需要转换的字符串
-     * @return 转换好的字符串
-     */
-    public static String underlineToCamel(String param) {
-        if (null == param || param.length() == 0) {
-            return MultiConstant.Strings.EMPTY;
-        }
-        String temp = param.toLowerCase();
-        int len = temp.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = temp.charAt(i);
-            if (c == MultiConstant.Strings.UNDERLINE) {
-                if (++i < len) {
-                    sb.append(Character.toUpperCase(temp.charAt(i)));
-                }
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
+//    /**
+//     * 字符串下划线转驼峰格式
+//     *
+//     * @param param 需要转换的字符串
+//     * @return 转换好的字符串
+//     */
+//    public static String underlineToCamel(String param) {
+//        if (null == param || param.length() == 0) {
+//            return MultiConstant.Strings.EMPTY;
+//        }
+//        String temp = param.toLowerCase();
+//        int len = temp.length();
+//        StringBuilder sb = new StringBuilder(len);
+//        for (int i = 0; i < len; i++) {
+//            char c = temp.charAt(i);
+//            if (c == MultiConstant.Strings.UNDERLINE) {
+//                if (++i < len) {
+//                    sb.append(Character.toUpperCase(temp.charAt(i)));
+//                }
+//            } else {
+//                sb.append(c);
+//            }
+//        }
+//        return sb.toString();
+//    }
 
     public static List<Field> getAllFields(Class<?> clazz) {
         return getClassMetas(clazz, Class::getDeclaredFields);
@@ -259,9 +260,9 @@ public class MultiUtil {
         return list;
     }
 
-    public static String methodNameToFieldName(String methodName) {
-        return camelToUnderline(methodName.substring(3));
-    }
+//    public static String methodNameToFieldName(String methodName) {
+//        return camelToUnderline(methodName.substring(3));
+//    }
 
     public static boolean isBasicDataType(Class<?> clazz) {
         if (null == clazz) {

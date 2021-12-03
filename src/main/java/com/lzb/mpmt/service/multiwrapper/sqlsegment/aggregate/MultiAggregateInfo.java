@@ -25,7 +25,7 @@ public class MultiAggregateInfo {
     /**
      * 聚合字段对应字段名称
      */
-    String fieldName;
+    String propName;
     /**
      * 聚合字段别名
      */

@@ -66,7 +66,7 @@ public class MultiExecutor {
 
         if (multiProperties.getCheckRelationRequire()) {
             //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启) MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(currNode.getRelationCode());
-            checkRequireRecursion(wrapper.getWrapperMain().getTableName(), mains, wrapper.getRelationTree().getChildren());
+            checkRequireRecursion(wrapper.getWrapperMain().getClassName(), mains, wrapper.getRelationTree().getChildren());
         }
         return mains;
     }
@@ -98,13 +98,13 @@ public class MultiExecutor {
     public static class MultiAggregateResultMap {
         private MultiConstant.MultiAggregateTypeEnum aggregateType;
         private String relationCode;
-        private String fieldName;
+        private String propName;
 
         public MultiAggregateResultMap(String append) {
             String[] split = append.split("\\.");
             aggregateType = MultiConstant.MultiAggregateTypeEnum.valueOf(split[0]);
             relationCode = split[1];
-            fieldName = split[2];
+            propName = split[2];
         }
     }
 
@@ -117,7 +117,7 @@ public class MultiExecutor {
         MultiAggregateResult aggregateResult = new MultiAggregateResult();
         Map<MultiAggregateResultMap, ? extends Map.Entry<String, ?>> map = MultiUtil.listToMap(objectMap.entrySet(), e -> new MultiAggregateResultMap(e.getKey()));
         map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
-            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + MultiUtil.underlineToCamel(e.getKey().getFieldName()), Map.Entry::getValue));
+            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + e.getKey().getPropName(), Map.Entry::getValue));
             switch (aggregateType) {
                 case SUM:
                     aggregateResult.setSum(keyValueMap);
@@ -146,28 +146,28 @@ public class MultiExecutor {
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> void checkRequireRecursion(String currTableName, List<MAIN_OR_SUB> currDatas, List<MultiTreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
+    private static <MAIN_OR_SUB> void checkRequireRecursion(String currClassName, List<MAIN_OR_SUB> currDatas, List<MultiTreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
         if (MultiUtil.isEmpty(currDatas)) {
             return;
         }
         for (MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode : subRelationNodes) {
             IMultiWrapperSubAndRelationTreeNode curr = relationTreeNode.getCurr();
             String relationCode = curr.getRelationCode();
-            String tableNameThis = curr.getTableNameThis();
+            String classNameThis = curr.getClassNameThis();
             Class<?> tableClassThis = curr.getTableClassThis();
-            Boolean subTableRequire = curr.getTableNameOtherRequire();
+            Boolean subTableRequire = curr.getClassNameOtherRequire();
 
             for (MAIN_OR_SUB currData : currDatas) {
-                Method getMethod = MultiRelationCaches.getTableWithTable_getSetMethod(relationCode, tableClassThis).getT1();
+                Method getMethod = MultiRelationCaches.getTableWithTable_getSetMethod(tableClassThis, relationCode).getT1();
                 Object subValues = getMethod.invoke(currData);
                 if (subTableRequire) {
                     //检查当前
                     if (subValues == null) {
-                        throwRequireException(currTableName, relationCode, currData);
+                        throwRequireException(currClassName, relationCode, currData);
                     }
                     if (subValues instanceof List) {
                         if (((List<?>) subValues).size() == 0) {
-                            throwRequireException(currTableName, relationCode, currData);
+                            throwRequireException(currClassName, relationCode, currData);
                         }
                     }
                 }
@@ -177,17 +177,17 @@ public class MultiExecutor {
                 }
                 if (subValues instanceof List && ((List<?>) subValues).size() > 0) {
                     //递归检查
-                    checkRequireRecursion(tableNameThis, (List<MAIN_OR_SUB>) subValues, relationTreeNode.getChildren());
+                    checkRequireRecursion(classNameThis, (List<MAIN_OR_SUB>) subValues, relationTreeNode.getChildren());
                 } else {
                     //递归检查
-                    checkRequireRecursion(tableNameThis, Collections.singletonList(subValues), relationTreeNode.getChildren());
+                    checkRequireRecursion(classNameThis, Collections.singletonList(subValues), relationTreeNode.getChildren());
                 }
             }
         }
     }
 
-    private static <MAIN_OR_SUB> void throwRequireException(String tableNameThis, String relationCode, MAIN_OR_SUB currData) {
-        throw new MultiException(tableNameThis + "表在" + relationCode + "关系中,需要另一张表一定有数据,但没有|" + tableNameThis + "表数据:" + JSONUtil.toString(currData));
+    private static <MAIN_OR_SUB> void throwRequireException(String classNameThis, String relationCode, MAIN_OR_SUB currData) {
+        throw new MultiException(classNameThis + "表在" + relationCode + "关系中,需要另一张表一定有数据,但没有|" + classNameThis + "表数据:" + JSONUtil.toString(currData));
     }
 
     /**
@@ -215,9 +215,8 @@ public class MultiExecutor {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
         String currRelationCode = currNode.getRelationCode();
-//        String currTableNameThis = currNode.getTableNameThis();
         Field currTableIdField = MultiRelationCaches.getTableIdField(currTableClass);
-        String idFieldName = currRelationCode + "." + MultiUtil.camelToUnderline(currTableIdField.getName());
+        String idFieldName = currRelationCode + "." + currTableIdField.getName();
         Object id = getValue(idFieldName, currTableIdField.getType(), resultSet);
         String relationIdObjectMapKey = parentCodeAppendId + "_" + idFieldName + "_" + id;
         MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(relationIdObjectMapKey);
@@ -258,19 +257,18 @@ public class MultiExecutor {
 
     @SneakyThrows
     private static <MAIN_OR_SUB> void setCurrEntityInToParent(IMultiWrapperSubAndRelationTreeNode currNode, MAIN_OR_SUB parentEntity, Class<?> currTableClass, String currRelationCode, MAIN_OR_SUB currEntity) {
-        MultiTuple2<Method, Method> getSetMethods = MultiRelationCaches.getTableWithTable_getSetMethod(currRelationCode, parentEntity.getClass());
+        MultiTuple2<Method, Method> getSetMethods = MultiRelationCaches.getTableWithTable_getSetMethod(parentEntity.getClass(), currRelationCode);
         Method getMethod = getSetMethods.getT1();
         Method setMethod = getSetMethods.getT2();
         Object subEntityExists = getMethod.invoke(parentEntity);
         Class<?> returnType = getMethod.getReturnType();
 
         //列表
-        String tableNameParent = currNode.getTableNameOther();
-        String tableNameThis = currNode.getTableNameThis();
+        String classNameParent = currNode.getClassNameOther();
+        String classNameThis = currNode.getClassNameThis();
         if (List.class.isAssignableFrom(returnType)) {
-            if (!ClassRelationOneOrManyEnum.MANY.equals(currNode.getTableNameThisOneOrMany())) {
-//                        throw new MultiException(currNode.getTableNameThis() + "与" + currNode.getTableNameOther() + "不是1对多(或者多对多)关系,但" + currTableClass + "中" + currRelationCode + "为数组,定义不一致");
-                log.warn(tableNameParent + "与" + tableNameThis + "不是1对多(或者多对多)关系,但" + currTableClass + "中" + currRelationCode + "为数组,定义不一致");
+            if (!ClassRelationOneOrManyEnum.MANY.equals(currNode.getClassNameThisOneOrMany())) {
+                log.warn(classNameParent + "与" + classNameThis + "不是1对多(或者多对多)关系,但" + currTableClass + "中" + currRelationCode + "为数组,定义不一致");
             }
             if (subEntityExists == null) {
                 subEntityExists = new ArrayList<>(8);
@@ -281,8 +279,8 @@ public class MultiExecutor {
         } else if (returnType.isArray()) {
             throw new MultiException("暂时不支持array类型参数:" + getMethod);
         } else {
-            if (multiProperties.getCheckRelationOneOrMany() && !ClassRelationOneOrManyEnum.ONE.equals(currNode.getTableNameThisOneOrMany())) {
-                throw new MultiException(tableNameParent + "与" + tableNameThis + "不是1对1(或者多对多)关系,但" + currTableClass + "中" + currRelationCode + "为对象,定义不一致");
+            if (multiProperties.getCheckRelationOneOrMany() && !ClassRelationOneOrManyEnum.ONE.equals(currNode.getClassNameThisOneOrMany())) {
+                throw new MultiException(classNameParent + "与" + classNameThis + "不是1对1(或者多对多)关系,但" + currTableClass + "中" + currRelationCode + "为对象,定义不一致");
             }
             //一对一元素
             if (subEntityExists == null) {

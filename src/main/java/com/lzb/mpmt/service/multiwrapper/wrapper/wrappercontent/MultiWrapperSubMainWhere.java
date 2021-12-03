@@ -24,7 +24,7 @@ public class MultiWrapperSubMainWhere<SUB> implements
     /**
      * 下划线表名
      */
-    private String tableName;
+    private String className;
 
     /**
      * where条件

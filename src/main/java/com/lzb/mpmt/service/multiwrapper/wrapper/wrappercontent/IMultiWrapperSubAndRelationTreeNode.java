@@ -16,14 +16,14 @@ public interface IMultiWrapperSubAndRelationTreeNode extends MultiTreeNode.IEqua
      *
      * @return 当前节点的当前表
      */
-    String getTableNameThis();
+    String getClassNameThis();
 
     /**
      * 当前节点的当其他表
      *
      * @return 当前节点的当其他表
      */
-    String getTableNameOther();
+    String getClassNameOther();
 
     /**
      * 父子节点存在父子关系的判断
@@ -33,8 +33,7 @@ public interface IMultiWrapperSubAndRelationTreeNode extends MultiTreeNode.IEqua
      */
     @Override
     default boolean parentKeyEqualsChildKey(IMultiWrapperSubAndRelationTreeNode child) {
-        String tableNameOtherParent = getTableNameThis();
-        return tableNameOtherParent.equals(child.getTableNameOther());
+        return getClassNameThis().equals(child.getClassNameOther());
     }
 
 
@@ -44,13 +43,13 @@ public interface IMultiWrapperSubAndRelationTreeNode extends MultiTreeNode.IEqua
      *
      * @return This -> Other 的关系是one还是many
      */
-    ClassRelationOneOrManyEnum getTableNameThisOneOrMany() ;
+    ClassRelationOneOrManyEnum getClassNameThisOneOrMany() ;
     /**
      * 关系中 是否是否,表1一定该有数据/表2一定该有数据
      *
      * @return 关系中 是否是否,表1一定该有数据/表2一定该有数据
      */
-    Boolean getTableNameOtherRequire() ;
+    Boolean getClassNameOtherRequire() ;
 
     /**
      * 当前副表(或主表)对应类

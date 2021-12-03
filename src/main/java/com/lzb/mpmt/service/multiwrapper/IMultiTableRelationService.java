@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper;
 
-import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ public interface IMultiTableRelationService {
      *
      * @return 加载表和表的关系
      */
-    List<MultiTableRelation> loadRelation();
+    List<MultiClassRelation> loadRelation();
 }

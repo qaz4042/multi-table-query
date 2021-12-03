@@ -6,7 +6,7 @@ import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.*;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
-import com.lzb.mpmt.service.multiwrapper.entity.MultiTableRelation;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,7 +110,7 @@ public class MultiWrapper<MAIN> {
     /***
      * join是有顺序的,前后两张表,必须有直接关联
      *
-     * @param relationCode      {@link MultiTableRelation#getCode()}
+     * @param relationCode      {@link MultiClassRelation#getCode()}
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
@@ -133,8 +133,8 @@ public class MultiWrapper<MAIN> {
      * 输出最终sql
      */
     public String computeAggregateSql() {
-        String mainTableName = wrapperMain.getTableName();
-        MultiUtil.assertNoNull(mainTableName,"请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+        String mainClassName = wrapperMain.getClassName();
+        MultiUtil.assertNoNull(mainClassName,"请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
 
         this.loadRelations();
 
@@ -145,9 +145,9 @@ public class MultiWrapper<MAIN> {
         if (aggregateAllTypes.size() > 0) {
             aggregateFieldAll.addAll(
                     aggregateAllTypes.stream().flatMap(aggregateAllType ->
-                            MultiConstant.MultiAggregateTypeEnum.COUNT.equals(aggregateAllType) ? Stream.of("count(DISTINCT " + mainTableName + ".id) as 'COUNT. . '") :
+                            MultiConstant.MultiAggregateTypeEnum.COUNT.equals(aggregateAllType) ? Stream.of("count(DISTINCT " + mainClassName + ".id) as 'COUNT. . '") :
                                     Stream.of(
-                                            this.computeAggregateFieldAssOne(this.wrapperMain, mainTableName, aggregateAllType),
+                                            this.computeAggregateFieldAssOne(this.wrapperMain, mainClassName, aggregateAllType),
                                             this.wrapperSubAndRelations.stream().flatMap(
                                                     multiWrapperSubAndRelation -> this.computeAggregateFieldAssOne(multiWrapperSubAndRelation.getWrapperSub(), multiWrapperSubAndRelation.getRelationCode(), aggregateAllType)
                                             )
@@ -163,7 +163,7 @@ public class MultiWrapper<MAIN> {
 
         //指定字段聚合
         String sqlSelect = "select " + String.join(",\n", aggregateFieldAll);
-        String sqlFromLimit = "\nfrom " + mainTableName;
+        String sqlFromLimit = "\nfrom " + mainClassName;
         String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
         String sqlWhere = this.getSqlWhere();
 
@@ -175,8 +175,8 @@ public class MultiWrapper<MAIN> {
      * 输出最终sql
      */
     public String computeSql() {
-        String mainTableName = wrapperMain.getTableName();
-        MultiUtil.assertNoNull(mainTableName, "请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+        String mainClassName = wrapperMain.getClassName();
+        MultiUtil.assertNoNull(mainClassName, "请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
 
         // 1. 解析 关系
         this.loadRelations();
@@ -184,16 +184,15 @@ public class MultiWrapper<MAIN> {
         // 2.1. 解析 select要查出的字段语句片段
         // select user_staff.* from user_staff
         List<String> selectPropsList = this.wrapperSubAndRelations.stream().map(o -> o.getWrapperSub().getSqlSelectProps(o.getRelationCode())).collect(Collectors.toList());
-        selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getTableName()));
+        selectPropsList.add(0, wrapperMain.getSqlSelectProps(wrapperMain.getClassName()));
         String sqlSelect = "\nselect\n" + selectPropsList.stream().filter(Objects::nonNull).collect(Collectors.joining(",\n"));
 
         // 3. 解析 from主表,limit主表语句片段
         //	SELECT u.*,p.* FROM user_info                          u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
-        String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainTableName);
+        String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainClassName);
 
         String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
-//        String sqlLeftJoinOn = "\n" + this.wrapperSubAndRelations.stream().map(r -> r.getSqlJoin(mainTableName)).collect(Collectors.joining("\n"));
 
         String sqlWhere = this.getSqlWhere();
 
@@ -228,9 +227,9 @@ public class MultiWrapper<MAIN> {
                 //noinspection rawtypes
                 MultiWrapperSubAndRelation curr = (MultiWrapperSubAndRelation) r.getCurr();
                 String subRelationCode = curr.getRelationCode();
-                MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
-                boolean thisIs1 = curr.getTableNameThis().equals(relation.getTableName1());
-                String leftJsonOn = " left join " + curr.getTableNameThis() + " " + subRelationCode + " on "
+                MultiClassRelation relation = MultiClassRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
+                boolean thisIs1 = curr.getClassNameThis().equals(relation.getClassName1());
+                String leftJsonOn = " left join " + curr.getClassNameThis() + " " + subRelationCode + " on "
                         + subRelationCode + "." + (thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
                         + "="
                         + relationCode + "." + (thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
@@ -304,103 +303,103 @@ public class MultiWrapper<MAIN> {
     }
 
     private void fillRelationCodeAndTableThisOther(MultiWrapperMain<MAIN> wrapperMain, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
-        String mainTableName = wrapperMain.getTableName();
+        String mainClassName = wrapperMain.getClassName();
 
         List<MultiWrapperSubAndRelation<?>> hasCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null != relation.getRelationCode()).collect(Collectors.toList());
         List<MultiWrapperSubAndRelation<?>> noCodeRelations = wrapperSubAndRelations.stream().filter(relation -> null == relation.getRelationCode()).collect(Collectors.toList());
 
         //已经确定关系的表
-        Set<String> relationTableNames = new HashSet<>();
-        relationTableNames.add(mainTableName);
+        Set<String> relationClassNames = new HashSet<>();
+        relationClassNames.add(mainClassName);
         hasCodeRelations.forEach(relationHasCode -> {
-            String subTableName = relationHasCode.getWrapperSub().getTableName();
-            relationTableNames.add(relationHasCode.getWrapperSub().getTableName());
-            MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationHasCode.getRelationCode());
-            this.fillTableThisAndOther(relationHasCode, subTableName, relation);
+            String subClassName = relationHasCode.getWrapperSub().getClassName();
+            relationClassNames.add(relationHasCode.getWrapperSub().getClassName());
+            MultiClassRelation relation = MultiClassRelationFactory.INSTANCE.getRelationCodeMap().get(relationHasCode.getRelationCode());
+            this.fillTableThisAndOther(relationHasCode, subClassName, relation);
         });
 
         noCodeRelations.forEach(noCodeRelation ->
                 {
-                    String subTableName = noCodeRelation.getWrapperSub().getTableName();
+                    String subClassName = noCodeRelation.getWrapperSub().getClassName();
                     boolean hasRelation = false;
-                    for (String relationTableName1 : relationTableNames) {
-                        List<MultiTableRelation> relations = MultiTableRelationFactory.INSTANCE.getRelation2TableNameMap()
-                                .getOrDefault(subTableName, Collections.emptyMap())
-                                .getOrDefault(relationTableName1, Collections.emptyList());
+                    for (String relationClassName1 : relationClassNames) {
+                        List<MultiClassRelation> relations = MultiClassRelationFactory.INSTANCE.getRelation2ClassNameMap()
+                                .getOrDefault(subClassName, Collections.emptyMap())
+                                .getOrDefault(relationClassName1, Collections.emptyList());
                         if (relations.size() > 1) {
                             //有多种关系,需要重新确定
-                            throw new MultiException(relationTableName1 + "和" + subTableName + "存在多种关系,需要手动指定relationCode");
+                            throw new MultiException(relationClassName1 + "和" + subClassName + "存在多种关系,需要手动指定relationCode");
                         }
                         if (relations.size() < 1) {
                             //有多种关系,需要重新确定
-                            throw new MultiException(relationTableName1 + "和" + subTableName + "没有存在表关系,无法关联");
+                            throw new MultiException(relationClassName1 + "和" + subClassName + "没有存在表关系,无法关联");
                         }
-                        MultiTableRelation relation = relations.get(0);
+                        MultiClassRelation relation = relations.get(0);
 
                         noCodeRelation.setRelationCode(relation.getCode());
-                        this.fillTableThisAndOther(noCodeRelation, subTableName, relation);
+                        this.fillTableThisAndOther(noCodeRelation, subClassName, relation);
 
                         hasRelation = true;
                         break;
                     }
                     if (hasRelation) {
-                        relationTableNames.add(subTableName);
+                        relationClassNames.add(subClassName);
                     } else {
-                        throw new MultiException(subTableName + "和[" + String.join(",", relationTableNames) + "]没有存在表关系,无法关联");
+                        throw new MultiException(subClassName + "和[" + String.join(",", relationClassNames) + "]没有存在表关系,无法关联");
                     }
                 }
         );
 
         // AggregateInfos 聚合信息中填充relationCode
-        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainTableName));
+        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainClassName));
         //todo 初始化relationCode
 //        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
     }
 
-    private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subTableName, MultiTableRelation multiTableRelation) {
-        String tableName1 = multiTableRelation.getTableName1();
-        String tableName2 = multiTableRelation.getTableName2();
-        if (tableName1.equals(subTableName)) {
-            noCodeRelation.setTableNameThis(tableName1);
-            noCodeRelation.setTableNameThisOneOrMany(multiTableRelation.getClass1OneOrMany());
-            noCodeRelation.setTableNameOtherRequire(multiTableRelation.getClass1Require());
-            noCodeRelation.setTableNameOther(tableName2);
-        } else if (tableName2.equals(subTableName)) {
-            noCodeRelation.setTableNameThis(tableName2);
-            noCodeRelation.setTableNameThisOneOrMany(multiTableRelation.getClass2OneOrMany());
-            noCodeRelation.setTableNameOtherRequire(multiTableRelation.getClass2Require());
-            noCodeRelation.setTableNameOther(tableName1);
+    private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subClassName, MultiClassRelation multiTableRelation) {
+        String className1 = multiTableRelation.getClassName1();
+        String className2 = multiTableRelation.getClassName2();
+        if (className1.equals(subClassName)) {
+            noCodeRelation.setClassNameThis(className1);
+            noCodeRelation.setClassNameThisOneOrMany(multiTableRelation.getClass1OneOrMany());
+            noCodeRelation.setClassNameOtherRequire(multiTableRelation.getClass1Require());
+            noCodeRelation.setClassNameOther(className2);
+        } else if (className2.equals(subClassName)) {
+            noCodeRelation.setClassNameThis(className2);
+            noCodeRelation.setClassNameThisOneOrMany(multiTableRelation.getClass2OneOrMany());
+            noCodeRelation.setClassNameOtherRequire(multiTableRelation.getClass2Require());
+            noCodeRelation.setClassNameOther(className1);
         } else {
-            throw new MultiException("表关系" + multiTableRelation.getCode() + "(" + tableName1 + "," + tableName2 + ")其中之一必须和当前查询的表" + subTableName);
+            throw new MultiException("表关系" + multiTableRelation.getCode() + "(" + className1 + "," + className2 + ")其中之一必须和当前查询的表" + subClassName);
         }
     }
 
     /**
      *
      */
-    private void addToListNew(List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelationsNew, Set<String> parentTableNames, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
+    private void addToListNew(List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelationsNew, Set<String> parentClassNames, List<MultiWrapperSubAndRelation<?>> wrapperSubAndRelations) {
         ArrayList<MultiWrapperSubAndRelation<?>> multiWrapperSubAndRelationsTemp = new ArrayList<>(wrapperSubAndRelations);
 
         List<MultiWrapperSubAndRelation<?>> subRelations = wrapperSubAndRelations.stream().filter(relation ->
                 {
-                    MultiTableRelation relation1Now = getRelationByCode(relation.getRelationCode());
-                    return parentTableNames.stream().anyMatch(parentTable -> relation1Now.getTableNames().contains(parentTable));
+                    MultiClassRelation relation1Now = getRelationByCode(relation.getRelationCode());
+                    return parentClassNames.stream().anyMatch(parentClass -> relation1Now.getClassNames().contains(parentClass));
                 }
         ).collect(Collectors.toList());
         wrapperSubAndRelationsNew.addAll(subRelations);
         multiWrapperSubAndRelationsTemp.removeAll(subRelations);
 
         //添加父节点表名
-        subRelations.forEach(subRelation -> parentTableNames.addAll(getRelationByCode(subRelation.getRelationCode()).getTableNames()));
+        subRelations.forEach(subRelation -> parentClassNames.addAll(getRelationByCode(subRelation.getRelationCode()).getClassNames()));
 
         if (multiWrapperSubAndRelationsTemp.size() > 0) {
             //递归添加
-            addToListNew(wrapperSubAndRelationsNew, parentTableNames, multiWrapperSubAndRelationsTemp);
+            addToListNew(wrapperSubAndRelationsNew, parentClassNames, multiWrapperSubAndRelationsTemp);
         }
     }
 
-    private MultiTableRelation getRelationByCode(String relationCode) {
-        return MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
+    private MultiClassRelation getRelationByCode(String relationCode) {
+        return MultiClassRelationFactory.INSTANCE.getRelationCodeMap().get(relationCode);
     }
 
     public List<MAIN> list() {
