@@ -166,17 +166,6 @@ public class MultiUtil {
      * @param t   异常信息
      * @return 返回异常
      */
-    public static MybatisPlusException mpe(String msg, Throwable t, Object... params) {
-        return new MybatisPlusException(String.format(msg, params), t);
-    }
-
-    /**
-     * 返回一个新的异常，统一构建，方便统一处理
-     *
-     * @param msg 消息
-     * @param t   异常信息
-     * @return 返回异常
-     */
     public static MybatisPlusException mpe(String msg, Throwable t) {
         return new MybatisPlusException(String.format(msg, (Object[]) null), t);
     }
@@ -192,27 +181,27 @@ public class MultiUtil {
     }
 
 
-//    /**
-//     * 字符串驼峰转下划线格式
-//     *
-//     * @param param 需要转换的字符串
-//     * @return 转换好的字符串
-//     */
-//    public static String camelToUnderline(String param) {
-//        if (null == param || param.length() == 0) {
-//            return MultiConstant.Strings.EMPTY;
-//        }
-//        int len = param.length();
-//        StringBuilder sb = new StringBuilder(len);
-//        for (int i = 0; i < len; i++) {
-//            char c = param.charAt(i);
-//            if (Character.isUpperCase(c) && i > 0) {
-//                sb.append(MultiConstant.Strings.UNDERLINE);
-//            }
-//            sb.append(Character.toLowerCase(c));
-//        }
-//        return sb.toString();
-//    }
+    /**
+     * 字符串驼峰转下划线格式
+     *
+     * @param param 需要转换的字符串
+     * @return 转换好的字符串
+     */
+    public static String camelToUnderline(String param) {
+        if (null == param || param.length() == 0) {
+            return MultiConstant.Strings.EMPTY;
+        }
+        int len = param.length();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            char c = param.charAt(i);
+            if (Character.isUpperCase(c) && i > 0) {
+                sb.append(MultiConstant.Strings.UNDERLINE);
+            }
+            sb.append(Character.toLowerCase(c));
+        }
+        return sb.toString();
+    }
 
 
 //    /**

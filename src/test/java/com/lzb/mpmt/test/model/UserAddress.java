@@ -14,4 +14,6 @@ public class UserAddress extends BaseModel {
     private String userId;
     private String province;
     private String street;
+    private String streetCode;
+    private Address addressUserAddress;
 }

@@ -75,14 +75,14 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum MultiAggregateTypeEnum {
-        SUM("求和","IFNULL(SUM(%d), 0)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
-        AVG("求平均值","AVG(%d)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
-        COUNT("计数","COUNT(%d)", c -> false),//默认对主表count(*)进行计数
-        COUNT_DISTINCT("计数去重","COUNT(DISTINCT %d)", c -> true),
-        MAX("最大值","MAX(%d)", c -> true),//默认对主表进行计数
-        MIN("最小值","MIN(%d)", c -> true),//默认对主表进行计数,
+        SUM("求和","IFNULL(SUM(%s), 0)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
+        AVG("求平均值","AVG(%s)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
+        COUNT("计数","COUNT(%s)", c -> false),//默认对主表count(*)进行计数
+        COUNT_DISTINCT("计数去重","COUNT(DISTINCT %s)", c -> true),
+        MAX("最大值","MAX(%s)", c -> true),//默认对主表进行计数
+        MIN("最小值","MIN(%s)", c -> true),//默认对主表进行计数,
         //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
-        GROUP_CONCAT("分组组合拼接","GROUP_CONCAT(%d)", c -> true),
+        GROUP_CONCAT("分组组合拼接","GROUP_CONCAT(%s)", c -> true),
 //        JSON_ARRAYAGG("组装成JsonArray"),  //JSON_ARRAYAGG(col or expr) 　　将结果集聚合为单个JSON数组，其元素由参数列的值组成。此数组中元素的顺序未定义。该函数作用于计算为单个值的列或表达式。
 //        JSON_OBJECTAGG("组装成JsonObject"), //JSON_OBJECTAGG(key,value)     两个列名或表达式作为参数，第一个用作键，第二个用作值，并返回包含键值对的JSON对象。
         ;

@@ -3,6 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata;
 import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.WhereOptEnum;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.ClientPreparedQueryBindings;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +33,7 @@ public class WhereDataUnit implements IWhereData {
 
     @Override
     public String getSqlWhereProps(String className) {
-        return String.format(opt.getTemplate(), className + "." + propName + " ", formatValues(values));
+        return String.format(opt.getTemplate(), className + "." + MultiUtil.camelToUnderline(propName) + " ", formatValues(values));
     }
 
     /***

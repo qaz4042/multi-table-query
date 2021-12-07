@@ -53,14 +53,18 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
         return (Wrapper) this;
     }
 
-    default String getSqlAggregate() {
+    default List<String> getSqlAggregate(String relationCode) {
         return this.getMultiAggregateInfos().stream().map(aggregateInfo ->
-                {
-                    String alias = aggregateInfo.getAlias();
-                    alias = null == alias ? "" : " as " + alias;
-                    return aggregateInfo.getAggregateType().name() + "(" + aggregateInfo.getRelationCode() + "." + aggregateInfo.getPropName() + ")"
-                            + alias;
-                }
-        ).collect(Collectors.joining(","));
+                appendOneField(aggregateInfo.getAggregateType(), relationCode, aggregateInfo.getPropName(), aggregateInfo.getAlias())
+        ).collect(Collectors.toList());
+    }
+
+    static String appendOneField(MultiConstant.MultiAggregateTypeEnum aggregateAllType, String relationCode, String fieldName, String alias) {
+        if (alias == null) {
+            alias = aggregateAllType.name() + "." + relationCode + "." + fieldName;
+        } else {
+            alias = aggregateAllType.name() + "." + "." + alias;
+        }
+        return String.format(aggregateAllType.getSqlTemplate(), relationCode + "." + fieldName) + " '" + alias + "'";
     }
 }

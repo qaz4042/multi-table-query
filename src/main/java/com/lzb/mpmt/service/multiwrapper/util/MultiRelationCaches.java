@@ -2,6 +2,7 @@ package com.lzb.mpmt.service.multiwrapper.util;
 
 import com.lzb.mpmt.service.multiwrapper.annotations.MultiTableField;
 import com.lzb.mpmt.service.multiwrapper.annotations.MultiTableId;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -71,8 +72,11 @@ public class MultiRelationCaches {
                             .filter(m -> m.getParameterTypes().length == 1 && !MultiUtil.isBasicDataType(m.getParameterTypes()[0]))
                             .findAny().orElse(null);
 
-                    MultiUtil.assertNoNull(setMethod, "找不到{0}对应的get{1}", tableClass, fieldNameUpperFirst);
-                    MultiUtil.assertNoNull(getMethod, "找不到{0}对应的get{1}", tableClass, fieldNameUpperFirst);
+                    if (setMethod == null) {
+                        int i = 0;
+                    }
+                    MultiUtil.assertNoNull(setMethod, "找不到{0}对应的set{1}()", tableClass, fieldNameUpperFirst);
+                    MultiUtil.assertNoNull(getMethod, "找不到{0}对应的get{1}()", tableClass, fieldNameUpperFirst);
 
                     return new MultiTuple2<>(getMethod, setMethod);
                 });
@@ -88,7 +92,7 @@ public class MultiRelationCaches {
             List<Field> allFields = MultiUtil.getAllFields(clazz);
             Field idField = allFields.stream().filter(f -> null != f.getAnnotation(MultiTableId.class)).findAny().orElse(null);
             if (idField == null) {
-                idField = allFields.stream().filter(f -> "id".equals(f.getName())).findAny().orElse(null);
+                idField = allFields.stream().filter(f -> MultiConstant.Strings.ID_FIELD_NAME_DEFAULT.equals(f.getName())).findAny().orElse(null);
             }
             MultiUtil.assertNoNull(idField, "找不到id字段(或者@MutilTableId对应属性){0}", tableClass);
             return idField;

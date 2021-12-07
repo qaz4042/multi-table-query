@@ -10,16 +10,17 @@ import com.lzb.mpmt.service.multiwrapper.wrapper.MultiWrapper;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMain;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperMainSubWhere;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSub;
-import com.lzb.mpmt.test.model.BaseModel;
-import com.lzb.mpmt.test.model.User;
-import com.lzb.mpmt.test.model.UserAddress;
-import com.lzb.mpmt.test.model.UserStaff;
+import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.MultiWrapperSubMainWhere;
+import com.lzb.mpmt.test.model.*;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @SpringBootTest(classes = MultiTableApplication.class)
@@ -31,7 +32,7 @@ class MultiTableApplicationTests {
     @Test
     @SneakyThrows
     void testQuerySimple() {
-        List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class, Address.class));
         System.out.println("testQuerySimple=" + JSONUtil.toString(userStaffsSimple));
     }
 
@@ -41,19 +42,25 @@ class MultiTableApplicationTests {
     @Test
     @SneakyThrows
     void testQueryPage() {
-        IMultiPage<UserStaff> page = MultiExecutor.page(new MultiPage<>(1, 10), new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class));
+        IMultiPage<UserStaff> page = MultiExecutor.page(new MultiPage<>(1, 10), new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class, Address.class));
         System.out.println("testQueryPage=" + JSONUtil.toString(page));
     }
 
     /**
-     * 基本聚合查询 todo 指定字段聚合
+     * 基本聚合查询
      */
     @Test
     @SneakyThrows
     void testQueryAggregate() {
-        MultiAggregateResult aggregate = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
-                .aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM,MultiConstant.MultiAggregateTypeEnum.AVG), User.class, UserAddress.class));
-        System.out.println("testQueryAggregate=" + JSONUtil.toString(aggregate));
+        MultiAggregateResult aggregateSumAll = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class).aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM),
+                MultiWrapperSub.lambda(User.class)
+        ));
+        System.out.println("aggregateSumAll=" + aggregateSumAll.getSum());
+
+        MultiAggregateResult aggregateSpecific = MultiExecutor.aggregate(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class),
+                MultiWrapperSub.lambda(User.class).sum(User::getBalance, "tempBalance")
+        ));
+        System.out.println("aggregateSpecific=" + aggregateSpecific.getSum().get("tempBalance"));
     }
 
     /**
@@ -61,7 +68,6 @@ class MultiTableApplicationTests {
      */
     @Test
     void testQueryComplex() {
-
         //1.复杂查询
         List<UserStaff> userStaffsComplex = MultiExecutor.list(MultiWrapper
                 .main(

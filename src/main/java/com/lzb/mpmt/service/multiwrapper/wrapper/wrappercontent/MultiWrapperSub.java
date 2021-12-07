@@ -10,6 +10,7 @@ import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -20,10 +21,10 @@ import java.util.function.Consumer;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> implements
-        MultiWrapperWhere<SUB, MultiWrapperSub<SUB, MAIN_WHERE>>,
-        MultiWrapperSelect<SUB, MultiWrapperSub<SUB, MAIN_WHERE>>,
-        MultiWrapperAggregate<SUB, MultiWrapperMain<SUB>> {
+public class MultiWrapperSub<SUB> implements
+        MultiWrapperWhere<SUB, MultiWrapperSub<SUB>>,
+        MultiWrapperSelect<SUB, MultiWrapperSub<SUB>>,
+        MultiWrapperAggregate<SUB, MultiWrapperSub<SUB>> {
 
 
     /**
@@ -46,16 +47,16 @@ public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SU
      */
     private Class<SUB> clazz;
 
-    private MAIN_WHERE mainWhere;
+    private MultiWrapperSubMainWhere<?> mainWhere;
 
     /**
      * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
      */
-    private List<MultiAggregateInfo> multiAggregateInfos = Collections.emptyList();
+    private List<MultiAggregateInfo> multiAggregateInfos = new ArrayList<>(8);
 
-    public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB, MAIN_WHERE> lambda(Class<SUB> clazz) {
+    public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
         String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
-        MultiWrapperSub<SUB, MAIN_WHERE> wrapperSub = new MultiWrapperSub<>();
+        MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
         wrapperSub.setClassName(className);
         wrapperSub.setClazz(clazz);
         return wrapperSub;
@@ -63,17 +64,17 @@ public class MultiWrapperSub<SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SU
 
     @SafeVarargs
     @Override
-    public final <VAL> MultiWrapperSub<SUB, MAIN_WHERE> select(MultiFunction<SUB, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperSub<SUB> select(MultiFunction<SUB, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
     }
 
 
-    public <VAL> MultiWrapperSub<SUB, MAIN_WHERE> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
+    public <VAL,MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
         if (this.mainWhere == null) {
-            //noinspection unchecked
-            this.mainWhere = (MAIN_WHERE) new MultiWrapperSubMainWhere<SUB>();
+            this.mainWhere = new MultiWrapperSubMainWhere<SUB>();
         }
-        mainWhereConsumer.accept(mainWhere);
+        //noinspection unchecked
+        mainWhereConsumer.accept((MAIN_WHERE) mainWhere);
         return this;
     }
 }

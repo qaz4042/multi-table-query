@@ -2,6 +2,7 @@ package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 
 /**
  * @author Administrator
@@ -28,9 +29,9 @@ public interface MultiWrapperLimit<T, Wrapper extends MultiWrapperLimit<T, Wrapp
 
     default String getSqlFromLimit(String className) {
         if (null == getLimitSize()) {
-            return className;
+            return MultiUtil.camelToUnderline(className) + " " + className;
         } else {
-            return "(select * from " + className + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitSize(), MultiConstant.Strings.EMPTY) + ") " + className;
+            return "(select * from " + MultiUtil.camelToUnderline(className) + " " + className + " limit " + valToStr(getLimitOffset(), ",") + valToStr(getLimitSize(), MultiConstant.Strings.EMPTY) + ") " + className;
         }
     }
 

@@ -66,7 +66,7 @@ public class MultiExecutor {
 
         if (multiProperties.getCheckRelationRequire()) {
             //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启) MultiTableRelation relation = MultiTableRelationFactory.INSTANCE.getRelationCodeMap().get(currNode.getRelationCode());
-            checkRequireRecursion(wrapper.getWrapperMain().getClassName(), mains, wrapper.getRelationTree().getChildren());
+            checkRequireRecursion(wrapper.getWrapperMain().getClazz(), mains, wrapper.getRelationTree().getChildren());
         }
         return mains;
     }
@@ -117,7 +117,10 @@ public class MultiExecutor {
         MultiAggregateResult aggregateResult = new MultiAggregateResult();
         Map<MultiAggregateResultMap, ? extends Map.Entry<String, ?>> map = MultiUtil.listToMap(objectMap.entrySet(), e -> new MultiAggregateResultMap(e.getKey()));
         map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
-            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + e.getKey().getPropName(), Map.Entry::getValue));
+            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> {
+                String relationCode = e.getKey().getRelationCode();
+                return relationCode + (MultiUtil.isEmpty(relationCode) ? "" : ".") + e.getKey().getPropName();
+            }, e -> e.getValue().getValue()));
             switch (aggregateType) {
                 case SUM:
                     aggregateResult.setSum(keyValueMap);
@@ -146,28 +149,26 @@ public class MultiExecutor {
 
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> void checkRequireRecursion(String currClassName, List<MAIN_OR_SUB> currDatas, List<MultiTreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
+    private static <MAIN_OR_SUB> void checkRequireRecursion(Class<?> currClass, List<MAIN_OR_SUB> currDatas, List<MultiTreeNode<IMultiWrapperSubAndRelationTreeNode>> subRelationNodes) {
         if (MultiUtil.isEmpty(currDatas)) {
             return;
         }
         for (MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode : subRelationNodes) {
             IMultiWrapperSubAndRelationTreeNode curr = relationTreeNode.getCurr();
             String relationCode = curr.getRelationCode();
-            String classNameThis = curr.getClassNameThis();
-            Class<?> tableClassThis = curr.getTableClassThis();
             Boolean subTableRequire = curr.getClassNameOtherRequire();
 
             for (MAIN_OR_SUB currData : currDatas) {
-                Method getMethod = MultiRelationCaches.getTableWithTable_getSetMethod(tableClassThis, relationCode).getT1();
+                Method getMethod = MultiRelationCaches.getTableWithTable_getSetMethod(currClass, relationCode).getT1();
                 Object subValues = getMethod.invoke(currData);
                 if (subTableRequire) {
                     //检查当前
                     if (subValues == null) {
-                        throwRequireException(currClassName, relationCode, currData);
+                        throwRequireException(currClass.getSimpleName(), relationCode, currData);
                     }
                     if (subValues instanceof List) {
                         if (((List<?>) subValues).size() == 0) {
-                            throwRequireException(currClassName, relationCode, currData);
+                            throwRequireException(currClass.getSimpleName(), relationCode, currData);
                         }
                     }
                 }
@@ -175,13 +176,14 @@ public class MultiExecutor {
                     //为空子表没数据检查,跳过
                     continue;
                 }
+                List<MAIN_OR_SUB> subs;
                 if (subValues instanceof List && ((List<?>) subValues).size() > 0) {
-                    //递归检查
-                    checkRequireRecursion(classNameThis, (List<MAIN_OR_SUB>) subValues, relationTreeNode.getChildren());
+                    subs = (List<MAIN_OR_SUB>) subValues;
                 } else {
-                    //递归检查
-                    checkRequireRecursion(classNameThis, Collections.singletonList(subValues), relationTreeNode.getChildren());
+                    subs = (List<MAIN_OR_SUB>) Collections.singletonList(subValues);
                 }
+                //递归检查
+                checkRequireRecursion(relationTreeNode.getCurr().getTableClassThis(), subs, relationTreeNode.getChildren());
             }
         }
     }

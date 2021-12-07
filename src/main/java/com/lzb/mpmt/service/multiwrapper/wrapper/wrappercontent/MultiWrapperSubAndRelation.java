@@ -25,7 +25,7 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     /**
      * wrapperSub 为空表示主表临时对象
      */
-    public MultiWrapperSubAndRelation(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB, ?> wrapperSub) {
+    public MultiWrapperSubAndRelation(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> wrapperSub) {
         this.joinType = joinType;
         this.relationCode = relationCode;
         this.wrapperSub = wrapperSub;
@@ -44,7 +44,7 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     /**
      * 副表信息
      */
-    private MultiWrapperSub<SUB, ?> wrapperSub;
+    private MultiWrapperSub<SUB> wrapperSub;
 
     /**
      * relationCode对应的关系表1

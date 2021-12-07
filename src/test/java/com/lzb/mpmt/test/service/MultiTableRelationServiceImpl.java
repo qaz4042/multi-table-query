@@ -3,6 +3,7 @@ package com.lzb.mpmt.test.service;
 import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
+import com.lzb.mpmt.test.model.Address;
 import com.lzb.mpmt.test.model.User;
 import com.lzb.mpmt.test.model.UserAddress;
 import com.lzb.mpmt.test.model.UserStaff;
@@ -43,7 +44,21 @@ public class MultiTableRelationServiceImpl implements IMultiTableRelationService
                         .class2KeyProp("userId")
                         .class2OneOrMany(ClassRelationOneOrManyEnum.MANY)
                         .class2Require(false)
-                        .build());
+                        .build(),
+                MultiClassRelation.builder()
+                        .code("addressUserAddress")
+                        .class1(UserAddress.class)
+                        .className1("userAddress")
+                        .class1KeyProp("streetCode")
+                        .class1OneOrMany(ClassRelationOneOrManyEnum.ONE)
+                        .class1Require(true)
+                        .class2(Address.class)
+                        .className2("address")
+                        .class2KeyProp("code")
+                        .class2OneOrMany(ClassRelationOneOrManyEnum.ONE)
+                        .class2Require(false)
+                        .build()
+        );
     }
 
 

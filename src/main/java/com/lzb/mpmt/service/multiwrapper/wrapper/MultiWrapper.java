@@ -1,6 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
@@ -47,7 +48,12 @@ public class MultiWrapper<MAIN> {
      */
     private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
 
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?, ?>... subTableWrappers) {
+
+    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain) {
+        this.wrapperMain = wrapperMain;
+    }
+
+    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?>... subTableWrappers) {
         this.wrapperMain = wrapperMain;
         //默认leftJoin
         Arrays.stream(subTableWrappers).forEach(this::leftJoin);
@@ -70,30 +76,13 @@ public class MultiWrapper<MAIN> {
         return wrapper;
     }
 
-//    /**
-//     * 主表信息
-//     * 例如 select * from user_staff u
-//     * left join user_staff_address a on a.staff_id = u.id
-//     * where user_staff_address.del_flag = 0
-//     *
-//     * @return MultiWrapper
-//     */
-//    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperMainSubWhere<?>... wrapperMainSubWhere) {
-//        MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
-//        wrapper.setWrapperMain(wrapperMain);
-//        if (wrapperMainSubWhere != null) {
-//            wrapper.setWrapperMainSubWheres(Arrays.stream(wrapperMainSubWhere).filter(Objects::nonNull).collect(Collectors.toList()));
-//        }
-//        return wrapper;
-//    }
-
     /***
      * join 副表信息
      *
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB, ?> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB> subTableWrapper) {
         return leftJoin(null, subTableWrapper);
     }
 
@@ -103,7 +92,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB, ?> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB> subTableWrapper) {
         return innerJoin(null, subTableWrapper);
     }
 
@@ -114,17 +103,17 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.left_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
+    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.inner_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB, ?> subTableWrapper) {
+    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
         wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationCode, subTableWrapper));
         return this;
     }
@@ -134,18 +123,19 @@ public class MultiWrapper<MAIN> {
      */
     public String computeAggregateSql() {
         String mainClassName = wrapperMain.getClassName();
-        MultiUtil.assertNoNull(mainClassName,"请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
+        MultiUtil.assertNoNull(mainClassName, "请先通过MultiWrapperMain.lambda(UserInfo.class)或者.eq(UserInfo::getId)确定表名,在执行查询");
 
         this.loadRelations();
-
+        String mainTableIdFieldName = MultiUtil.camelToUnderline(MultiRelationCaches.getTableIdField(wrapperMain.getClazz()).getName());
         //全部字段聚合 select sum(t1.amount),sum(t2.qty) ...
         // sum/avg全部数字型字段 count(1) countDistinct全部字段
         List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = this.wrapperMain.getAggregateAllTypes();
-        List<String> aggregateFieldAll = new ArrayList<>(32);
+        List<String> aggregateFields = new ArrayList<>(32);
         if (aggregateAllTypes.size() > 0) {
-            aggregateFieldAll.addAll(
+            aggregateFields.addAll(
                     aggregateAllTypes.stream().flatMap(aggregateAllType ->
-                            MultiConstant.MultiAggregateTypeEnum.COUNT.equals(aggregateAllType) ? Stream.of("count(DISTINCT " + mainClassName + ".id) as 'COUNT. . '") :
+                            MultiConstant.MultiAggregateTypeEnum.COUNT.equals(aggregateAllType) ?
+                                    Stream.of("count(DISTINCT " + mainClassName + "." + mainTableIdFieldName + ") as 'COUNT. . '") :
                                     Stream.of(
                                             this.computeAggregateFieldAssOne(this.wrapperMain, mainClassName, aggregateAllType),
                                             this.wrapperSubAndRelations.stream().flatMap(
@@ -154,20 +144,34 @@ public class MultiWrapper<MAIN> {
                                     ).flatMap(l -> l)
                     ).collect(Collectors.toList())
             );
-            System.out.println("aggregateFieldAss" + JSONUtil.toString(aggregateFieldAll));
+            System.out.println("aggregateFieldAss" + JSONUtil.toString(aggregateFields));
             //过滤掉非数字的属性
         }
-        if (MultiUtil.isEmpty(aggregateFieldAll)) {
+        //todo 自定义聚合属性
+        this.getMultiAggregateInfosRecursion(this.relationTree, aggregateFields);
+
+        if (MultiUtil.isEmpty(aggregateFields)) {
             throw new MultiException("没有可以(要)聚合的列,无法查询");
         }
 
         //指定字段聚合
-        String sqlSelect = "select " + String.join(",\n", aggregateFieldAll);
-        String sqlFromLimit = "\nfrom " + mainClassName;
-        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
+        String sqlSelect = "select " + String.join(",\n", aggregateFields);
+        String sqlFromLimit = "\nfrom " + MultiUtil.camelToUnderline(mainClassName) + " " + mainClassName;
+        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoinRecursion(this.relationTree));
         String sqlWhere = this.getSqlWhere();
 
         return sqlSelect + sqlFromLimit + sqlLeftJoinOn + sqlWhere;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void getMultiAggregateInfosRecursion(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree, List<String> aggregateFields) {
+        IMultiWrapperSubAndRelationTreeNode curr = relationTree.getCurr();
+        if (curr instanceof MultiWrapperMain) {
+            aggregateFields.addAll(((MultiWrapperMain) curr).getSqlAggregate(relationTree.getCurr().getRelationCode()));
+        } else if (curr instanceof MultiWrapperSubAndRelation) {
+            aggregateFields.addAll(((MultiWrapperSubAndRelation) curr).getWrapperSub().getSqlAggregate(relationTree.getCurr().getRelationCode()));
+        }
+        relationTree.getChildren().forEach(child -> getMultiAggregateInfosRecursion(child, aggregateFields));
     }
 
 
@@ -192,7 +196,7 @@ public class MultiWrapper<MAIN> {
         //	SELECT u.*,p.* FROM (select * from user_info limit 10) u LEFT JOIN principal_user p ON p.user_id = u.id where p.admin_flag = 1;
         String sqlFromLimit = "\nFROM " + wrapperMain.getSqlFromLimit(mainClassName);
 
-        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoin(this.relationTree));
+        String sqlLeftJoinOn = "\n" + String.join("\n", getSqlJoinRecursion(this.relationTree));
 
         String sqlWhere = this.getSqlWhere();
 
@@ -210,17 +214,10 @@ public class MultiWrapper<MAIN> {
                             Class<?> relation_fieldType = fieldInfo.getT1().getType();
                             return aggregateAllType.getFieldTypeFilter().apply(relation_fieldType);
                         }
-                ).map(fieldName -> {
-                    String aggregate = aggregateAllType.name() + "(" + relationCode + "." + fieldName + ")";
-                    if (MultiConstant.MultiAggregateTypeEnum.SUM.equals(aggregateAllType)) {
-                        aggregate = "IFNULL(" + aggregate + ", 0)";
-                    }
-                    return aggregate + " as '" + aggregateAllType.name() + "." + relationCode + "." + fieldName + "'";
-                });
+                ).map(fieldName -> MultiWrapperAggregate.appendOneField(aggregateAllType, relationCode, fieldName, null));
     }
 
-
-    private List<String> getSqlJoin(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree) {
+    private List<String> getSqlJoinRecursion(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree) {
         String relationCode = relationTree.getCurr().getRelationCode();
         List<String> leftJoins = relationTree.getChildren().stream().map(r -> {
             if (r.getCurr() instanceof MultiWrapperSubAndRelation) {
@@ -229,16 +226,16 @@ public class MultiWrapper<MAIN> {
                 String subRelationCode = curr.getRelationCode();
                 MultiClassRelation relation = MultiClassRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
                 boolean thisIs1 = curr.getClassNameThis().equals(relation.getClassName1());
-                String leftJsonOn = " left join " + curr.getClassNameThis() + " " + subRelationCode + " on "
-                        + subRelationCode + "." + (thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
+                String leftJsonOn = " left join " + MultiUtil.camelToUnderline(curr.getClassNameThis()) + " " + subRelationCode + " on "
+                        + subRelationCode + "." + MultiUtil.camelToUnderline(thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
                         + "="
-                        + relationCode + "." + (thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
+                        + relationCode + "." + MultiUtil.camelToUnderline(thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
                 String sqlWhereSub = curr.getWrapperSub().getSqlWhereProps(curr.getRelationCode());
                 return leftJsonOn + (MultiUtil.isEmpty(sqlWhereSub) ? "" : " and " + sqlWhereSub);
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<String> leftJoinsSub = relationTree.getChildren().stream().flatMap(child -> getSqlJoin(child).stream()).collect(Collectors.toList());
+        List<String> leftJoinsSub = relationTree.getChildren().stream().flatMap(child -> getSqlJoinRecursion(child).stream()).collect(Collectors.toList());
         leftJoins.addAll(leftJoinsSub);
         return leftJoins;
     }
@@ -331,8 +328,7 @@ public class MultiWrapper<MAIN> {
                             throw new MultiException(relationClassName1 + "和" + subClassName + "存在多种关系,需要手动指定relationCode");
                         }
                         if (relations.size() < 1) {
-                            //有多种关系,需要重新确定
-                            throw new MultiException(relationClassName1 + "和" + subClassName + "没有存在表关系,无法关联");
+                            continue;
                         }
                         MultiClassRelation relation = relations.get(0);
 
@@ -351,7 +347,7 @@ public class MultiWrapper<MAIN> {
         );
 
         // AggregateInfos 聚合信息中填充relationCode
-        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainClassName));
+//        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainClassName));
         //todo 初始化relationCode
 //        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
     }

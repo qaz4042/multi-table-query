@@ -18,10 +18,10 @@ public class MultiAggregateInfo {
      * 聚合操作类型
      */
     MultiConstant.MultiAggregateTypeEnum aggregateType;
-    /**
-     * 聚合字段对应关系名称
-     */
-    String relationCode;
+//    /**
+//     * 聚合字段对应关系名称
+//     */
+//    String relationCode;
     /**
      * 聚合字段对应字段名称
      */
