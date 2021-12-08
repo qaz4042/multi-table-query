@@ -60,8 +60,6 @@ public class MultiExecutor {
             return mainAndIsNew.getT2() ? main : null;
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
 
-//        System.out.println(JSONUtil.toString(mains));
-
         log.info("Multi 查询结果{}条, sql:{}", mains.size(), sql);
 
         if (multiProperties.getCheckRelationRequire()) {
@@ -117,7 +115,7 @@ public class MultiExecutor {
         MultiAggregateResult aggregateResult = new MultiAggregateResult();
         Map<MultiAggregateResultMap, ? extends Map.Entry<String, ?>> map = MultiUtil.listToMap(objectMap.entrySet(), e -> new MultiAggregateResultMap(e.getKey()));
         map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
-            Map<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> {
+            Map<String, ?> keyValueMap = list.stream().collect(Collectors.toMap(e -> {
                 String relationCode = e.getKey().getRelationCode();
                 return relationCode + (MultiUtil.isEmpty(relationCode) ? "" : ".") + e.getKey().getPropName();
             }, e -> e.getValue().getValue()));
@@ -141,7 +139,11 @@ public class MultiExecutor {
                     aggregateResult.setMin(keyValueMap);
                     break;
                 case GROUP_CONCAT:
+                    //noinspection unchecked
+                    aggregateResult.setGroup_concat((Map<String, String>) keyValueMap);
                     break;
+                default:
+                    throw new MultiException(aggregateType + "该聚合方法待实现");
             }
         });
         return aggregateResult;

@@ -33,7 +33,7 @@ public class WhereDataUnit implements IWhereData {
 
     @Override
     public String getSqlWhereProps(String className) {
-        return String.format(opt.getTemplate(), className + "." + MultiUtil.camelToUnderline(propName) + " ", formatValues(values));
+        return String.format(opt.getTemplate(), className + "." + MultiUtil.camelToUnderline(propName), formatValues(values));
     }
 
     /***

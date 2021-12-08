@@ -35,6 +35,17 @@ class MultiTableApplicationTests {
         List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class, Address.class));
         System.out.println("testQuerySimple=" + JSONUtil.toString(userStaffsSimple));
     }
+    /**
+     * 简单查询test
+     */
+    @Test
+    @SneakyThrows
+    void testQueryParamMap() {
+        HashMap<String, String> paramMap = new HashMap<>();
+        paramMap.put("userStaff_sex", "#lr#1");
+        List<UserStaff> userStaffsSimple = MultiExecutor.list(new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class, Address.class).extendParams(paramMap));
+        System.out.println("testQueryParamMap=" + JSONUtil.toString(userStaffsSimple));
+    }
 
     /**
      * 分页查询

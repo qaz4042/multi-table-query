@@ -1,14 +1,14 @@
 package com.lzb.mpmt.service.multiwrapper.wrapper;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
+import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
+import com.lzb.mpmt.service.multiwrapper.sqlsegment.wheredata.WhereDataUnit;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JSONUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent.*;
-import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
-import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * @param <MAIN>
  * @author Administrator
  */
-@Data
+//@Getter
 @NoArgsConstructor
 @Slf4j
 @SuppressWarnings("unused")
@@ -35,7 +35,6 @@ public class MultiWrapper<MAIN> {
      * 主表信息
      */
     private MultiWrapperMain<MAIN> wrapperMain;
-//    private List<MultiWrapperMainSubWhere<?>> wrapperMainSubWheres = Collections.emptyList();
 
     /**
      * 副表信息
@@ -47,6 +46,16 @@ public class MultiWrapper<MAIN> {
      * 计算SQL时,初始化表关系树
      */
     private MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTree;
+
+
+    /**
+     * 参数Map 例如
+     * {
+     * "userAndUserStaff.balance":"#gt#100", //其中userAndUserStaff是relationCode
+     * "userStaff.sex":"#eq#1"
+     * }
+     */
+    private Map<String, List<WhereDataUnit>> extendParamMap = Collections.emptyMap();
 
 
     public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain) {
@@ -72,7 +81,7 @@ public class MultiWrapper<MAIN> {
      */
     public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
         MultiWrapper<MAIN> wrapper = new MultiWrapper<>();
-        wrapper.setWrapperMain(wrapperMain);
+        wrapper.wrapperMain = wrapperMain;
         return wrapper;
     }
 
@@ -82,7 +91,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public MultiWrapper<MAIN> leftJoin(MultiWrapperSub<?> subTableWrapper) {
         return leftJoin(null, subTableWrapper);
     }
 
@@ -92,7 +101,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> innerJoin(MultiWrapperSub<SUB> subTableWrapper) {
+    public MultiWrapper<MAIN> innerJoin(MultiWrapperSub<?> subTableWrapper) {
         return innerJoin(null, subTableWrapper);
     }
 
@@ -103,18 +112,52 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
-    public <SUB> MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.left_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    public <SUB> MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    public MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
         JoinTypeEnum joinType = JoinTypeEnum.inner_join;
         return this.getMainMultiWrapper(joinType, relationCode, subTableWrapper);
     }
 
-    private <SUB> MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> subTableWrapper) {
+    private MultiWrapper<MAIN> getMainMultiWrapper(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<?> subTableWrapper) {
         wrapperSubAndRelations.add(new MultiWrapperSubAndRelation<>(joinType, relationCode, subTableWrapper));
+        return this;
+    }
+
+    /**
+     * @param extendParams 参数Map例如:
+     *                     {
+     *                     "userAndUserStaff_balance":"100#%#", //其中userAndUserStaff是relationCode,  like '张三%' 才能走索引
+     *                     "userStaff_sex":"1"
+     *                     }
+     */
+    public MultiWrapper<MAIN> extendParams(Map<String, ?> extendParams) {
+        Map<String, List<WhereDataUnit>> extendParamMap = new LinkedHashMap<>();
+        for (String key : extendParams.keySet()) {
+            String[] keys = key.split("_");
+            if (keys.length != 2) {
+                log.warn("参数" + key + "格式异常,没有参与过滤|应类似\"userAndUserStaff_balance\"(relationCode_propName)");
+                continue;
+            }
+            String relationCode = keys[0];
+            String propName = keys[1];
+            Object value = extendParams.get(key);
+            MultiConstant.WhereOptEnum opt = MultiConstant.WhereOptEnum.eq;
+            if (value instanceof String) {
+                String valueStr = (String) value;
+                if (valueStr.indexOf("#") == 0 && valueStr.indexOf("#", 1) == 3) {
+                    String optPrefix = valueStr.substring(0, 4);
+                    opt = MultiConstant.WhereOptEnum.PARAM_MAP_OPT_PREFIX_MAP.get(optPrefix);
+                    MultiUtil.assertNoNull(opt, "无效的查询条件操作类型{}|{} {}", optPrefix, key, value);
+                    value = ((String) value).substring(4);
+                }
+            }
+            extendParamMap.computeIfAbsent(relationCode, c -> new ArrayList<>(8)).add(new WhereDataUnit(propName, opt, value));
+        }
+        this.extendParamMap = extendParamMap;
         return this;
     }
 
@@ -222,7 +265,7 @@ public class MultiWrapper<MAIN> {
         List<String> leftJoins = relationTree.getChildren().stream().map(r -> {
             if (r.getCurr() instanceof MultiWrapperSubAndRelation) {
                 //noinspection rawtypes
-                MultiWrapperSubAndRelation curr = (MultiWrapperSubAndRelation) r.getCurr();
+                MultiWrapperSubAndRelation<?> curr = (MultiWrapperSubAndRelation) r.getCurr();
                 String subRelationCode = curr.getRelationCode();
                 MultiClassRelation relation = MultiClassRelationFactory.INSTANCE.getRelationCodeMap().get(subRelationCode);
                 boolean thisIs1 = curr.getClassNameThis().equals(relation.getClassName1());
@@ -230,7 +273,7 @@ public class MultiWrapper<MAIN> {
                         + subRelationCode + "." + MultiUtil.camelToUnderline(thisIs1 ? relation.getClass1KeyProp() : relation.getClass2KeyProp())
                         + "="
                         + relationCode + "." + MultiUtil.camelToUnderline(thisIs1 ? relation.getClass2KeyProp() : relation.getClass1KeyProp());
-                String sqlWhereSub = curr.getWrapperSub().getSqlWhereProps(curr.getRelationCode());
+                String sqlWhereSub = curr.getWrapperSub().getSqlWhereProps(curr.getRelationCode(), this.extendParamMap.get(curr.getRelationCode()));
                 return leftJsonOn + (MultiUtil.isEmpty(sqlWhereSub) ? "" : " and " + sqlWhereSub);
             }
             return null;
@@ -246,27 +289,27 @@ public class MultiWrapper<MAIN> {
         //      and user_staff_address.del_flag = 0
         List<String> sqlWheres = new ArrayList<>();
 
-        String sqlWhereMain = this.wrapperMain.getSqlWhereProps(wrapperMain.getRelationCode());
-        List<String> sqlWhereSubMain = this.getSqlMainWhMerePropsMainRecursion(this.relationTree);
+        String sqlWhereMain = this.wrapperMain.getSqlWhereProps(wrapperMain.getRelationCode(), this.extendParamMap.get(wrapperMain.getRelationCode()));
+        List<String> sqlWhereSubMain = this.getSqlMainWhMerePropsMainRecursion(this.relationTree, this.extendParamMap);
         sqlWheres.add(sqlWhereMain);
         sqlWheres.addAll(sqlWhereSubMain);
 
         String sqlWhereAppend = String.join("\n and ", sqlWheres);
-        return MultiUtil.isEmpty(sqlWhereAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and" + sqlWhereAppend;
+        return MultiUtil.isEmpty(sqlWhereAppend) ? MultiConstant.Strings.EMPTY : "\nwhere 1=1\n  and " + sqlWhereAppend;
     }
 
-    private List<String> getSqlMainWhMerePropsMainRecursion(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> treeNode) {
+    private List<String> getSqlMainWhMerePropsMainRecursion(MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> treeNode, Map<String, List<WhereDataUnit>> extendParamMap) {
         List<String> sqlChildren = treeNode.getChildren().stream().map(treeNodeChild -> {
             IMultiWrapperSubAndRelationTreeNode curr = treeNodeChild.getCurr();
             if (curr instanceof MultiWrapperSubAndRelation) {
                 MultiWrapperSubMainWhere<?> mainWhere = ((MultiWrapperSubAndRelation<?>) curr).getWrapperSub().getMainWhere();
                 if (mainWhere != null) {
-                    return mainWhere.getSqlWhereProps(curr.getRelationCode());
+                    return mainWhere.getSqlWhereProps(curr.getRelationCode(), extendParamMap.get(curr.getRelationCode()));
                 }
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-        List<String> sqlGrandChildren = treeNode.getChildren().stream().flatMap(treeNodeChild -> getSqlMainWhMerePropsMainRecursion(treeNodeChild).stream()).filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> sqlGrandChildren = treeNode.getChildren().stream().flatMap(treeNodeChild -> getSqlMainWhMerePropsMainRecursion(treeNodeChild, extendParamMap).stream()).filter(Objects::nonNull).collect(Collectors.toList());
         sqlChildren.addAll(sqlGrandChildren);
         return sqlChildren;
     }
@@ -345,11 +388,6 @@ public class MultiWrapper<MAIN> {
                     }
                 }
         );
-
-        // AggregateInfos 聚合信息中填充relationCode
-//        wrapperMain.getMultiAggregateInfos().forEach(a -> a.setRelationCode(mainClassName));
-        //todo 初始化relationCode
-//        wrapperSubAndRelations.forEach(reloadRelation -> reloadRelation.getWrapperSub().getMultiAggregateInfos().forEach(a -> a.setRelationCode(reloadRelation.getRelationCode())));
     }
 
     private void fillTableThisAndOther(MultiWrapperSubAndRelation<?> noCodeRelation, String subClassName, MultiClassRelation multiTableRelation) {
@@ -400,5 +438,13 @@ public class MultiWrapper<MAIN> {
 
     public List<MAIN> list() {
         return Collections.emptyList();
+    }
+
+    public MultiWrapperMain<MAIN> getWrapperMain() {
+        return wrapperMain;
+    }
+
+    public MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> getRelationTree() {
+        return relationTree;
     }
 }

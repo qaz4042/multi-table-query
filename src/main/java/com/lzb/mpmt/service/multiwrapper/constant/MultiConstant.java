@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.constant;
 
+import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,6 +9,8 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Function;
 
 public class MultiConstant {
@@ -75,14 +78,17 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum MultiAggregateTypeEnum {
-        SUM("求和","IFNULL(SUM(%s), 0)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
-        AVG("求平均值","AVG(%s)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
-        COUNT("计数","COUNT(%s)", c -> false),//默认对主表count(*)进行计数
-        COUNT_DISTINCT("计数去重","COUNT(DISTINCT %s)", c -> true),
-        MAX("最大值","MAX(%s)", c -> true),//默认对主表进行计数
-        MIN("最小值","MIN(%s)", c -> true),//默认对主表进行计数,
+        /**
+         * 聚合操作
+         */
+        SUM("求和", "IFNULL(SUM(%s), 0)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
+        AVG("求平均值", "AVG(%s)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
+        COUNT("计数", "COUNT(%s)", c -> false),//默认对主表count(*)进行计数
+        COUNT_DISTINCT("计数去重", "COUNT(DISTINCT %s)", c -> true),
+        MAX("最大值", "MAX(%s)", c -> true),//默认对主表进行计数
+        MIN("最小值", "MIN(%s)", c -> true),//默认对主表进行计数,
         //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
-        GROUP_CONCAT("分组组合拼接","GROUP_CONCAT(%s)", c -> true),
+        GROUP_CONCAT("分组组合拼接", "GROUP_CONCAT(%s)", c -> true),
 //        JSON_ARRAYAGG("组装成JsonArray"),  //JSON_ARRAYAGG(col or expr) 　　将结果集聚合为单个JSON数组，其元素由参数列的值组成。此数组中元素的顺序未定义。该函数作用于计算为单个值的列或表达式。
 //        JSON_OBJECTAGG("组装成JsonObject"), //JSON_OBJECTAGG(key,value)     两个列名或表达式作为参数，第一个用作键，第二个用作值，并返回包含键值对的JSON对象。
         ;
@@ -130,21 +136,26 @@ public class MultiConstant {
     @Getter
     @AllArgsConstructor
     public enum WhereOptEnum {
-        /** todo  改成 MessageFormat 更友好 */
-        eq("%s = '%s'", "age = 18"),
-        isNull("%s is null", "age is null"),
-        isNotNull("%s is not null", "age is not null"),
-        in("%s in (%s)", "age in (18,19)"),
-        not_in("%s not in (%s)", "age not in (18,19)"),
-        gt("%s > '%s'", "age > '18'"),
-        ge("%s >= '%s'", "age >= '18'"),
-        lt("%s < '%s'", "age < '18'"),
-        le("%s <= '%s'", "age <= '18'"),
-        //%%转义为%
-        likeDefault("%s like '%%%s%%'", "name like '%咔咔%'"),
+        /**
+         * 查询where操作类型
+         */
+        eq("%s = '%s'", ""),
+        isNull("%s is null", "#nu#"),
+        isNotNull("%s is not null", "#nn#"),
+        in("%s in (%s)", "#in#"),
+        not_in("%s not in (%s)", "#ni#"),
+        gt("%s > '%s'", "#gt#"),
+        ge("%s >= '%s'", "#ge#"),
+        lt("%s < '%s'", "#lt#"),
+        le("%s <= '%s'", "#le#"),
+        //%%转义为%   张三% 才能走索引
+        likeDefault("%s like '%%%s%%'", "#la#"),
+        likeLeft("%s like '%%%s'", "#ll#"),
+        likeRight("%s like '%s%%'", "#lr#"),
         ;
 
         private final String template;
-        private final String demo;
+        private final String paramMapOptPrefix;
+        public static final Map<String, WhereOptEnum> PARAM_MAP_OPT_PREFIX_MAP = MultiUtil.listToMap(Arrays.asList(WhereOptEnum.values()), WhereOptEnum::getParamMapOptPrefix);
     }
 }
