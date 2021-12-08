@@ -80,12 +80,16 @@ public class MultiExecutor {
 
     @SneakyThrows
     public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
-        wrapper.getWrapperMain().count().limit((page.getCurrPage() - 1) * page.getPageSize(), page.getPageSize());
+        wrapper.getWrapperMain()
+                .limit((page.getCurrPage() - 1) * page.getPageSize(), page.getPageSize())
+                .count()
+        ;
         MultiAggregateResult aggregateResult = aggregate(wrapper);
-        List<MAIN> list = list(wrapper);
+        Long count = aggregateResult.getCount();
+        List<MAIN> list = count > 0 ? list(wrapper) : Collections.emptyList();
         //独立 count (如果wrapper里面有可以直接取)
         page.setRecords(list);
-        page.setTotal(aggregateResult.getCount());
+        page.setTotal(count);
         page.setAggregateResult(aggregateResult);
         return page;
     }
