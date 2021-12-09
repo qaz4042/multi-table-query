@@ -38,15 +38,6 @@ public class SerializedLambdaData {
      */
     private Class<?> propReturnType;
 
-//    /**
-//     * 表名(类名转的,带下划线)
-//     */
-//    private String tableName;
-//    /**
-//     * 属性名(带下划线)
-//     */
-//    private String fieldName;
-
     @SneakyThrows
     public SerializedLambdaData(SerializedLambda serializedLambda) {
         //实体类
@@ -54,10 +45,5 @@ public class SerializedLambdaData {
         //去掉"get",首字母小写
         propName = MultiUtil.firstToLowerCase(serializedLambda.getImplMethodName().substring(3));
         propReturnType = MultiUtil.toClassConfident(serializedLambda.getImplMethodSignature().substring(3, serializedLambda.getImplMethodSignature().indexOf(";")).replaceAll("/", "."));
-
-        //下划线表名
-//        tableName = MultiUtil.camelToUnderline(MultiUtil.firstToLowerCase(clazz.getSimpleName()));
-//        //下划线字段
-//        fieldName = MultiUtil.camelToUnderline(propName);
     }
 }

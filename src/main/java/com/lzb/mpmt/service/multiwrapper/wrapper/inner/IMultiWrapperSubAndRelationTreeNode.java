@@ -1,11 +1,8 @@
-package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
+package com.lzb.mpmt.service.multiwrapper.wrapper.inner;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
-import com.lzb.mpmt.service.multiwrapper.sqlsegment.aggregate.MultiAggregateInfo;
 import com.lzb.mpmt.service.multiwrapper.util.MultiTreeNode;
-
-import java.util.List;
 
 /**
  * 副表,和主副表对应关系信息
@@ -74,8 +71,5 @@ public interface IMultiWrapperSubAndRelationTreeNode extends MultiTreeNode.IEqua
      * @return select信息
      */
     MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo();
-
-    //    List<MultiAggregateInfo> getMultiAggregateInfos();
-//    List<String> getSqlAggregate(String relationCode);
     // ----  以下是与树节点无关的额外信息 ----- end
 }

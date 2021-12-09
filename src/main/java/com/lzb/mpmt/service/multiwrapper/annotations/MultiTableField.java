@@ -1,5 +1,7 @@
 package com.lzb.mpmt.service.multiwrapper.annotations;
 
+import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,7 +17,7 @@ public @interface MultiTableField {
     /***
      * 字段中文名
      */
-    String value() default "";
+    String value() default MultiConstant.Strings.EMPTY;
     /***
      * 字段是否在数据库中存在
      */

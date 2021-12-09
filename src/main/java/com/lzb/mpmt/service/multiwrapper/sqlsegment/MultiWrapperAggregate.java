@@ -22,7 +22,7 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
 
     void setClassName(String className);
 
-    List<MultiAggregateInfo> getMultiAggregateInfos();
+    List<MultiAggregateInfo> getAggregateInfos();
 
     default <VAL> Wrapper sum(MultiFunction<T, VAL> propFunc) {
         return sum(propFunc, null);
@@ -36,25 +36,29 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
      * @return 当前wrapper
      */
     default <VAL> Wrapper sum(MultiFunction<T, VAL> propFunc, String alias) {
+        aggregate(propFunc, alias, MultiConstant.MultiAggregateTypeEnum.SUM);
+        return (Wrapper) this;
+    }
+
+    default <VAL> void aggregate(MultiFunction<T, VAL> propFunc, String alias, MultiConstant.MultiAggregateTypeEnum aggregateType) {
         assert null != propFunc;
         SerializedLambdaData lambdaData = SerializedLambda.resolveCache(propFunc);
         if (null == getClassName()) {
             this.setClassName(MultiUtil.firstToLowerCase(lambdaData.getClazz().getSimpleName()));
         }
 
-        getMultiAggregateInfos().add(
+        getAggregateInfos().add(
                 MultiAggregateInfo.builder()
-                        .aggregateType(MultiConstant.MultiAggregateTypeEnum.SUM)
+                        .aggregateType(aggregateType)
 //                        .relationCode()//关系树加载完后,把relationCode,set进去
                         .propName(lambdaData.getPropName())
                         .alias(alias)
                         .build()
         );
-        return (Wrapper) this;
     }
 
     default List<String> getSqlAggregate(String relationCode) {
-        return this.getMultiAggregateInfos().stream().map(aggregateInfo ->
+        return this.getAggregateInfos().stream().map(aggregateInfo ->
                 appendOneField(aggregateInfo.getAggregateType(), relationCode, aggregateInfo.getPropName(), aggregateInfo.getAlias())
         ).collect(Collectors.toList());
     }
@@ -65,6 +69,6 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
         } else {
             alias = aggregateAllType.name() + "." + "." + alias;
         }
-        return String.format(aggregateAllType.getSqlTemplate(), relationCode + "." + fieldName) + " '" + alias + "'";
+        return String.format(aggregateAllType.getSqlTemplate(), relationCode + "." + fieldName) + " \"" + alias + "\"";
     }
 }

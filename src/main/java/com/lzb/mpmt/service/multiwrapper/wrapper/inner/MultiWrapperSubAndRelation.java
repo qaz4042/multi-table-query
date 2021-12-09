@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
+package com.lzb.mpmt.service.multiwrapper.wrapper.inner;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.JoinTypeEnum;
@@ -25,7 +25,7 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     /**
      * wrapperSub 为空表示主表临时对象
      */
-    public MultiWrapperSubAndRelation(JoinTypeEnum joinType, String relationCode, MultiWrapperSub<SUB> wrapperSub) {
+    public MultiWrapperSubAndRelation(JoinTypeEnum joinType, String relationCode, MultiWrapperSubInner<SUB> wrapperSub) {
         this.joinType = joinType;
         this.relationCode = relationCode;
         this.wrapperSub = wrapperSub;
@@ -44,7 +44,7 @@ public class MultiWrapperSubAndRelation<SUB> implements IMultiWrapperSubAndRelat
     /**
      * 副表信息
      */
-    private MultiWrapperSub<SUB> wrapperSub;
+    private MultiWrapperSubInner<SUB> wrapperSub;
 
     /**
      * relationCode对应的关系表1

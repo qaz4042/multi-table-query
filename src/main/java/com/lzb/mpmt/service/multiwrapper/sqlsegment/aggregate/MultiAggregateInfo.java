@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * 聚合信息
+ * @author Administrator
  */
 @Data
 @NoArgsConstructor

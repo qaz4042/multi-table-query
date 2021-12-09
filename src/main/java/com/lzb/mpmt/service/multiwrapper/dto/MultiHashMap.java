@@ -1,5 +1,9 @@
 package com.lzb.mpmt.service.multiwrapper.dto;
 
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
+
 import java.util.HashMap;
 
 /**
@@ -24,6 +28,16 @@ public class MultiHashMap<K, V> extends HashMap<K, V> {
      */
     public V getFirstValue() {
         return this.values().size() > 0 ? this.values().iterator().next() : null;
+    }
+
+    /**
+     * 添加getFirst方法
+     *
+     * @return 方便快速取值
+     */
+    public <T, VAL> V getValue(String relationCode, MultiFunction<T, VAL> prop) {
+        SerializedLambdaData serializedLambdaData = SerializedLambda.resolveCache(prop);
+        return get(serializedLambdaData.getPropName());
     }
 
     private static final MultiHashMap<?, ?> EMPTY = new MultiHashMap<>();

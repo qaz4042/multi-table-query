@@ -1,17 +1,17 @@
-#spring:
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    schema: classpath:db/schema-h2.sql
-#    data: classpath:db/data-h2.sql
-#    url: jdbc:h2:mem:test
-#    username: root
-#    password: test
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/mybatis_plus_multi_table?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&useSSL=false
-    username: root
-    password: root
-mybatismulti:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/mybatis_plus_multi_table?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+#    username: root
+#    password: root
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: test
+    password:
+  sql:
+    init:
+      data-locations: classpath:db/data.sql
+      schema-locations: classpath:db/schema.sql
+mybatis-plus-multi:
     checkRelationRequire: true
     checkRelationOneOrMany: true

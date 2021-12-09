@@ -1,9 +1,11 @@
 package com.lzb.mpmt.service.multiwrapper.sqlsegment;
 
 import com.lzb.mpmt.service.multiwrapper.util.MultiRelationCaches;
+import com.lzb.mpmt.service.multiwrapper.util.MultiTuple2;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +35,11 @@ public interface MultiWrapperSelect<T, Wrapper extends MultiWrapperSelect<T, Wra
      * @return 当前wrapper
      */
     default <VAL> Wrapper select(MultiFunction<T, VAL>... propFuncs) {
-        if (!MultiUtil.isEmpty(propFuncs)) {
-            if (null == getClassName()) {
-                this.setClassName(MultiUtil.firstToLowerCase(SerializedLambda.resolveCache(propFuncs[0]).getClazz().getSimpleName()));
-            }
-            this.setSelectFields(Arrays.stream(propFuncs).map(propFunc -> SerializedLambda.resolveCache(propFunc).getPropName()).collect(Collectors.toList()));
+        MultiTuple2<String, List<String>> result = MultiUtil.calcMultiFunctions(SerializedLambdaData::getPropName, propFuncs);
+        if (null == getClassName()) {
+            setClassName(result.getT1());
         }
+        this.setSelectFields(result.getT2());
         return (Wrapper) this;
     }
 

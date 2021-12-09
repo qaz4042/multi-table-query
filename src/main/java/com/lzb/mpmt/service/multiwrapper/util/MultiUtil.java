@@ -2,7 +2,10 @@ package com.lzb.mpmt.service.multiwrapper.util;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.MybatisPlusException;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambda;
+import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -92,7 +95,7 @@ public class MultiUtil {
     }
 
 
-    public  static <T> T assertNoNull(T o, String errorMessage, Object... params) {
+    public static <T> T assertNoNull(T o, String errorMessage, Object... params) {
         if (null == o) {
             throw new MultiException(MessageFormat.format(errorMessage, params));
         }
@@ -311,8 +314,12 @@ public class MultiUtil {
         return valueEnumMap.get(value);
     }
 
-
-    //统一json序列化
+    /**
+     * 枚举类通过name()找到枚举项
+     * @param type  枚举类
+     * @param name  name
+     * @return 枚举项
+     */
     @SneakyThrows
     public static <T extends Enum<T>> T getEnumByName(Class<T> type, String name) {
         if (type.isEnum()) {
@@ -365,4 +372,19 @@ public class MultiUtil {
     }
 
 
+    @SafeVarargs
+    public static <VAL, T, PROP_INFO> MultiTuple2<String, List<PROP_INFO>> calcMultiFunctions(Function<SerializedLambdaData, PROP_INFO> builder, MultiFunction<T, VAL>... propFuncs) {
+        String className = null;
+        List<PROP_INFO> list = new ArrayList<>(32);
+        if (null != propFuncs) {
+            for (MultiFunction<T, VAL> propFunc : propFuncs) {
+                SerializedLambdaData serializedLambdaData = SerializedLambda.resolveCache(propFunc);
+                if (className == null) {
+                    className = MultiUtil.firstToLowerCase(serializedLambdaData.getClazz().getSimpleName());
+                }
+                list.add(builder.apply(serializedLambdaData));
+            }
+        }
+        return new MultiTuple2<>(className, list);
+    }
 }

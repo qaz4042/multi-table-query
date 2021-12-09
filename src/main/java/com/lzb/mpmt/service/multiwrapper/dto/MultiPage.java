@@ -2,8 +2,7 @@ package com.lzb.mpmt.service.multiwrapper.dto;
 
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 分页信息对象
@@ -19,6 +18,7 @@ public class MultiPage<T> implements IMultiPage<T> {
         this.pageSize = pageSize;
         this.currPage = currPage;
     }
+
     /* ------------- 入参 ------------- */
     /**
      * 每页大小
@@ -28,11 +28,6 @@ public class MultiPage<T> implements IMultiPage<T> {
      * 当前第几页
      */
     private Long currPage;
-    /**
-     * 排序信息
-     * 例如 username asc,id desc
-     */
-    private String orders;
 
 
     /* ------------- 返回 ------------- */

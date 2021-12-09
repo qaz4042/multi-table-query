@@ -3,7 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcTemplateSqlExecutor;
+import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcJdbcSpringSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.MultiClassRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * 基础配置
+ * @author Administrator
  */
 @Configuration
 @EnableConfigurationProperties(MultiProperties.class)
@@ -27,7 +28,7 @@ public class MultiConfig {
     @Bean
     @ConditionalOnMissingBean(IMultiSqlExecutor.class)
     public IMultiSqlExecutor multiSqlExecutor(JdbcTemplate jdbcTemplate) {
-        return new MultiJdbcTemplateSqlExecutor(jdbcTemplate);
+        return new MultiJdbcJdbcSpringSqlExecutor(jdbcTemplate);
     }
 
     /***

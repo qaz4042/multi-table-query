@@ -22,16 +22,10 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 public class MultiClassRelation {
-    /***
-     * 唯一编号,推荐使用 className1__className2
-     * 对应实体中关系对象的变量名,例如(user__userStaff):
-     * public class User{
-     *   private String username;
-     *   private List<UserStaff> user__userStaff;
-     * }
+    /*
+     * 表关系唯一编号,例如 userAndUserStaff
      */
     private String code;
-//    r1(User.class, UserStaff.class, ONE, MANY, true, false, User::getId);
 
     /**
      * 两张表名 (仅做展示用)

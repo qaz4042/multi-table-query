@@ -12,11 +12,10 @@
     <artifactId>mybatis-plus-multi-table</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mybatis-plus-multi-table</name>
-    <description>Demo project for Spring Boot</description>
+    <description>SQL多表联查工具DAO框架,不强制依赖任何jar包,推荐依赖spring-boot-starter-jdbc</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
         <mybatis-plus.version>3.4.1</mybatis-plus.version>
-
     </properties>
     <dependencies>
         <dependency>
@@ -27,45 +26,36 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>compile</scope>
         </dependency>
+
         <!-- 默认是jackson框架 可选 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-json</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.25</version>
+            <optional>true</optional>
         </dependency>
-
-        <!-- todo 资源包,再精简 -->
-<!--        <dependency>-->
-<!--            <groupId>com.baomidou</groupId>-->
-<!--            <artifactId>mybatis-plus-boot-starter</artifactId>-->
-<!--            <version>${mybatis-plus.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.h2database</groupId>-->
-<!--            <artifactId>h2</artifactId>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>cn.hutool</groupId>-->
-<!--            <artifactId>hutool-all</artifactId>-->
-<!--            <version>5.7.16</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
     <build>
     </build>

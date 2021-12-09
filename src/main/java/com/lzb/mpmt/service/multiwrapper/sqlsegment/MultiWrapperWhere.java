@@ -80,8 +80,8 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         return notIn(true, prop, values);
     }
 
-    default <VAL> Wrapper likeDefault(MultiFunction<T, VAL> prop, VAL value) {
-        return likeDefault(true, prop, value);
+    default <VAL> Wrapper likeAll(MultiFunction<T, VAL> prop, VAL value) {
+        return likeAll(true, prop, value);
     }
 
 
@@ -130,8 +130,8 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         return (Wrapper) this;
     }
 
-    default <VAL> Wrapper likeDefault(Boolean condition, MultiFunction<T, VAL> prop, VAL value) {
-        this.addWhereTreeData(condition, prop, value, WhereOptEnum.likeDefault);
+    default <VAL> Wrapper likeAll(Boolean condition, MultiFunction<T, VAL> prop, VAL value) {
+        this.addWhereTreeData(condition, prop, value, WhereOptEnum.likeAll);
         return (Wrapper) this;
     }
 
@@ -165,7 +165,6 @@ public interface MultiWrapperWhere<T, Wrapper extends MultiWrapperWhere<T, Wrapp
         if (null == getClassName()) {
             setClassName(MultiUtil.firstToLowerCase(resolve.getClazz().getSimpleName()));
         }
-//        String propNameUnderline = resolve.getFieldName();
         getWhereTree().getWhereDatas().add(new WhereDataUnit(resolve.getPropName(), opt, values));
     }
 }

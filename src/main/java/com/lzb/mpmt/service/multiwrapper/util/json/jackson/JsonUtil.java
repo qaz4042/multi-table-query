@@ -2,7 +2,6 @@ package com.lzb.mpmt.service.multiwrapper.util.json.jackson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lzb.mpmt.service.multiwrapper.util.MultiException;
 import com.lzb.mpmt.service.multiwrapper.util.MultiUtil;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +9,17 @@ import org.springframework.stereotype.Component;
 
 /**
  * 才有Multi框架,需要统一用jackson序列化,否则无法使用实体类自定义int值枚举功能
+ * @author Administrator
  */
 @Component
-public class JSONUtil {
+public class JsonUtil {
 
     private static ObjectMapper objectMapper;
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         MultiEnumSerializeConfigJackson.addEnumAndNotNullConfigs(objectMapper);
-        JSONUtil.objectMapper = objectMapper;
+        JsonUtil.objectMapper = objectMapper;
     }
 
     @SneakyThrows

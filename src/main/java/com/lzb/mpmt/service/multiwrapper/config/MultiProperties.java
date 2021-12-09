@@ -3,8 +3,12 @@ package com.lzb.mpmt.service.multiwrapper.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * 配置文件
+ * @author Administrator
+ */
 @Data
-@ConfigurationProperties(prefix = "mybatismulti")
+@ConfigurationProperties(prefix = "mybatis-plus-multi")
 public class MultiProperties {
     /**
      * 是否检查关系里的必要关系,并显式地抛异常

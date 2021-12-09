@@ -13,6 +13,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * 常量
+ *
+ * @author Administrator
+ */
 public class MultiConstant {
 
     /***
@@ -32,14 +37,6 @@ public class MultiConstant {
         public static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         public static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
     }
-
-    /**
-     * multi框架相关常量
-     */
-    public static class MultiStrings {
-//        public static final String ID_FIELD_NAME = "";
-    }
-
 
     /**
      * 类和类的关系  可以自动生成left join 统一规范sql
@@ -83,11 +80,12 @@ public class MultiConstant {
          */
         SUM("求和", "IFNULL(SUM(%s), 0)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
         AVG("求平均值", "AVG(%s)", c -> Integer.class.isAssignableFrom(c) || BigDecimal.class.isAssignableFrom(c)),
-        COUNT("计数", "COUNT(%s)", c -> false),//默认对主表count(*)进行计数
+        COUNT("计数", "COUNT(%s)", c -> false),
         COUNT_DISTINCT("计数去重", "COUNT(DISTINCT %s)", c -> true),
-        MAX("最大值", "MAX(%s)", c -> true),//默认对主表进行计数
-        MIN("最小值", "MIN(%s)", c -> true),//默认对主表进行计数,
-        //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
+        MAX("最大值", "MAX(%s)", c -> true),
+        MIN("最小值", "MIN(%s)", c -> true),
+
+        //select SId, group_concat(cId,cName),group_concat(score order by score desc separator \"  \")   group_concat_max_len  如果没有group by 默认合成一条
         GROUP_CONCAT("分组组合拼接", "GROUP_CONCAT(%s)", c -> true),
 //        JSON_ARRAYAGG("组装成JsonArray"),  //JSON_ARRAYAGG(col or expr) 　　将结果集聚合为单个JSON数组，其元素由参数列的值组成。此数组中元素的顺序未定义。该函数作用于计算为单个值的列或表达式。
 //        JSON_OBJECTAGG("组装成JsonObject"), //JSON_OBJECTAGG(key,value)     两个列名或表达式作为参数，第一个用作键，第二个用作值，并返回包含键值对的JSON对象。
@@ -139,19 +137,19 @@ public class MultiConstant {
         /**
          * 查询where操作类型
          */
-        eq("%s = '%s'", ""),
+        eq("%s = \"%s\"", MultiConstant.Strings.EMPTY),
         isNull("%s is null", "#nu#"),
         isNotNull("%s is not null", "#nn#"),
         in("%s in (%s)", "#in#"),
         not_in("%s not in (%s)", "#ni#"),
-        gt("%s > '%s'", "#gt#"),
-        ge("%s >= '%s'", "#ge#"),
-        lt("%s < '%s'", "#lt#"),
-        le("%s <= '%s'", "#le#"),
+        gt("%s > \"%s\"", "#gt#"),
+        ge("%s >= \"%s\"", "#ge#"),
+        lt("%s < \"%s\"", "#lt#"),
+        le("%s <= \"%s\"", "#le#"),
         //%%转义为%   张三% 才能走索引
-        likeDefault("%s like '%%%s%%'", "#la#"),
-        likeLeft("%s like '%%%s'", "#ll#"),
-        likeRight("%s like '%s%%'", "#lr#"),
+        likeAll("%s like \"%%%s%%\"", "#la#"),
+        likeLeft("%s like \"%%%s\"", "#ll#"),
+        likeRight("%s like \"%s%%\"", "#lr#"),
         ;
 
         private final String template;

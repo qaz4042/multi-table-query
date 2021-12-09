@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
+package com.lzb.mpmt.service.multiwrapper.wrapper.inner;
 
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant;
 import com.lzb.mpmt.service.multiwrapper.constant.MultiConstant.ClassRelationOneOrManyEnum;
@@ -24,11 +24,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMain<MAIN> implements
-        MultiWrapperWhere<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperSelect<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperLimit<MAIN, MultiWrapperMain<MAIN>>,
-        MultiWrapperAggregate<MAIN, MultiWrapperMain<MAIN>>
+public class MultiWrapperMainInner<MAIN> implements
+        MultiWrapperWhere<MAIN, MultiWrapperMainInner<MAIN>>,
+        MultiWrapperSelect<MAIN, MultiWrapperMainInner<MAIN>>,
+        MultiWrapperLimit<MAIN, MultiWrapperMainInner<MAIN>>,
+        MultiWrapperAggregate<MAIN, MultiWrapperMainInner<MAIN>>
         , IMultiWrapperSubAndRelationTreeNode {
 
     /**
@@ -56,6 +56,11 @@ public class MultiWrapperMain<MAIN> implements
      */
     private Long limitOffset;
     private Long limitSize;
+    /**
+     * 排序信息
+     * 例如 ['username asc','id desc'] 或者 ['userStaff.username asc','userStaff.id desc'] (暂时只支持主表字段排序)
+     */
+    private List<String> orderInfos = Collections.emptyList();
 
     /**
      * 类为了生成List<SUB>
@@ -63,27 +68,40 @@ public class MultiWrapperMain<MAIN> implements
     private Class<MAIN> clazz;
 
     /**
-     * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
-     */
-    private List<MultiAggregateInfo> multiAggregateInfos = Collections.emptyList();
-
-    /**
      * 是否全部按默认字段去聚合
      */
     private List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypes = new ArrayList<>(4);
+    private List<MultiConstant.MultiAggregateTypeEnum> aggregateAllTypesTemp = new ArrayList<>(4);
 
-    public MultiWrapperMain<MAIN> aggregateAll(MultiConstant.MultiAggregateTypeEnum... aggregateTypeEnums) {
+    /**
+     * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
+     */
+    private List<MultiAggregateInfo> aggregateInfos = Collections.emptyList();
+    private List<MultiAggregateInfo> aggregateInfosTemp = Collections.emptyList();
+
+
+    public MultiWrapperMainInner<MAIN> aggregateAll(MultiConstant.MultiAggregateTypeEnum... aggregateTypeEnums) {
         aggregateAllTypes.addAll(Arrays.asList(aggregateTypeEnums));
         return this;
     }
-    public MultiWrapperMain<MAIN> count() {
-        aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.COUNT);
+
+    public MultiWrapperMainInner<MAIN> count() {
+        if (!aggregateAllTypes.contains(MultiConstant.MultiAggregateTypeEnum.COUNT)) {
+            aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.COUNT);
+        }
         return this;
     }
 
-    public static <MAIN> MultiWrapperMain<MAIN> lambda(Class<MAIN> clazz) {
+    public MultiWrapperMainInner<MAIN> sumAll() {
+        if (!aggregateAllTypes.contains(MultiConstant.MultiAggregateTypeEnum.SUM)) {
+            aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.SUM);
+        }
+        return this;
+    }
+
+    public static <MAIN> MultiWrapperMainInner<MAIN> lambda(Class<MAIN> clazz) {
         String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
-        MultiWrapperMain<MAIN> wrapperMain = new MultiWrapperMain<>();
+        MultiWrapperMainInner<MAIN> wrapperMain = new MultiWrapperMainInner<>();
         wrapperMain.setClassName(className);
         wrapperMain.setClazz(clazz);
         return wrapperMain;
@@ -91,7 +109,7 @@ public class MultiWrapperMain<MAIN> implements
 
     @SafeVarargs
     @Override
-    public final <VAL> MultiWrapperMain<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperMainInner<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
     }
 
@@ -102,7 +120,7 @@ public class MultiWrapperMain<MAIN> implements
 
     @Override
     public String getClassNameOther() {
-        return "";
+        return MultiConstant.Strings.EMPTY;
     }
 
     @Override
@@ -128,5 +146,30 @@ public class MultiWrapperMain<MAIN> implements
     @Override
     public MultiWrapperSelect<?, ?> getMultiWrapperSelectInfo() {
         return this;
+    }
+
+    @Override
+    @SafeVarargs
+    public final <VAL> MultiWrapperMainInner<MAIN> desc(MultiFunction<MAIN, VAL>... propFuncs) {
+        //为了添加 @SafeVarargs 重写的方法
+        return MultiWrapperLimit.super.desc(propFuncs);
+    }
+
+    @Override
+    @SafeVarargs
+    public final <VAL> MultiWrapperMainInner<MAIN> asc(MultiFunction<MAIN, VAL>... propFuncs) {
+        return MultiWrapperLimit.super.asc(propFuncs);
+    }
+
+    public void aggregateBackupAndClear() {
+        aggregateAllTypesTemp = aggregateAllTypes;
+        aggregateInfosTemp = aggregateInfos;
+        aggregateAllTypes = Collections.emptyList();
+        aggregateInfos = Collections.emptyList();
+    }
+
+    public void aggregateRestore() {
+        aggregateAllTypes = aggregateAllTypesTemp;
+        aggregateInfos = aggregateInfosTemp;
     }
 }

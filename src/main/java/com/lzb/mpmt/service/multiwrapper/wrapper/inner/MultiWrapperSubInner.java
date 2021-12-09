@@ -1,4 +1,4 @@
-package com.lzb.mpmt.service.multiwrapper.wrapper.wrappercontent;
+package com.lzb.mpmt.service.multiwrapper.wrapper.inner;
 
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
 import com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperSelect;
@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -21,10 +20,10 @@ import java.util.function.Consumer;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperSub<SUB> implements
-        MultiWrapperWhere<SUB, MultiWrapperSub<SUB>>,
-        MultiWrapperSelect<SUB, MultiWrapperSub<SUB>>,
-        MultiWrapperAggregate<SUB, MultiWrapperSub<SUB>> {
+public class MultiWrapperSubInner<SUB> implements
+        MultiWrapperWhere<SUB, MultiWrapperSubInner<SUB>>,
+        MultiWrapperSelect<SUB, MultiWrapperSubInner<SUB>>,
+        MultiWrapperAggregate<SUB, MultiWrapperSubInner<SUB>> {
 
 
     /**
@@ -47,16 +46,16 @@ public class MultiWrapperSub<SUB> implements
      */
     private Class<SUB> clazz;
 
-    private MultiWrapperSubMainWhere<?> mainWhere;
+    private MultiWrapperSubMainWhereInner<SUB> mainWhere;
 
     /**
      * 聚合函数信息 执行MultiExecutor.page()/MultiExecutor.aggregate()时,才会使用到
      */
-    private List<MultiAggregateInfo> multiAggregateInfos = new ArrayList<>(8);
+    private List<MultiAggregateInfo> aggregateInfos = new ArrayList<>(8);
 
-    public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB> lambda(Class<SUB> clazz) {
+    public static <SUB, MAIN_WHERE extends MultiWrapperSubMainWhereInner<SUB>> MultiWrapperSubInner<SUB> lambda(Class<SUB> clazz) {
         String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
-        MultiWrapperSub<SUB> wrapperSub = new MultiWrapperSub<>();
+        MultiWrapperSubInner<SUB> wrapperSub = new MultiWrapperSubInner<>();
         wrapperSub.setClassName(className);
         wrapperSub.setClazz(clazz);
         return wrapperSub;
@@ -64,14 +63,14 @@ public class MultiWrapperSub<SUB> implements
 
     @SafeVarargs
     @Override
-    public final <VAL> MultiWrapperSub<SUB> select(MultiFunction<SUB, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperSubInner<SUB> select(MultiFunction<SUB, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
     }
 
 
-    public <VAL,MAIN_WHERE extends MultiWrapperSubMainWhere<SUB>> MultiWrapperSub<SUB> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
+    public <VAL,MAIN_WHERE extends MultiWrapperSubMainWhereInner<SUB>> MultiWrapperSubInner<SUB> mainWhere(Consumer<MAIN_WHERE> mainWhereConsumer) {
         if (this.mainWhere == null) {
-            this.mainWhere = new MultiWrapperSubMainWhere<SUB>();
+            this.mainWhere = new MultiWrapperSubMainWhereInner<>();
         }
         //noinspection unchecked
         mainWhereConsumer.accept((MAIN_WHERE) mainWhere);

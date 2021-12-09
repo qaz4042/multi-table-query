@@ -22,13 +22,6 @@ public interface IMultiPage<T> {
      * @return 当前第几页
      */
     Long getCurrPage();
-    /**
-     * 排序信息
-     * 例如 username asc,id desc
-     * @return 当前第几页
-     */
-    String getOrders();
-
 
     /* ------------- 返回 ------------- */
     /**
@@ -57,7 +50,6 @@ public interface IMultiPage<T> {
 
     void setPageSize(Long pageSize);
     void setCurrPage(Long currPage) ;
-    void setOrders(String orders);
     void setRecords(List<T> records);
     void setTotal(Long total) ;
     void setAggregateResult(MultiAggregateResult aggregateResult) ;

@@ -12,21 +12,23 @@ import java.util.function.Function;
  * @author Administrator
  */
 @Slf4j
-public class MultiJdbcTemplateSqlExecutor implements IMultiSqlExecutor {
+public class MultiJdbcJdbcSpringSqlExecutor implements IMultiSqlExecutor {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public MultiJdbcTemplateSqlExecutor(JdbcTemplate jdbcTemplate) {
+    public MultiJdbcJdbcSpringSqlExecutor(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public <T> List<T> executeSql(String sql, Function<ResultSet, T> function) {
+    public <T> List<T> select(String sql, Function<ResultSet, T> function) {
+        log.info("Multi 查询Sql:{}", sql);
         return jdbcTemplate.query(sql, (rs, i) -> function.apply(rs));
     }
 
     @Override
-    public Map<String, Object> executeSql(String sql) {
+    public Map<String, Object> selectFirstRow(String sql) {
+        log.info("Multi 查询Sql:{}", sql);
         return jdbcTemplate.queryForMap(sql);
     }
 }

@@ -22,11 +22,11 @@ public class MultiAggregateResult {
     /**
      * 求和(支持多字段计算)
      */
-    private Map<String, ?> sum = MultiHashMap.emptyMap();
+    private MultiHashMap<String, ?> sum = MultiHashMap.emptyMap();
     /**
      * 求平均值
      */
-    private Map<String, ?> avg = MultiHashMap.emptyMap();
+    private MultiHashMap<String, ?> avg = MultiHashMap.emptyMap();
     /**
      * 计数
      */
@@ -34,17 +34,17 @@ public class MultiAggregateResult {
     /**
      * 计数去重
      */
-    private Map<String, Long> countDistinct = MultiHashMap.emptyMap();
+    private MultiHashMap<String, Long> countDistinct = MultiHashMap.emptyMap();
     /**
      * 最大值
      */
-    private Map<String, ?> max = MultiHashMap.emptyMap();
+    private MultiHashMap<String, ?> max = MultiHashMap.emptyMap();
     /**
      * 最小值
      */
-    private Map<String, ?> min = MultiHashMap.emptyMap();
+    private MultiHashMap<String, ?> min = MultiHashMap.emptyMap();
     /**
      * 分组组合拼接
      */
-    private Map<String, String> group_concat = MultiHashMap.emptyMap();
+    private MultiHashMap<String, String> groupConcat = MultiHashMap.emptyMap();
 }
