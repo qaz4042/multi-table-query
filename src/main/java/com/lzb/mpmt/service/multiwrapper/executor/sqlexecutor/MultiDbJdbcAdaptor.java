@@ -1,5 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
@@ -8,21 +9,22 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * JDBC 基础查询实现 (各方面性能可能需要单独优化(连接池,业务代码易用性等),推荐使用 {@link MultiJdbcJdbcSpringSqlExecutor})
+ * JDBC 基础查询实现 (各方面性能可能需要单独优化(连接池,业务代码易用性等),推荐使用 {@link MultiDbSpringAdaptor})
  *
  * @author Administrator
  */
 @Slf4j
 @Deprecated
-public class MultiJdbcJdbcSqlExecutor implements MultiSqlExecutorIntf {
+@AllArgsConstructor
+public class MultiDbJdbcAdaptor implements MultiDbAdaptor {
 
-    public static String driver = "com.mysql.jdbc.Driver";
+    public String driver = "com.mysql.jdbc.Driver";
 
-    public static String url = "jdbc:mysql://42.123.87.49:3306/aaaaa?useUnicode=true&characterEncoding=utf-8";
+    public String url = "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8";
 
-    public static String user = "***";
+    public String user = "test";
 
-    public static String password = "****";
+    public String password = "test";
 
     @Override
     public <T> List<T> select(String sql, Function<ResultSet, T> function) {

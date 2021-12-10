@@ -1,4 +1,4 @@
-# 快捷多表查询框架
+# mybatis-plus-multi-table 多表查询Dao框架
 ### 1.基础(70%)单库查询都可以简单做到 (不用强行手写xxxMapper.xml)
 ####
     public class UserStaff {
@@ -82,7 +82,9 @@
     数据库中,可以储存是枚举的name(),也可以储存IMultiEnum.getValue()(Integer)
 
 
-### 3.demo-详见本项目的 test方法 (附sql脚本)
+### 3.运用详见demo项目
+    
+
 
 ### 4.调试环境
     mysql5.6 / h2database(内存数据库模式)

@@ -1,20 +1,12 @@
 package com.lzb.mpmt.service.multiwrapper.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzb.mpmt.service.multiwrapper.MultiTableRelationService;
-import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutorInner;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiSqlExecutorIntf;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcJdbcSpringSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.MultiClassRelationFactory;
-import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * 基础配置
@@ -28,19 +20,6 @@ public class MultiConfig {
 
     public MultiConfig(ObjectProvider<MultiTableRelationService> interceptorsProvider) {
         multiTableRelationService = interceptorsProvider.getIfAvailable();
-    }
-
-    /***
-     * sql执行实现
-     * @return IMultiSqlExecutor
-     */
-    @Bean
-    @ConditionalOnMissingBean(MultiSqlExecutorIntf.class)
-    public MultiSqlExecutorIntf multiSqlExecutor(JdbcTemplate jdbcTemplate, MultiProperties multiProperties) {
-        MultiJdbcJdbcSpringSqlExecutor executor = new MultiJdbcJdbcSpringSqlExecutor(jdbcTemplate);
-        MultiExecutorInner.executor = executor;
-        MultiExecutorInner.multiProperties = multiProperties;
-        return executor;
     }
 
     /***

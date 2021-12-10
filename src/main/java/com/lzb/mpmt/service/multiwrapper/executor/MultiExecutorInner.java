@@ -8,7 +8,7 @@ import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResultMap;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiHashMap;
 import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiSqlExecutorIntf;
+import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiDbAdaptor;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JsonUtil;
 import com.lzb.mpmt.service.multiwrapper.wrapper.inner.IMultiWrapperSubAndRelationTreeNode;
@@ -38,7 +38,7 @@ import static com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate
 @Service
 public class MultiExecutorInner {
 
-    public static MultiSqlExecutorIntf executor;
+    public static MultiDbAdaptor executor;
     public static MultiProperties multiProperties;
 
     @SneakyThrows

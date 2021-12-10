@@ -1,29 +1,20 @@
 package com.lzb.mpmt.service.multiwrapper.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lzb.mpmt.service.multiwrapper.MultiTableRelationService;
-import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutorInner;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcJdbcSpringSqlExecutor;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiSqlExecutorIntf;
-import com.lzb.mpmt.service.multiwrapper.util.MultiClassRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * 基础配置
+ * JSON框架 数据库配置 (为了支持,枚举在java对象中为枚举,在数据和请求中都为Integer/String类型)
  *
  * @author Administrator
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(ObjectMapper.class)
-public class MultiConfigJson {
+public class MultiConfigJsonJackson {
 
     /**
      * 实体类,转json和入库,自动转为自定义枚举
