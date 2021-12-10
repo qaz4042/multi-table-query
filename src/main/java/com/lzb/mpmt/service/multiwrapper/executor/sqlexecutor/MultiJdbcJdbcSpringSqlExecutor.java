@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @author Administrator
  */
 @Slf4j
-public class MultiJdbcJdbcSpringSqlExecutor implements IMultiSqlExecutor {
+public class MultiJdbcJdbcSpringSqlExecutor implements MultiSqlExecutorIntf {
 
     private final JdbcTemplate jdbcTemplate;
 

@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<T, Wrapper>> {
 
 
+    String RELATION_CODE_TEMP_ALIAS_ALIAS = "Alias_Alias";
+
     String getClassName();
 
     void setClassName(String className);
@@ -67,7 +69,7 @@ public interface MultiWrapperAggregate<T, Wrapper extends MultiWrapperAggregate<
         if (alias == null) {
             alias = aggregateAllType.name() + "." + relationCode + "." + fieldName;
         } else {
-            alias = aggregateAllType.name() + "." + "." + alias;
+            alias = aggregateAllType.name() + "." + RELATION_CODE_TEMP_ALIAS_ALIAS + "." + alias;
         }
         return String.format(aggregateAllType.getSqlTemplate(), relationCode + "." + fieldName) + " \"" + alias + "\"";
     }

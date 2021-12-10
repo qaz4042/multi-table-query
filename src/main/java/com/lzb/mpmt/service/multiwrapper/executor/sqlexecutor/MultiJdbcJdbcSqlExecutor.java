@@ -14,7 +14,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @Deprecated
-public class MultiJdbcJdbcSqlExecutor implements IMultiSqlExecutor {
+public class MultiJdbcJdbcSqlExecutor implements MultiSqlExecutorIntf {
 
     public static String driver = "com.mysql.jdbc.Driver";
 

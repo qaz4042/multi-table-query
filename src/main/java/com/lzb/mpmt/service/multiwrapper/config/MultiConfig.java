@@ -1,11 +1,13 @@
 package com.lzb.mpmt.service.multiwrapper.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
+import com.lzb.mpmt.service.multiwrapper.MultiTableRelationService;
+import com.lzb.mpmt.service.multiwrapper.executor.MultiExecutorInner;
+import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiSqlExecutorIntf;
 import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiJdbcJdbcSpringSqlExecutor;
 import com.lzb.mpmt.service.multiwrapper.util.MultiClassRelationFactory;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.MultiEnumSerializeConfigJackson;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,20 +17,29 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * 基础配置
+ *
  * @author Administrator
  */
 @Configuration
 @EnableConfigurationProperties(MultiProperties.class)
 public class MultiConfig {
+    private final MultiTableRelationService multiTableRelationService;
+
+    public MultiConfig(ObjectProvider<MultiTableRelationService> interceptorsProvider) {
+        multiTableRelationService = interceptorsProvider.getIfAvailable();
+    }
 
     /***
      * sql执行实现
      * @return IMultiSqlExecutor
      */
     @Bean
-    @ConditionalOnMissingBean(IMultiSqlExecutor.class)
-    public IMultiSqlExecutor multiSqlExecutor(JdbcTemplate jdbcTemplate) {
-        return new MultiJdbcJdbcSpringSqlExecutor(jdbcTemplate);
+    @ConditionalOnMissingBean(MultiSqlExecutorIntf.class)
+    public MultiSqlExecutorIntf multiSqlExecutor(JdbcTemplate jdbcTemplate, MultiProperties multiProperties) {
+        MultiJdbcJdbcSpringSqlExecutor executor = new MultiJdbcJdbcSpringSqlExecutor(jdbcTemplate);
+        MultiExecutorInner.executor = executor;
+        MultiExecutorInner.multiProperties = multiProperties;
+        return executor;
     }
 
     /***
@@ -37,7 +48,7 @@ public class MultiConfig {
      */
     @Bean
     @ConditionalOnMissingBean(MultiClassRelationFactory.class)
-    public MultiClassRelationFactory multiTableRelationFactory(IMultiTableRelationService multiTableRelationService) {
+    public MultiClassRelationFactory multiTableRelationFactory() {
         return new MultiClassRelationFactory(multiTableRelationService);
     }
 

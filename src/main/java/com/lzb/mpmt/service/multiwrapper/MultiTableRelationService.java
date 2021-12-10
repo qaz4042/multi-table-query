@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @author Administrator
  */
-public interface IMultiTableRelationService {
+public interface MultiTableRelationService {
     /**
      * 加载表和表的关系
      *

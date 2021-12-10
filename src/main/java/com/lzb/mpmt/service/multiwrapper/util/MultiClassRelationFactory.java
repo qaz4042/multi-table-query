@@ -1,6 +1,6 @@
 package com.lzb.mpmt.service.multiwrapper.util;
 
-import com.lzb.mpmt.service.multiwrapper.IMultiTableRelationService;
+import com.lzb.mpmt.service.multiwrapper.MultiTableRelationService;
 import com.lzb.mpmt.service.multiwrapper.entity.MultiClassRelation;
 import lombok.Getter;
 
@@ -20,7 +20,7 @@ public class MultiClassRelationFactory {
     private Map<String, MultiClassRelation> relationCodeMap;
     private Map<String, Map<String, List<MultiClassRelation>>> relation2ClassNameMap = new HashMap<>(256);
 
-    public MultiClassRelationFactory(IMultiTableRelationService tableRelationService) {
+    public MultiClassRelationFactory(MultiTableRelationService tableRelationService) {
 
         this.relations = Collections.unmodifiableList(tableRelationService.loadRelation());
 

@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  * @author Administrator
  */
-public interface IMultiSqlExecutor {
+public interface MultiSqlExecutorIntf {
 
     /**
      * 执行sql返回结果集

@@ -85,7 +85,7 @@ public class MultiConstant {
         MAX("最大值", "MAX(%s)", c -> true),
         MIN("最小值", "MIN(%s)", c -> true),
 
-        //select SId, group_concat(cId,cName),group_concat(score order by score desc separator \"  \")   group_concat_max_len  如果没有group by 默认合成一条
+        //select SId, group_concat(cId,cName),group_concat(score order by score desc separator '  ')   group_concat_max_len  如果没有group by 默认合成一条
         GROUP_CONCAT("分组组合拼接", "GROUP_CONCAT(%s)", c -> true),
 //        JSON_ARRAYAGG("组装成JsonArray"),  //JSON_ARRAYAGG(col or expr) 　　将结果集聚合为单个JSON数组，其元素由参数列的值组成。此数组中元素的顺序未定义。该函数作用于计算为单个值的列或表达式。
 //        JSON_OBJECTAGG("组装成JsonObject"), //JSON_OBJECTAGG(key,value)     两个列名或表达式作为参数，第一个用作键，第二个用作值，并返回包含键值对的JSON对象。
@@ -137,19 +137,19 @@ public class MultiConstant {
         /**
          * 查询where操作类型
          */
-        eq("%s = \"%s\"", MultiConstant.Strings.EMPTY),
+        eq("%s = '%s'", MultiConstant.Strings.EMPTY),
         isNull("%s is null", "#nu#"),
         isNotNull("%s is not null", "#nn#"),
         in("%s in (%s)", "#in#"),
         not_in("%s not in (%s)", "#ni#"),
-        gt("%s > \"%s\"", "#gt#"),
-        ge("%s >= \"%s\"", "#ge#"),
-        lt("%s < \"%s\"", "#lt#"),
-        le("%s <= \"%s\"", "#le#"),
+        gt("%s > '%s'", "#gt#"),
+        ge("%s >= '%s'", "#ge#"),
+        lt("%s < '%s'", "#lt#"),
+        le("%s <= '%s'", "#le#"),
         //%%转义为%   张三% 才能走索引
-        likeAll("%s like \"%%%s%%\"", "#la#"),
-        likeLeft("%s like \"%%%s\"", "#ll#"),
-        likeRight("%s like \"%s%%\"", "#lr#"),
+        likeAll("%s like '%%%s%%'", "#la#"),
+        likeLeft("%s like '%%%s'", "#ll#"),
+        likeRight("%s like '%s%%'", "#lr#"),
         ;
 
         private final String template;

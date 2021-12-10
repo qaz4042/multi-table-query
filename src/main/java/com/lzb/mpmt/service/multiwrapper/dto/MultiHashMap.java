@@ -7,7 +7,7 @@ import com.lzb.mpmt.service.multiwrapper.util.mybatisplus.SerializedLambdaData;
 import java.util.HashMap;
 
 /**
- * 就是HashMap,扩展getFirstValue方法方便调用
+ * HashMap,扩展getValue框架便捷方法
  *
  * @param <K>
  * @param <V>
@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class MultiHashMap<K, V> extends HashMap<K, V> {
 
     public MultiHashMap() {
+        super();
     }
 
     public MultiHashMap(int initialCapacity) {
@@ -37,7 +38,7 @@ public class MultiHashMap<K, V> extends HashMap<K, V> {
      */
     public <T, VAL> V getValue(String relationCode, MultiFunction<T, VAL> prop) {
         SerializedLambdaData serializedLambdaData = SerializedLambda.resolveCache(prop);
-        return get(serializedLambdaData.getPropName());
+        return get(relationCode + "." + serializedLambdaData.getPropName());
     }
 
     private static final MultiHashMap<?, ?> EMPTY = new MultiHashMap<>();

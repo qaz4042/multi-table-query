@@ -8,15 +8,14 @@ import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResult;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiAggregateResultMap;
 import com.lzb.mpmt.service.multiwrapper.dto.MultiHashMap;
 import com.lzb.mpmt.service.multiwrapper.entity.IMultiEnum;
-import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.IMultiSqlExecutor;
+import com.lzb.mpmt.service.multiwrapper.executor.sqlexecutor.MultiSqlExecutorIntf;
 import com.lzb.mpmt.service.multiwrapper.util.*;
 import com.lzb.mpmt.service.multiwrapper.util.json.jackson.JsonUtil;
-import com.lzb.mpmt.service.multiwrapper.wrapper.inner.MultiWrapperInner;
 import com.lzb.mpmt.service.multiwrapper.wrapper.inner.IMultiWrapperSubAndRelationTreeNode;
+import com.lzb.mpmt.service.multiwrapper.wrapper.inner.MultiWrapperInner;
 import com.lzb.mpmt.service.multiwrapper.wrapper.inner.MultiWrapperMainInner;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -30,6 +29,8 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.lzb.mpmt.service.multiwrapper.sqlsegment.MultiWrapperAggregate.RELATION_CODE_TEMP_ALIAS_ALIAS;
+
 /**
  * @author Administrator
  */
@@ -37,18 +38,8 @@ import java.util.stream.Collectors;
 @Service
 public class MultiExecutorInner {
 
-    private static IMultiSqlExecutor executor;
-    private static MultiProperties multiProperties;
-
-    @Autowired
-    public void setExecutor(IMultiSqlExecutor executor) {
-        MultiExecutorInner.executor = executor;
-    }
-
-    @Autowired
-    public void setMultiProperties(MultiProperties multiProperties) {
-        MultiExecutorInner.multiProperties = multiProperties;
-    }
+    public static MultiSqlExecutorIntf executor;
+    public static MultiProperties multiProperties;
 
     @SneakyThrows
     public static <MAIN> List<MAIN> list(MultiWrapperInner<MAIN> wrapper) {
@@ -136,7 +127,9 @@ public class MultiExecutorInner {
         MultiAggregateResult aggregateResult = new MultiAggregateResult();
         Map<MultiAggregateResultMap, ? extends Map.Entry<String, ?>> map = MultiUtil.listToMap(objectMap.entrySet(), e -> new MultiAggregateResultMap(e.getKey()));
         map.entrySet().stream().collect(Collectors.groupingBy(e -> e.getKey().getAggregateType())).forEach((aggregateType, list) -> {
-            MultiHashMap<String, ?> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + e.getKey().getPropName(), e -> e.getValue().getValue(), (v1, v2) -> v1, MultiHashMap::new));
+            MultiHashMap<String, Object> keyValueMap = list.stream().collect(Collectors.toMap(e -> e.getKey().getRelationCode() + "." + e.getKey().getPropName(), e -> e.getValue().getValue(), (v1, v2) -> v1, MultiHashMap::new));
+            //聚合字段重命名
+            list.stream().filter(e -> RELATION_CODE_TEMP_ALIAS_ALIAS.equals(e.getKey().getRelationCode())).forEach(e -> keyValueMap.put(e.getKey().getPropName(), e.getValue().getValue()));
             switch (aggregateType) {
                 case SUM:
                     aggregateResult.setSum(keyValueMap);
@@ -158,7 +151,7 @@ public class MultiExecutorInner {
                     break;
                 case GROUP_CONCAT:
                     //noinspection unchecked
-                    aggregateResult.setGroupConcat((MultiHashMap<String, String>) keyValueMap);
+                    aggregateResult.setGroupConcat((MultiHashMap) keyValueMap);
                     break;
                 default:
                     throw new MultiException(aggregateType + "该聚合方法待实现");

@@ -3,7 +3,7 @@ package com.lzb.mpmt.service.multiwrapper.entity;
 import java.io.Serializable;
 
 /**
- * 枚举实现
+ * 枚举实现 取枚举的value属性入库
  * <VALUE> 必须是可以数据库透传的类型,比如int string等等
  * @author Administrator
  */

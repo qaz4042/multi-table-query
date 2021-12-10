@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * 字段注释
+ *
  * @author Administrator
  */
 @Target(value = {ElementType.FIELD})
@@ -18,6 +19,7 @@ public @interface MultiTableField {
      * 字段中文名
      */
     String value() default MultiConstant.Strings.EMPTY;
+
     /***
      * 字段是否在数据库中存在
      */
