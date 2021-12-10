@@ -8,7 +8,7 @@
         <version>2.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.lzb</groupId>
+    <groupId>com.better</groupId>
     <artifactId>mybatis-plus-multi-table</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>mybatis-plus-multi-table</name>
@@ -62,6 +62,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

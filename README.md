@@ -12,6 +12,8 @@
     List<UserStaff> userStaffsSimple = MultiExecutor.list(
             new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
     );
+
+    支持 getOne list page aggregate(聚合,例如sum) 等查询
 ####
 	[
 	  {
@@ -78,15 +80,14 @@
 ### 2.实体类可以直接用枚举类做属性
 ####
     数据库中,可以储存是枚举的name(),也可以储存IMultiEnum.getValue()(Integer)
-####
-    "sex": 0,
+
 
 ### 3.demo-详见本项目的 test方法 (附sql脚本)
 
 ### 4.调试环境
-    mysql5.6
+    mysql5.6 / h2database(内存数据库模式)
     spring-jdbc
-    jdk11(jdk8应该兼容)
+    jdk8 + 
 
 ### license
     Apache Licence 2.0
