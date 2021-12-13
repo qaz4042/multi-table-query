@@ -8,7 +8,7 @@
         <version>2.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.bebetter</groupId>
+    <groupId>io.github.qaz4042</groupId>
     <artifactId>multi-table-query</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>multi-table-query</name>
