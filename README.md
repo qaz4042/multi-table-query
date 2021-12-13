@@ -1,4 +1,4 @@
-# mybatis-plus-multi-table 多表查询Dao框架
+# multi-table-query 多表查询Dao框架
 ### 1.基础(70%)单库查询都可以简单做到 (不用强行手写xxxMapper.xml)
 ####
     public class UserStaff {

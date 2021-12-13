@@ -1,5 +1,4 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.lzb.mpmt.service.multiwrapper.config.MultiConfig,\
-  com.lzb.mpmt.service.multiwrapper.config.MultiConfigDbSpring,\
-  com.lzb.mpmt.service.multiwrapper.config.MultiConfigDbJdbc,\
-  com.lzb.mpmt.service.multiwrapper.config.MultiConfigJsonJackson
+  com.bebetter.mtq.service.multiwrapper.config.MultiConfig,\
+  com.bebetter.mtq.service.multiwrapper.config.MultiConfigDbSpring,\
+  com.bebetter.mtq.service.multiwrapper.config.MultiConfigJsonJackson

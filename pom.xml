@@ -8,14 +8,13 @@
         <version>2.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.better</groupId>
-    <artifactId>mybatis-plus-multi-table</artifactId>
+    <groupId>com.bebetter</groupId>
+    <artifactId>multi-table-query</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mybatis-plus-multi-table</name>
+    <name>multi-table-query</name>
     <description>SQL多表联查工具DAO框架,不强制依赖任何jar包,推荐依赖spring-boot-starter-jdbc</description>
     <properties>
         <java.version>8</java.version>
-        <mybatis-plus.version>3.4.1</mybatis-plus.version>
     </properties>
     <dependencies>
         <dependency>
