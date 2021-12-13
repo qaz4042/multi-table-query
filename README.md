@@ -87,9 +87,10 @@
 
 
 ### 4.调试环境
-    mysql5.6 / h2database(内存数据库模式)
-    spring-jdbc
-    jdk8 + 
+	
+    jdk8 spring-jdbc h2database(内存数据库模式)
+  
+    jdk8 mysql5.6
 
 ### license
     Apache Licence 2.0
