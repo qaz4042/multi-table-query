@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.5.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.github.qaz4042</groupId>
     <artifactId>multi-table-query</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>multi-table-query</name>
     <description>SQL多表联查工具DAO框架,不强制依赖任何jar包,推荐依赖spring-boot-starter-jdbc</description>
     <properties>
@@ -147,7 +146,8 @@
         <connection>scm:git:https://github.com/qaz4042/multi-table-query.git</connection>
         <developerConnection>scm:git:https://github.com/qaz4042/multi-table-query.git</developerConnection>
         <url>git:https://github.com/qaz4042/multi-table-query.git</url>
-    </scm>
+      <tag>dao,multi table,query</tag>
+  </scm>
     <developers>
         <developer>
             <name>qaz404286846</name>
