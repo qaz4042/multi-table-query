@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.5.5</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.github.qaz4042</groupId>
     <artifactId>multi-table-query</artifactId>
@@ -73,69 +74,72 @@
         </repository>
     </distributionManagement>
     <build>
-    <plugins>
-        <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
-            <extensions>true</extensions>
-            <configuration>
-                <serverId>ossrh</serverId>
-                <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
-            <executions>
-                <execution>
-                    <id>attach-sources</id>
-                    <goals>
-                        <goal>jar-no-fork</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-<!--        <plugin>-->
-<!--            <groupId>org.apache.maven.plugins</groupId>-->
-<!--            <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--            <version>2.9.1</version>-->
-<!--            <executions>-->
-<!--                <execution>-->
-<!--                    <id>attach-javadocs</id>-->
-<!--                    <goals>-->
-<!--                        <goal>jar</goal>-->
-<!--                    </goals>-->
-<!--                </execution>-->
-<!--            </executions>-->
-<!--        </plugin>-->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-                <execution>
-                    <id>sign-artifacts</id>
-                    <phase>verify</phase>
-                    <goals>
-                        <goal>sign</goal>
-                    </goals>
-<!--                    <configuration>-->
-<!--                        <keyname>${gpg.keyname}</keyname>-->
-<!--                        <passphraseServerId>${gpg.keyname}</passphraseServerId>-->
-<!--                    </configuration>-->
-                </execution>
-            </executions>
-        </plugin>
-    </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <!-- -Xdoclint:none maven忽视javadoc过程中警告和错误 -->
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                        <!--                    <configuration>-->
+                        <!--                        <keyname>${gpg.keyname}</keyname>-->
+                        <!--                        <passphraseServerId>${gpg.keyname}</passphraseServerId>-->
+                        <!--                    </configuration>-->
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
-
-
-
-
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -146,8 +150,8 @@
         <connection>scm:git:https://github.com/qaz4042/multi-table-query.git</connection>
         <developerConnection>scm:git:https://github.com/qaz4042/multi-table-query.git</developerConnection>
         <url>git:https://github.com/qaz4042/multi-table-query.git</url>
-      <tag>dao,multi table,query</tag>
-  </scm>
+        <tag>multi-table-query</tag>
+    </scm>
     <developers>
         <developer>
             <name>qaz404286846</name>
@@ -156,17 +160,4 @@
             <timezone>+8</timezone>
         </developer>
     </developers>
-
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>ossrh</id>-->
-<!--            <activation>-->
-<!--                <activeByDefault>true</activeByDefault>-->
-<!--            </activation>-->
-<!--            <properties>-->
-<!--                <gpg.executable>gpg2</gpg.executable>-->
-<!--                <gpg.passphrase>1qaz!QAZ123456</gpg.passphrase>-->
-<!--            </properties>-->
-<!--        </profile>-->
-<!--    </profiles>-->
 </project>

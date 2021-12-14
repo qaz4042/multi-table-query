@@ -30,3 +30,5 @@ build/
 
 .idea/
 /.mvn/
+/pom.xml.releaseBackup
+/release.properties
