@@ -15,7 +15,13 @@
     <description>SQL多表联查工具DAO框架,不强制依赖任何jar包,推荐依赖spring-boot-starter-jdbc</description>
     <properties>
         <java.version>8</java.version>
+        <!-- 文件拷贝时的编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- 编译时的编码 -->
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,21 +62,111 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+    <plugins>
+        <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.7</version>
+            <extensions>true</extensions>
+            <configuration>
+                <serverId>ossrh</serverId>
+                <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar-no-fork</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+<!--        <plugin>-->
+<!--            <groupId>org.apache.maven.plugins</groupId>-->
+<!--            <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--            <version>2.9.1</version>-->
+<!--            <executions>-->
+<!--                <execution>-->
+<!--                    <id>attach-javadocs</id>-->
+<!--                    <goals>-->
+<!--                        <goal>jar</goal>-->
+<!--                    </goals>-->
+<!--                </execution>-->
+<!--            </executions>-->
+<!--        </plugin>-->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+                <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>sign</goal>
+                    </goals>
+<!--                    <configuration>-->
+<!--                        <keyname>${gpg.keyname}</keyname>-->
+<!--                        <passphraseServerId>${gpg.keyname}</passphraseServerId>-->
+<!--                    </configuration>-->
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
     </build>
+
+
+
+
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/qaz4042/multi-table-query.git</connection>
+        <developerConnection>scm:git:https://github.com/qaz4042/multi-table-query.git</developerConnection>
+        <url>git:https://github.com/qaz4042/multi-table-query.git</url>
+    </scm>
+    <developers>
+        <developer>
+            <name>qaz404286846</name>
+            <email>404286846@qq.com</email>
+            <organization>lzb</organization>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+<!--    <profiles>-->
+<!--        <profile>-->
+<!--            <id>ossrh</id>-->
+<!--            <activation>-->
+<!--                <activeByDefault>true</activeByDefault>-->
+<!--            </activation>-->
+<!--            <properties>-->
+<!--                <gpg.executable>gpg2</gpg.executable>-->
+<!--                <gpg.passphrase>1qaz!QAZ123456</gpg.passphrase>-->
+<!--            </properties>-->
+<!--        </profile>-->
+<!--    </profiles>-->
 </project>
