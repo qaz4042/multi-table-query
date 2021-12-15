@@ -81,10 +81,13 @@
 ####
     数据库中,可以储存是枚举的name(),也可以储存IMultiEnum.getValue()(Integer)
 
-
 ### 3.运用详见demo项目
-    [multi-table-query-demo](https://github.com/qaz4042/multi-table-query-demo.git)
+[multi-table-query-demo](https://github.com/qaz4042/multi-table-query-demo.git)
 
+	multi-table-query-demo-jdk
+
+	multi-table-query-demo-spring
+	
 ### 4.调试环境
 	
     jdk8 spring-jdbc h2database(内存数据库模式)
