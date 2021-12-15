@@ -83,7 +83,7 @@
 
 
 ### 3.运用详见demo项目
-    [multi-table-query-demo](https://github.com/qaz4042/multi-table-query-demo)
+    [demo] (https://github.com/qaz4042/multi-table-query-demo.git)
 
 
 ### 4.调试环境
