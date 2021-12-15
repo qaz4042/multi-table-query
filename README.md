@@ -5,7 +5,7 @@
         private String staffName;
         private TestConst.SexEnum sex;
         private Long adminUserId;
-        //UserStaff对应user 是 一对一 反过来是一对多(List<UserStaff> user_userStaff)
+        //关联表属性(属性名为relationCode)
         private User userAndUserStaff;
     }
 ####
@@ -13,8 +13,18 @@
             new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
     );
 
-    支持 getOne list page aggregate(聚合,例如sum) 等查询
-####
+    IMultiPage<UserStaff> page = MultiExecutor.page(new MultiPage<>(1, 10),
+            new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class)
+                    .desc(BaseModel::getCreateTime)
+                    , User.class, UserAddress.class, Address.class));
+
+    MultiAggregateResult aggregateSumAll = MultiExecutor.aggregate(
+            new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class).aggregateAll(MultiConstant.MultiAggregateTypeEnum.SUM),
+            MultiWrapperSub.lambda(User.class)
+    ));
+
+    ...包含有 list getOne page aggregate(聚合,例如sum) paramMap(统一参数传递)... 等查询功能
+#### list查询结果:
 	[
 	  {
 	    "id": 11,
@@ -85,14 +95,13 @@
 [multi-table-query-demo](https://github.com/qaz4042/multi-table-query-demo.git)
 
 	multi-table-query-demo-jdk
-
+        测试入口类 Main.java 中 main() 方法
 	multi-table-query-demo-spring
-	
+        测试入口类 MultiTableQueryDemoApplicationTest.java 中 @Test 相关方法
 ### 4.调试环境
     jdk8 mysql5.6
 	
     jdk8 spring-jdbc h2database(内存数据库模式)/mysql5.6
-  
 
 ### license
     Apache Licence 2.0
