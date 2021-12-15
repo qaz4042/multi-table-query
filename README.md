@@ -89,9 +89,9 @@
 	multi-table-query-demo-spring
 	
 ### 4.调试环境
-	jdk8 mysql5.6
+    jdk8 mysql5.6
 	
-    	jdk8 spring-jdbc h2database(内存数据库模式)/mysql5.6
+    jdk8 spring-jdbc h2database(内存数据库模式)/mysql5.6
   
 
 ### license
