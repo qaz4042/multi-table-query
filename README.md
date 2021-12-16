@@ -158,7 +158,6 @@ List<UserStaff> userStaffsSimple = MultiExecutor.list(
     Apache Licence 2.0
 
 ### 7.作者有话说 & 赞助
-#### 作者有话说
     该框架立足点:
     1.关系型事务数据库,对服务端编程的意义
     2.Mybatis相对于jpa编程的超高可扩展性,MybatisPlus等框架,单表增删改对应编程便利性
@@ -167,6 +166,5 @@ List<UserStaff> userStaffsSimple = MultiExecutor.list(
     4.DTO,VO的必须95%以上强制使用,尤其是公司内部2个服务对接时也强制使用DTO,VO
     5.质疑实体类为了干净而干净.认为实体类可以有规划地调整,为面向对象编程,java编译约束,多做贡献
     
-#### 赞助
-为更nice更有爱的代码,加油
+#### 为更nice更有爱的代码,加油
 <img src="https://user-images.githubusercontent.com/29392228/146324082-c5af3414-3395-4c13-9ad8-e22ab924145b.jpg" width="205" height="319" alt="微信小程序"/><br/>
