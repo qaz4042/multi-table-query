@@ -1,6 +1,7 @@
 # multi-table-query 多表查询Dao框架
 ### 功能&特点
-#### ①.基础多表查询,可简单&统一实现 (不需手写xxxMapper.xml)
+#### ①.基础多表查询的简单&统一实现 (不需手写xxxMapper.xml) 
+	使用习惯类似 MyBatis-Plus https://baomidou.com
 #### 
 ```java
 public class UserStaff {
