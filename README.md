@@ -158,5 +158,5 @@ List<UserStaff> userStaffsSimple = MultiExecutor.list(
     Apache Licence 2.0
 
 ### 7.赞助
-	为更nice的代码加油
+    为更nice更有爱的代码,加油
 <img src="https://user-images.githubusercontent.com/29392228/146324082-c5af3414-3395-4c13-9ad8-e22ab924145b.jpg" width="205" height="319" alt="微信小程序"/><br/>
