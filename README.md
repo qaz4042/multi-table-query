@@ -139,10 +139,16 @@ public class MultiTableRelationServiceImpl implements MultiTableRelationService 
 ### 4.调试环境
     jdk8 mysql5.6
 	
-    jdk8 spring-jdbc h2database(内存数据库模式)/mysql5.6### 
+    jdk8 spring-jdbc h2database(内存数据库模式)/mysql5.6
     
 ### 5.交流讨论
-    QQ群,multi-table-query交流群: 390137834
-    
+    QQ群    multi-table-query交流群    390137834
+    群主QQ 404286846
+![multi-table-query交流群群二维码](https://user-images.githubusercontent.com/29392228/146323468-05b3d0b8-d93b-49d1-aba2-b9ef3ba14b14.png)
+
 ### 6.license
     Apache Licence 2.0
+
+### 7.赞助
+为更nice的代码加油
+<img src="https://user-images.githubusercontent.com/29392228/146324082-c5af3414-3395-4c13-9ad8-e22ab924145b.jpg" width="205" height="319" alt="微信小程序"/><br/>
