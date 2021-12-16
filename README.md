@@ -82,7 +82,7 @@ MultiAggregateResult aggregateSumAll = MultiExecutor.aggregate(
     <version>0.0.1</version>
 </dependency>
 ```
-1.配置表和表的关系,数据库查询引擎
+2.配置表和表的关系,数据库查询引擎
 ```java
 public class MybatisPlusMultiConfig {
     public static void build() {
@@ -108,6 +108,7 @@ public class MybatisPlusMultiConfig {
 }
 ```
 ```java
+//表和表的关系
 public class MultiTableRelationServiceImpl implements MultiTableRelationService {
 
     @Override
@@ -127,6 +128,12 @@ public class MultiTableRelationServiceImpl implements MultiTableRelationService 
         );
     }
 }
+```
+3.使用
+```java
+List<UserStaff> userStaffsSimple = MultiExecutor.list(
+    new MultiWrapper<>(MultiWrapperMain.lambda(UserStaff.class), User.class, UserAddress.class)
+);
 ```
 ### 3.DEMO项目
 [multi-table-query-demo](https://github.com/qaz4042/multi-table-query-demo.git)
