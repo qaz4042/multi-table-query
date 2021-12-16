@@ -166,7 +166,7 @@ List<UserStaff> userStaffsSimple = MultiExecutor.list(
     该框架相斥观点:(也欢迎讨论battle)
     4.DTO,VO的必须95%以上强制使用,尤其是公司内部2个服务(例如:微服务的上下层)的对接时也强制使用DTO,VO的规范论
     5.实体类为了干净而干净,为了大众规范的强制分层论 
-    	(认为,实体类应有规划地调整,靠近面向对象编程,靠近java最大的有点(编码-编译-运行)开发生态的优化)
+    	(认为,实体类应有规划地调整,靠近面向对象编程,靠近java核心(面向对象设计-编码-编译-运行)开发生态的优化)
     
 #### 为更nice更有爱的代码,加油
 <img src="https://user-images.githubusercontent.com/29392228/146324082-c5af3414-3395-4c13-9ad8-e22ab924145b.jpg" width="205" height="319" alt="微信小程序"/><br/>
