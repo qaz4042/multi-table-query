@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
  * 统一只有三种类型(根据源字段类型)
  * Long,BigDecimal,String
  * map的key为字段名
+ * @author Administrator
  */
 @Data
 @NoArgsConstructor

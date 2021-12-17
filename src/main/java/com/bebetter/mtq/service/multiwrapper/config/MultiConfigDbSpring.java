@@ -2,7 +2,6 @@ package com.bebetter.mtq.service.multiwrapper.config;
 
 import com.bebetter.mtq.service.multiwrapper.executor.sqlexecutor.MultiDbAdaptor;
 import com.bebetter.mtq.service.multiwrapper.executor.sqlexecutor.MultiDbSpringAdaptor;
-import com.bebetter.mtq.service.multiwrapper.executor.MultiExecutorInner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

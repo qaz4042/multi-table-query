@@ -22,7 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder
 public class MultiClassRelation {
-    /*
+    /**
      * 表关系唯一编号,例如 userAndUserStaff
      */
     private String code;
