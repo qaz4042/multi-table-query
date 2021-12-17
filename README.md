@@ -40,14 +40,14 @@ MultiAggregateResult aggregateSumAll = MultiExecutor.aggregate(
     "staffName": "staff1",
     "sex": 0,
     "adminUserId": 1,
-    "user_userStaff": {
+    "userUserStaff": {
       "id": 1,
       "createTime": "2021-11-09",
       "updateTime": "2021-11-09",
       "username": "username1",
       "sex": 1,
       "parentId": null,
-      "user_userAddress": [
+      "userUserAddress": [
 	{
 	  "id": 111,
 	  "createTime": "2021-11-09",
