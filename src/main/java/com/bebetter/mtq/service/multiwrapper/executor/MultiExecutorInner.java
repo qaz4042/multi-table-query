@@ -7,7 +7,6 @@ import com.bebetter.mtq.service.multiwrapper.dto.MultiAggregateResult;
 import com.bebetter.mtq.service.multiwrapper.dto.MultiAggregateResultMap;
 import com.bebetter.mtq.service.multiwrapper.dto.MultiHashMap;
 import com.bebetter.mtq.service.multiwrapper.entity.IMultiEnum;
-import com.bebetter.mtq.service.multiwrapper.executor.sqlexecutor.MultiDbAdaptor;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
 import com.bebetter.mtq.service.multiwrapper.util.*;
 import com.bebetter.mtq.service.multiwrapper.util.json.jackson.JsonUtil;
@@ -37,28 +36,28 @@ import java.util.stream.Collectors;
 public class MultiExecutorInner {
 
     @SneakyThrows
-    public static <MAIN> List<MAIN> list(MultiWrapperInner<MAIN> wrapper) {
+    public static <MAIN, DTO> List<DTO> list(MultiWrapperInner<MAIN, DTO> wrapper) {
         String sql = wrapper.computeSql();
         //执行sql
         Map<String, Object> relationIdObjectMap = new HashMap<>(2048);
-        List<MAIN> mains = MultiConfig.multiDbAdaptor.select(sql, (resultSet) -> {
-            MultiTuple2<MAIN, Boolean> mainAndIsNew = buildReturnRecursion(MultiConstant.Strings.EMPTY, null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
-            MAIN main = mainAndIsNew.getT1();
-            return mainAndIsNew.getT2() ? main : null;
+        List<DTO> mains = MultiConfig.multiDbAdaptor.select(sql, (resultSet) -> {
+            MultiTuple2<DTO, Boolean> mainAndIsNew = buildReturnRecursion(MultiConstant.Strings.EMPTY, null, wrapper.getRelationTree(), resultSet, relationIdObjectMap, false);
+            DTO dto = mainAndIsNew.getT1();
+            return mainAndIsNew.getT2() ? dto : null;
         }).stream().filter(Objects::nonNull).collect(Collectors.toList());
 
         log.info("Multi 查询结果:{}条", mains.size());
 
         if (MultiConfig.multiProperties.getCheckRelationRequire()) {
             //检查表关系中,一方有数据,另一方必须有数据,是否有异常数据(测试环境可以开启)
-            checkRequireRecursion(wrapper.getWrapperMain().getClazz(), mains, wrapper.getRelationTree().getChildren());
+            checkRequireRecursion(wrapper.getWrapperMain().getDtoClass(), mains, wrapper.getRelationTree().getChildren());
         }
         return mains;
     }
 
     @SneakyThrows
-    public static <MAIN> MAIN getOne(MultiWrapperInner<MAIN> wrapper) {
-        List<MAIN> list = list(wrapper);
+    public static <MAIN, DTO> DTO getOne(MultiWrapperInner<MAIN, DTO> wrapper) {
+        List<DTO> list = list(wrapper);
         if (list.size() > 1) {
             log.warn("getOne查询出两条数据:" + wrapper.computeSql());
         }
@@ -73,13 +72,13 @@ public class MultiExecutorInner {
      * @return 聚合查询结果 例如 {"sum":{"userAndUserStaff.balance":"100.00"}}
      */
     @SneakyThrows
-    public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapperInner<MAIN> wrapper) {
-        MultiWrapperMainInner<MAIN> wrapperMain = wrapper.getWrapperMain();
+    public static <MAIN, DTO> IMultiPage<DTO> page(IMultiPage<DTO> page, MultiWrapperInner<MAIN, DTO> wrapper) {
+        MultiWrapperMainInner<MAIN, DTO> wrapperMain = wrapper.getWrapperMain();
         boolean containsAggregate = wrapperMain.getAggregateAllTypes().size() + wrapperMain.getAggregateInfos().size() > 0;
 
         Long count;
         MultiAggregateResult aggregateResult;
-        List<MAIN> list = Collections.emptyList();
+        List<DTO> list = Collections.emptyList();
 
 
         //查询聚合
@@ -114,7 +113,7 @@ public class MultiExecutorInner {
      * @return 聚合查询结果 例如 {"sum":{"userAndUserStaff.balance":"100.00"}}
      */
     @SneakyThrows
-    public static <MAIN> MultiAggregateResult aggregate(MultiWrapperInner<MAIN> wrapper) {
+    public static <MAIN, DTO> MultiAggregateResult aggregate(MultiWrapperInner<MAIN, DTO> wrapper) {
         String aggregateSql = wrapper.computeAggregateSql();
 
         Map<String, ?> objectMap = MultiConfig.multiDbAdaptor.selectFirstRow(aggregateSql);
@@ -205,7 +204,7 @@ public class MultiExecutorInner {
     /**
      * 递归构造子表对象
      *
-     * @param <MAIN_OR_SUB>       父表对象的泛型
+     * @param <DTO_MAIN_SUB>      父表对象的泛型
      * @param parentCodeAppendId  父实体的唯一code+ID(多层级)
      * @param parentEntity        父表对象
      * @param relationTreeNode    父表和子表当前的关系(.chlidren()是子表和他的子表的关系)
@@ -216,9 +215,9 @@ public class MultiExecutorInner {
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    private static <MAIN_OR_SUB> MultiTuple2<MAIN_OR_SUB, Boolean> buildReturnRecursion(
+    private static <DTO_MAIN_SUB> MultiTuple2<DTO_MAIN_SUB, Boolean> buildReturnRecursion(
             String parentCodeAppendId,
-            MAIN_OR_SUB parentEntity,
+            DTO_MAIN_SUB parentEntity,
             MultiTreeNode<IMultiWrapperSubAndRelationTreeNode> relationTreeNode,
             ResultSet resultSet,
             Map<String, Object> relationIdObjectMap,
@@ -226,20 +225,21 @@ public class MultiExecutorInner {
     ) {
         IMultiWrapperSubAndRelationTreeNode currNode = relationTreeNode.getCurr();
         Class<?> currTableClass = currNode.getTableClassThis();
+        Class<?> currTableDTOClass = currNode instanceof MultiWrapperMainInner ? ((MultiWrapperMainInner<?, ?>) currNode).getDtoClass() : currTableClass;
         String currRelationCode = currNode.getRelationCode();
         Field currTableIdField = MultiRelationCaches.getTableIdField(currTableClass);
         String idFieldName = currRelationCode + "." + currTableIdField.getName();
         Object id = getValue(idFieldName, currTableIdField.getType(), resultSet);
         String relationIdObjectMapKey = parentCodeAppendId + "_" + idFieldName + "_" + id;
-        MAIN_OR_SUB currEntity = (MAIN_OR_SUB) relationIdObjectMap.get(relationIdObjectMapKey);
+        DTO_MAIN_SUB currEntity = (DTO_MAIN_SUB) relationIdObjectMap.get(relationIdObjectMapKey);
         //要新增元素
         boolean isNew = parentIsNew || currEntity == null;
         if (isNew) {
-            //重复则不在生成
-            currEntity = (MAIN_OR_SUB) currTableClass.newInstance();
+            //重复则不再生成
+            currEntity = (DTO_MAIN_SUB) currTableDTOClass.newInstance();
 
-            Map<String, MultiTuple2<Field, Method>> classInfos = MultiRelationCaches.getClassInfos(currTableClass);
-            MultiUtil.assertNoNull(classInfos, "找不到{0}对应的类", currTableClass);
+            Map<String, MultiTuple2<Field, Method>> classInfos = MultiRelationCaches.getClassInfos(currTableDTOClass);
+//            MultiUtil.assertNoNull(classInfos, "找不到{0}对应的类", currTableDTOClass);
 
             List<String> selectFieldNames = currNode.getMultiWrapperSelectInfo().getSelectFields();
             for (String selectFieldName : selectFieldNames) {
@@ -261,7 +261,7 @@ public class MultiExecutorInner {
 
         relationIdObjectMap.put(relationIdObjectMapKey, currEntity);
         //副表信息,要递推填充下去
-        MAIN_OR_SUB finalCurrEntity = currEntity;
+        DTO_MAIN_SUB finalCurrEntity = currEntity;
         relationTreeNode.getChildren().forEach(subNode -> buildReturnRecursion(relationIdObjectMapKey, finalCurrEntity, subNode, resultSet, relationIdObjectMap, isNew));
         return new MultiTuple2<>(currEntity, isNew);
     }

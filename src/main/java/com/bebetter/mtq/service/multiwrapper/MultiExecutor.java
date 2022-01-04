@@ -18,12 +18,12 @@ import java.util.*;
 public class MultiExecutor {
 
     @SneakyThrows
-    public static <MAIN> List<MAIN> list(MultiWrapper<MAIN> wrapper) {
+    public static <MAIN, DTO> List<DTO> list(MultiWrapper<MAIN, DTO> wrapper) {
         return MultiExecutorInner.list(wrapper.getWrapperInner());
     }
 
     @SneakyThrows
-    public static <MAIN> MAIN getOne(MultiWrapper<MAIN> wrapper) {
+    public static <MAIN, DTO> DTO getOne(MultiWrapper<MAIN, DTO> wrapper) {
         return MultiExecutorInner.getOne(wrapper.getWrapperInner());
     }
 
@@ -35,7 +35,7 @@ public class MultiExecutor {
      * @return 聚合查询结果 例如 {"sum":{"userAndUserStaff.balance":"100.00"}}
      */
     @SneakyThrows
-    public static <MAIN> IMultiPage<MAIN> page(IMultiPage<MAIN> page, MultiWrapper<MAIN> wrapper) {
+    public static <MAIN, DTO> IMultiPage<DTO> page(IMultiPage<DTO> page, MultiWrapper<MAIN, DTO> wrapper) {
         return MultiExecutorInner.page(page, wrapper.getWrapperInner());
     }
 
@@ -46,7 +46,7 @@ public class MultiExecutor {
      * @return 聚合查询结果 例如 {"sum":{"userAndUserStaff.balance":"100.00"}}
      */
     @SneakyThrows
-    public static <MAIN> MultiAggregateResult aggregate(MultiWrapper<MAIN> wrapper) {
+    public static <MAIN, DTO> MultiAggregateResult aggregate(MultiWrapper<MAIN, DTO> wrapper) {
         return MultiExecutorInner.aggregate(wrapper.getWrapperInner());
     }
 }

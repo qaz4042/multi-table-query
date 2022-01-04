@@ -14,32 +14,32 @@ import java.util.*;
  * 多表联查器
  * 举例说明 主表:user_staff 副表:user_staff_address
  *
- * @param <MAIN>
+ * @param <MAIN, DTO>
  * @author Administrator
  */
 @NoArgsConstructor
 @Slf4j
 @Data
 @SuppressWarnings("unused")
-public class MultiWrapper<MAIN> {
-    MultiWrapper(MultiWrapperInner<MAIN> wrapperInner) {
+public class MultiWrapper<MAIN, DTO> {
+    MultiWrapper(MultiWrapperInner<MAIN, DTO> wrapperInner) {
         this.wrapperInner = wrapperInner;
     }
 
     /**
      * 主表信息
      */
-    private MultiWrapperInner<MAIN> wrapperInner;
+    private MultiWrapperInner<MAIN, DTO> wrapperInner;
 
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain) {
+    public MultiWrapper(MultiWrapperMain<MAIN, DTO> wrapperMain) {
         wrapperInner = new MultiWrapperInner<>(wrapperMain.getWrapperMainInner());
     }
 
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, MultiWrapperSub<?>... subTableWrappers) {
+    public MultiWrapper(MultiWrapperMain<MAIN, DTO> wrapperMain, MultiWrapperSub<?>... subTableWrappers) {
         wrapperInner = new MultiWrapperInner<>(wrapperMain.getWrapperMainInner(), Arrays.stream(subTableWrappers).map(MultiWrapperSub::getWrapperSubInner).toArray(MultiWrapperSubInner<?>[]::new));
     }
 
-    public MultiWrapper(MultiWrapperMain<MAIN> wrapperMain, Class<?>... subTableClasses) {
+    public MultiWrapper(MultiWrapperMain<MAIN, DTO> wrapperMain, Class<?>... subTableClasses) {
         wrapperInner = new MultiWrapperInner<>(wrapperMain.getWrapperMainInner());
         Arrays.stream(subTableClasses).forEach(subTableClass -> wrapperInner.leftJoin(MultiWrapperSubInner.lambda(subTableClass)));
     }
@@ -50,8 +50,8 @@ public class MultiWrapper<MAIN> {
      *
      * @return MultiWrapper
      */
-    public static <MAIN> MultiWrapper<MAIN> main(MultiWrapperMain<MAIN> wrapperMain) {
-        MultiWrapper<MAIN> wrapper = new MultiWrapper<>(new MultiWrapperInner<>());
+    public static <MAIN, DTO> MultiWrapper<MAIN, DTO> main(MultiWrapperMain<MAIN, DTO> wrapperMain) {
+        MultiWrapper<MAIN, DTO> wrapper = new MultiWrapper<>(new MultiWrapperInner<>());
         wrapper.wrapperInner.wrapperMain = wrapperMain.getWrapperMainInner();
         return wrapper;
     }
@@ -62,7 +62,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public MultiWrapper<MAIN> leftJoin(MultiWrapperSub<?> subTableWrapper) {
+    public MultiWrapper<MAIN, DTO> leftJoin(MultiWrapperSub<?> subTableWrapper) {
         return leftJoin(null, subTableWrapper);
     }
 
@@ -72,7 +72,7 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper subTableWrapper
      * @return MultiWrapper
      */
-    public MultiWrapper<MAIN> innerJoin(MultiWrapperSub<?> subTableWrapper) {
+    public MultiWrapper<MAIN, DTO> innerJoin(MultiWrapperSub<?> subTableWrapper) {
         return innerJoin(null, subTableWrapper);
     }
 
@@ -83,13 +83,13 @@ public class MultiWrapper<MAIN> {
      * @param subTableWrapper 副表的select和 on内条件信息
      * @return MultiWrapper
      */
-    public MultiWrapper<MAIN> leftJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
+    public MultiWrapper<MAIN, DTO> leftJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
         MultiConstant.JoinTypeEnum joinType = MultiConstant.JoinTypeEnum.left_join;
         wrapperInner.getMainMultiWrapper(joinType, relationCode, subTableWrapper.getWrapperSubInner());
         return this;
     }
 
-    public MultiWrapper<MAIN> innerJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
+    public MultiWrapper<MAIN, DTO> innerJoin(String relationCode, MultiWrapperSub<?> subTableWrapper) {
         MultiConstant.JoinTypeEnum joinType = MultiConstant.JoinTypeEnum.left_join;
         wrapperInner.getMainMultiWrapper(joinType, relationCode, subTableWrapper.getWrapperSubInner());
         return this;
@@ -103,7 +103,7 @@ public class MultiWrapper<MAIN> {
      *                     "userStaff_sex":"1"
      *                     }
      */
-    public MultiWrapper<MAIN> extendParams(Map<String, ?> extendParams) {
+    public MultiWrapper<MAIN, DTO> extendParams(Map<String, ?> extendParams) {
         wrapperInner.extendParams(extendParams);
         return this;
     }

@@ -4,11 +4,11 @@ import com.bebetter.mtq.service.multiwrapper.constant.MultiConstant;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.MultiWrapperAggregate;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.MultiWrapperLimit;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.MultiWrapperSelect;
-import com.bebetter.mtq.service.multiwrapper.sqlsegment.aggregate.MultiAggregateInfo;
-import com.bebetter.mtq.service.multiwrapper.util.mybatisplus.MultiFunction;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.MultiWrapperWhere;
-import com.bebetter.mtq.service.multiwrapper.util.MultiUtil;
+import com.bebetter.mtq.service.multiwrapper.sqlsegment.aggregate.MultiAggregateInfo;
 import com.bebetter.mtq.service.multiwrapper.sqlsegment.wheredata.WhereDataTree;
+import com.bebetter.mtq.service.multiwrapper.util.MultiUtil;
+import com.bebetter.mtq.service.multiwrapper.util.mybatisplus.MultiFunction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,13 +23,22 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuppressWarnings("unused")
-public class MultiWrapperMainInner<MAIN> implements
-        MultiWrapperWhere<MAIN, MultiWrapperMainInner<MAIN>>,
-        MultiWrapperSelect<MAIN, MultiWrapperMainInner<MAIN>>,
-        MultiWrapperLimit<MAIN, MultiWrapperMainInner<MAIN>>,
-        MultiWrapperAggregate<MAIN, MultiWrapperMainInner<MAIN>>
+public class MultiWrapperMainInner<MAIN, DTO> implements
+        MultiWrapperWhere<MAIN, MultiWrapperMainInner<MAIN, DTO>>,
+        MultiWrapperSelect<MAIN, MultiWrapperMainInner<MAIN, DTO>>,
+        MultiWrapperLimit<MAIN, MultiWrapperMainInner<MAIN, DTO>>,
+        MultiWrapperAggregate<MAIN, MultiWrapperMainInner<MAIN, DTO>>
         , IMultiWrapperSubAndRelationTreeNode {
 
+    /**
+     * 返回DTO类
+     */
+    private Class<?> dtoClass;
+
+    /**
+     * 类为了生成List<SUB>
+     */
+    private Class<MAIN> clazz;
     /**
      * 下划线表名
      */
@@ -61,10 +70,6 @@ public class MultiWrapperMainInner<MAIN> implements
      */
     private List<String> orderInfos = Collections.emptyList();
 
-    /**
-     * 类为了生成List<SUB>
-     */
-    private Class<MAIN> clazz;
 
     /**
      * 是否全部按默认字段去聚合
@@ -79,36 +84,37 @@ public class MultiWrapperMainInner<MAIN> implements
     private List<MultiAggregateInfo> aggregateInfosTemp = Collections.emptyList();
 
 
-    public MultiWrapperMainInner<MAIN> aggregateAll(MultiConstant.MultiAggregateTypeEnum... aggregateTypeEnums) {
+    public MultiWrapperMainInner<MAIN, DTO> aggregateAll(MultiConstant.MultiAggregateTypeEnum... aggregateTypeEnums) {
         aggregateAllTypes.addAll(Arrays.asList(aggregateTypeEnums));
         return this;
     }
 
-    public MultiWrapperMainInner<MAIN> count() {
+    public MultiWrapperMainInner<MAIN, DTO> count() {
         if (!aggregateAllTypes.contains(MultiConstant.MultiAggregateTypeEnum.COUNT)) {
             aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.COUNT);
         }
         return this;
     }
 
-    public MultiWrapperMainInner<MAIN> sumAll() {
+    public MultiWrapperMainInner<MAIN, DTO> sumAll() {
         if (!aggregateAllTypes.contains(MultiConstant.MultiAggregateTypeEnum.SUM)) {
             aggregateAllTypes.add(MultiConstant.MultiAggregateTypeEnum.SUM);
         }
         return this;
     }
 
-    public static <MAIN> MultiWrapperMainInner<MAIN> lambda(Class<MAIN> clazz) {
+    public static <MAIN, DTO> MultiWrapperMainInner<MAIN, DTO> lambda(Class<MAIN> clazz, Class<DTO> dtoClazz) {
         String className = MultiUtil.firstToLowerCase(clazz.getSimpleName());
-        MultiWrapperMainInner<MAIN> wrapperMain = new MultiWrapperMainInner<>();
+        MultiWrapperMainInner<MAIN, DTO> wrapperMain = new MultiWrapperMainInner<>();
         wrapperMain.setClassName(className);
         wrapperMain.setClazz(clazz);
+        wrapperMain.setDtoClass(dtoClazz);
         return wrapperMain;
     }
 
     @SafeVarargs
     @Override
-    public final <VAL> MultiWrapperMainInner<MAIN> select(MultiFunction<MAIN, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperMainInner<MAIN, DTO> select(MultiFunction<MAIN, VAL>... propFuncs) {
         return MultiWrapperSelect.super.select(propFuncs);
     }
 
@@ -134,7 +140,7 @@ public class MultiWrapperMainInner<MAIN> implements
 
     @Override
     public Class<?> getTableClassThis() {
-        return getClazz();
+        return getDtoClass();
     }
 
     @Override
@@ -149,14 +155,14 @@ public class MultiWrapperMainInner<MAIN> implements
 
     @Override
     @SafeVarargs
-    public final <VAL> MultiWrapperMainInner<MAIN> desc(MultiFunction<MAIN, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperMainInner<MAIN, DTO> desc(MultiFunction<MAIN, VAL>... propFuncs) {
         //为了添加 @SafeVarargs 重写的方法
         return MultiWrapperLimit.super.desc(propFuncs);
     }
 
     @Override
     @SafeVarargs
-    public final <VAL> MultiWrapperMainInner<MAIN> asc(MultiFunction<MAIN, VAL>... propFuncs) {
+    public final <VAL> MultiWrapperMainInner<MAIN, DTO> asc(MultiFunction<MAIN, VAL>... propFuncs) {
         return MultiWrapperLimit.super.asc(propFuncs);
     }
 
