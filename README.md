@@ -81,7 +81,7 @@ MultiAggregateResult aggregateSumAll = MultiExecutor.aggregate(
 <dependency>
     <groupId>io.github.qaz4042</groupId>
     <artifactId>multi-table-query</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 2.配置表和表的关系,数据库查询引擎

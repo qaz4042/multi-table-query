@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.github.qaz4042</groupId>
     <artifactId>multi-table-query</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>multi-table-query</name>
     <description>SQL多表联查工具DAO框架,不强制依赖任何jar包,推荐依赖spring-boot-starter-jdbc</description>
     <properties>
